@@ -1,0 +1,32 @@
+---
+title: "Gisell Bennett"
+---
+
+# Welcome to My Website
+
+## About Me
+
+Hello! I'm **Gisell Bennett**, a **Data Analytics major** at **CUNY - Baruch** with a keen interest in uncovering insights from data. I am currently expanding my knowledge in programming, statistical analysis, and big data technologies.
+
+## What I'm Learning
+
+I'm exploring:\
+- **Python and SQL** for data analysis and manipulation\
+- **Data visualization** techniques to present insights effectively\
+- **Machine learning fundamentals** to build predictive models\
+- **Big data technologies** like Apache Spark and AWS for scalable data processing
+
+## Projects
+
+Some of the projects I’ve worked on include:\
+- 📊 **Analyzing IMDB Movie Data** – Extracting trends and patterns from large datasets\
+- 🔍 **Exploring Social Media Sentiment** –
+
+```{r}
+#| include: false
+1+1
+```
+
+------------------------------------------------------------------------
+
+Last Updated: `r format(Sys.time(), "%A %m %d, %Y at %H:%M%p")`
