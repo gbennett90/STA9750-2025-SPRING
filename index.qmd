@@ -1,26 +1,18 @@
 ---
-title: "Gisell Bennett"
+title: "Welcome to My Website"
 ---
-
-# Welcome to My Website
 
 ## About Me
 
-Hello! I'm **Gisell Bennett**, a **Data Analytics major** at **CUNY - Baruch** with a keen interest in uncovering insights from data. I am currently expanding my knowledge in programming, statistical analysis, and big data technologies.
+Hello, My name is Gisell Bennett! I'm a **Data Analytics major at Baruch College**, interested in exploring data and using it to drive meaningful insights. I'm currently learning various tools and techniques in data analysis, machine learning, and big data technologies.
 
-## What I'm Learning
+## Skills I'm Learning
 
-I'm exploring:\
-- **Python and SQL** for data analysis and manipulation\
-- **Data visualization** techniques to present insights effectively\
-- **Machine learning fundamentals** to build predictive models\
-- **Big data technologies** like Apache Spark and AWS for scalable data processing
+🚀 **Big Data & Cloud Computing**: AWS EMR, Apache Spark\
 
-## Projects
+------------------------------------------------------------------------
 
-Some of the projects I’ve worked on include:\
-- 📊 **Analyzing IMDB Movie Data** – Extracting trends and patterns from large datasets\
-- 🔍 **Exploring Social Media Sentiment** –
+*Thank you for visiting! Stay tuned for more updates on my data analytics journey.*
 
 ```{r}
 #| include: false
@@ -30,3 +22,24 @@ Some of the projects I’ve worked on include:\
 ------------------------------------------------------------------------
 
 Last Updated: `r format(Sys.time(), "%A %m %d, %Y at %H:%M%p")`
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+if(!require("leaflet")){
+    options(repos=c(CRAN="https://cloud.r-project.org"))
+    install.packages("leaflet")
+    stopifnot(require("leaflet"))
+}
+
+baruch_longitude <- -73.98333
+baruch_latitude <- +40.75028
+
+leaflet() |>
+  addTiles() |>
+  setView(baruch_longitude, baruch_latitude, zoom=17) |>
+  addPopups(baruch_longitude, baruch_latitude, 
+            "I am a Master's student at <b>Baruch College</b>!")
+```
