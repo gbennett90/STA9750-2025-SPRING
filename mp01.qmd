@@ -1,0 +1,316 @@
+---
+title: "Mini Project 1"
+output: html_document
+code_folding: "hide"  # To fold the code
+---
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Introduction
+
+New York City’s payroll expenses form a major part of its budget, prompting the Commission to Analyze Taxpayer Spending (CATS) to explore cost-saving policies. This project evaluates three proposals: capping salaries at the mayoral level, increasing staffing to reduce overtime costs, and implementing a custom policy to control excessive overtime pay. Using NYC payroll data and R for analysis, we assess each policy’s financial impact and feasibility. The findings will guide policymakers in optimizing taxpayer spending while maintaining city services.
+
+## Acquiring Payroll Data
+
+```{r}
+if(!file.exists("data/mp01/nyc_payroll_export.csv")){
+  dir.create("data/mp01", showWarnings=FALSE, recursive=TRUE)
+  
+  ENDPOINT <- "https://data.cityofnewyork.us/resource/k397-673e.json"
+  
+  if(!require("httr2")) install.packages("httr2")
+  library(httr2)
+  
+  if(!require("jsonlite")) install.packages("jsonlite")
+  library(jsonlite)
+  
+  if(!require("dplyr")) install.packages("dplyr")
+  library(dplyr)
+  
+  if(!require("readr")) install.packages("readr")
+  library(readr)
+  
+  BATCH_SIZE <- 50000
+  OFFSET     <- 0
+  END_OF_EXPORT <- FALSE
+  ALL_DATA <- list()
+  
+  while(!END_OF_EXPORT){
+    req <- request(ENDPOINT) |>
+      req_url_query(`$limit`  = BATCH_SIZE, 
+                    `$offset` = OFFSET)
+    
+    resp <- req_perform(req)
+    batch_data <- fromJSON(resp_body_string(resp))
+    ALL_DATA <- c(ALL_DATA, list(batch_data))
+    
+    if(NROW(batch_data) != BATCH_SIZE){
+      END_OF_EXPORT <- TRUE
+    } else {
+      OFFSET <- OFFSET + BATCH_SIZE
+    }
+  }
+  
+  ALL_DATA <- bind_rows(ALL_DATA)
+  write_csv(ALL_DATA, "data/mp01/nyc_payroll_export.csv")
+}
+```
+
+## Data Preparation and Cleaning
+
+```{r include=FALSE}
+library(readr)
+library(dplyr)
+library(stringr)
+
+nyc_payroll <- read_csv("data/mp01/nyc_payroll_export.csv")
+
+nyc_clean <- nyc_payroll |>
+  mutate(
+    total_salary = base_salary + total_ot_paid + total_other_pay
+  ) |>
+  mutate(
+    across(
+      c("agency_name", "last_name", "first_name", "work_location_borough", 
+        "title_description", "leave_status_as_of_june_30"), 
+      str_to_title
+    )
+  )
+```
+
+#Initial Exploration
+# Eric L. Adams Salary Table
+
+```{r, include=TRUE}
+library(knitr)
+adams_salary_table <- nyc_clean |>
+  filter(first_name == "Eric", last_name == "Adams") |>
+  select(fiscal_year, title_description, agency_name, total_salary) |>
+  rename(
+    "Fiscal Year" = fiscal_year,
+    "Position" = title_description,
+    "Agency" = agency_name,
+    "Total Salary" = total_salary
+  )
+```
+
+### Employee Compensation Analysis
+Employee Compensation Table
+
+```{r, include=TRUE}
+nyc_clean <- nyc_clean |>
+  mutate(
+    hourly_rate = base_salary / 2080,
+    total_compensation = case_when(
+      title_description %in% c("Mayor") ~ total_salary,
+      !is.na(hourly_rate) & !is.na(regular_hours) & !is.na(ot_hours) ~ (hourly_rate * regular_hours) + (hourly_rate * 1.5 * ot_hours),
+      !is.na(hourly_rate) & !is.na(regular_hours) & is.na(ot_hours) ~ hourly_rate * regular_hours,
+      TRUE ~ NA_real_
+    )
+  )
+```
+
+## Instructor Provided Questions
+
+```{r, include=TRUE}
+# Job title with the highest base rate
+nyc_clean |>
+  mutate(hourly_base_rate = base_salary / 2000) |>
+  arrange(desc(hourly_base_rate)) |>
+  slice(1) |>
+  select(title_description, hourly_base_rate)
+
+# Individual with highest total payroll
+nyc_clean |>
+  transform(total_payroll = total_salary + total_ot_paid) |>
+  arrange(desc(total_payroll)) |>
+  slice(1) |>
+  select(fiscal_year, first_name, last_name, total_payroll)
+
+# Most overtime hours worked
+nyc_clean |>
+  arrange(desc(ot_hours)) |>
+  slice(1) |>
+  select(first_name, last_name, ot_hours)
+
+# Agency with highest total payroll per employee
+nyc_clean |>
+  group_by(agency_name) |>
+  summarise(avg_total_payroll = mean(total_salary + total_ot_paid, na.rm = TRUE)) |>
+  arrange(desc(avg_total_payroll)) |>
+  slice(1)
+
+# Agency with most employees per year
+nyc_clean |>
+  group_by(fiscal_year, agency_name) |>
+  summarise(employee_count = n(), .groups = "keep") |>
+  group_by(fiscal_year) |>
+  slice_max(employee_count, n = 1)
+
+# Agency with highest overtime usage
+nyc_clean |>
+  group_by(agency_name) |>
+  summarise(
+    total_regular_hours = sum(regular_hours, na.rm = TRUE),
+    total_ot_hours = sum(ot_hours, na.rm = TRUE),
+    ot_to_regular_ratio = total_ot_hours / total_regular_hours
+  ) |>
+  arrange(desc(ot_to_regular_ratio)) |>
+  slice(1)
+
+# Average salary of employees outside the five boroughs
+nyc_clean |>
+  filter(!(work_location_borough %in% c("Manhattan", "Brooklyn", "Queens", "Bronx", "Staten Island"))) |>
+  summarise(avg_salary_outside_boroughs = mean(base_salary, na.rm = TRUE))
+
+# Aggregate payroll growth over 10 years
+nyc_clean |>
+  group_by(fiscal_year) |>
+  summarise(aggregate_payroll = sum(total_salary + total_ot_paid, na.rm = TRUE)) |>
+  filter(fiscal_year >= (max(fiscal_year) - 10)) |>
+  arrange(fiscal_year)
+```
+
+## Analysis
+
+Effective management of New York City payroll is crucial for maintaining fiscal responsibility and ensuring optimal allocation of taxpayer money. The City Agency for Transportation Services (CATS) is committed to exploring policy reforms that can enhance efficiency and reduce expenditures without compromising service quality. This analysis examines three proposed policies aimed at achieving these objectives:
+
+- **Policy I:** Capping Salaries at Mayoral Level
+- **Policy II:** Increasing Staffing to Reduce Overtime Expenses
+- **Policy III:** Implementing Performance-Based Pay Adjustments
+
+# Policy I: Capping Salaries at the Mayoral Level
+For Policy I, which caps salaries at the mayor’s level, the approach began with calculating the total mayoral salary for each fiscal year. Employees earning above this threshold were identified, and their salaries were capped at the mayor’s level. The savings were then determined by comparing the original and capped salaries, aggregated by agency and job title. For instance, agencies like the Police Department and Fire Department exhibit significant potential savings. This analysis assumes that the mayor’s salary remains fixed over the period, while limitations include potential data gaps and external economic factors that might affect projections.
+
+```{r}
+# Set knitr options to hide code and show only the output when rendered
+knitr::opts_chunk$set(echo = FALSE)
+
+# Identify the Mayor's salary
+mayor_salary <- nyc_clean |>
+  filter(title_description == "Mayor") |>
+  summarise(mayor_salary = max(total_salary, na.rm = TRUE))
+
+# Find employees earning more than the Mayor's salary
+employees_above_mayor <- nyc_clean |>
+  filter(total_salary > mayor_salary$mayor_salary)
+
+# Compute the total savings if employees' compensation were capped at the mayor's salary
+nyc_clean_with_cap <- nyc_clean |>
+  mutate(
+    capped_salary = ifelse(total_salary > mayor_salary$mayor_salary, mayor_salary$mayor_salary, total_salary),
+    savings_from_cap = total_salary - capped_salary
+  )
+
+# Summarize total savings by agency
+total_savings_by_agency <- nyc_clean_with_cap |>
+  group_by(agency_name) |>
+  summarise(
+    total_savings = sum(savings_from_cap, na.rm = TRUE),
+    total_salaries = sum(total_salary, na.rm = TRUE),
+    .groups = 'drop'
+  ) |>
+  arrange(desc(total_savings))
+
+# Display the summary of savings by agency
+total_savings_by_agency
+```
+
+# Results 
+By implementing a salary cap for employees earning more than the Mayor, the total savings to the city payroll is calculated. This policy results in a reduction of salaries for employees whose total compensation exceeds the Mayor's salary. The agencies and job titles most impacted by this policy are those with the highest number of employees earning above the capped amount. These departments would experience the most significant financial impact, as their payroll would see the greatest reduction in total salary expenditures.
+
+# Policy II: Increasing Staffing to Reduce Overtime Expenses
+Policy II suggests increasing staffing to reduce overtime expenses. The analysis focused on measuring overtime hours across agencies and job titles and calculated the number of additional employees needed to eliminate overtime. Agencies with high overtime usage, such as the Police and Fire Departments, are highlighted as key areas for this staffing increase. The projected savings are based on the replacement of overtime with regular hours, which cost less. However, this analysis assumes a direct proportional reduction in overtime with increased staffing and acknowledges that variability in overtime needs and scheduling challenges may limit these projections.
+
+```{r}
+# Set knitr options to hide code and show only the output when rendered
+knitr::opts_chunk$set(echo = FALSE)
+
+# Calculate hourly rate for each employee
+nyc_clean <- nyc_clean |>
+  mutate(
+    hourly_rate = base_salary / 2080  # Assuming 2080 work hours per year for full-time employees
+  )
+
+# Find total overtime hours worked by each agency and job title and retain base_salary and hourly_rate
+agency_ot_hours <- nyc_clean |>
+  group_by(agency_name, title_description) |>
+  summarise(
+    total_ot_hours = sum(ot_hours, na.rm = TRUE),
+    total_regular_hours = sum(regular_hours, na.rm = TRUE),
+    base_salary = first(base_salary),  # Keep base_salary for potential savings calculation
+    hourly_rate = first(hourly_rate),  # Keep hourly_rate for potential savings calculation
+    .groups = 'drop'
+  )
+
+# Calculate potential savings from reducing overtime by hiring more employees
+agency_ot_replacement <- agency_ot_hours |>
+  mutate(
+    # Calculate potential savings if overtime hours are replaced with regular hours
+    potential_savings = total_ot_hours * (1.5 * hourly_rate) - total_ot_hours * hourly_rate
+  )
+
+# Summarize total savings by agency
+total_savings_by_agency_ot <- agency_ot_replacement |>
+  group_by(agency_name) |>
+  summarise(
+    total_savings = sum(potential_savings, na.rm = TRUE),
+    .groups = 'drop'
+  ) |>
+  arrange(desc(total_savings))
+
+# Display the summary of savings by agency
+total_savings_by_agency_ot
+```
+
+# Results
+Policy II suggests increasing staffing to reduce overtime expenses, the analysis indicates that agencies with higher overtime usage typically have a disproportionate ratio of overtime hours to regular hours. By increasing staffing levels, the need for overtime could be reduced, leading to lower total payroll costs and a more efficient allocation of resources. The findings suggest that targeting agencies with the highest overtime-to-regular hours ratio would be a strategic approach to minimizing excessive overtime expenses, ultimately contributing to better taxpayer spending.
+
+# Policy III: Optimizing Employee Shifts and Job Distribution
+In Policy III, the focus shifts to optimizing employee shifts and redistributing workloads to reduce the need for overtime. Improved shift scheduling and task redistribution are proposed to convert overtime hours into regular hours, thus lowering payroll expenses. This strategy identifies which agencies can achieve the greatest savings by balancing workloads more efficiently. While the analysis assumes that work demands remain constant following these changes, it also notes that unforeseen changes in workload distribution and staffing flexibility could affect the outcomes.
+
+```{r, include=TRUE}
+# Step 1: Calculate hourly rate for each employee in the nyc_clean dataset
+nyc_clean <- nyc_clean |>
+  mutate(
+    hourly_rate = base_salary / 2080  # Assuming 2080 work hours per year for full-time employees
+  )
+
+# Step 2: Calculate total overtime hours and regular hours by agency and job title
+agency_ot_hours <- nyc_clean |>
+  group_by(agency_name, title_description) |>
+  summarise(
+    total_ot_hours = sum(ot_hours, na.rm = TRUE),
+    total_regular_hours = sum(regular_hours, na.rm = TRUE),
+    hourly_rate = mean(hourly_rate, na.rm = TRUE),  # Include hourly_rate here to use it later
+    .groups = 'drop'
+  )
+
+# Step 3: Calculate potential savings from reducing overtime by hiring more employees
+agency_ot_replacement <- agency_ot_hours |>
+  mutate(
+    # Calculating the potential savings from replacing overtime with regular hours
+    potential_savings = total_ot_hours * (1.5 * hourly_rate) - total_ot_hours * hourly_rate
+  )
+
+# Step 4: Summarize the total potential savings by agency
+agency_ot_replacement_summary <- agency_ot_replacement |>
+  group_by(agency_name) |>
+  summarise(
+    total_savings = sum(potential_savings, na.rm = TRUE),
+    .groups = 'drop'
+  )
+
+# Display the results
+agency_ot_replacement_summary
+```
+
+# Results 
+This policy focuses on optimizing employee shifts by redistributing overtime hours to regular hours. This strategy aims to reduce overtime pay, which is more expensive due to the 1.5x multiplier. The analysis shows potential savings for each agency by converting overtime into regular hours, with savings calculated based on overtime hours worked and the regular hourly rate. The results highlight which agencies can save the most by adjusting their workforce distribution.
+
+# Conclusion
+In conclusion, these three policies offer distinct pathways to reduce NYC’s payroll expenses and improve fiscal efficiency. The proposals include implementing a salary cap, increasing staffing in overtime-heavy departments, and optimizing shift scheduling to balance workloads effectively. Despite inherent uncertainties due to economic and operational factors, further research and ongoing data collection are recommended to refine these projections and support decision-making by the CATS Commissioners.
