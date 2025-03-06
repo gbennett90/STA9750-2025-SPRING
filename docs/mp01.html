@@ -6,6 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Gisell Bennett">
 
 <title>Mini Project 1 – STA 9750 Submission Material</title>
 <style>
@@ -19,6 +20,40 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -103,6 +138,12 @@ ul.task-list li input[type="checkbox"] {
 
 <div class="quarto-title-meta">
 
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Gisell Bennett </p>
+          </div>
+  </div>
     
   
     
@@ -113,94 +154,761 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<hr>
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
 <p>New York City’s payroll expenses form a major part of its budget, prompting the Commission to Analyze Taxpayer Spending (CATS) to explore cost-saving policies. This project evaluates three proposals: capping salaries at the mayoral level, increasing staffing to reduce overtime costs, and implementing a custom policy to control excessive overtime pay. Using NYC payroll data and R for analysis, we assess each policy’s financial impact and feasibility. The findings will guide policymakers in optimizing taxpayer spending while maintaining city services.</p>
 </section>
 <section id="acquiring-payroll-data" class="level2">
 <h2 class="anchored" data-anchor-id="acquiring-payroll-data">Acquiring Payroll Data</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"data/mp01/nyc_payroll_export.csv"</span>)){</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dir.create</span>(<span class="st">"data/mp01"</span>, <span class="at">showWarnings=</span><span class="cn">FALSE</span>, <span class="at">recursive=</span><span class="cn">TRUE</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  ENDPOINT <span class="ot">&lt;-</span> <span class="st">"https://data.cityofnewyork.us/resource/k397-673e.json"</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="sc">!</span><span class="fu">require</span>(<span class="st">"httr2"</span>)) <span class="fu">install.packages</span>(<span class="st">"httr2"</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(httr2)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="sc">!</span><span class="fu">require</span>(<span class="st">"jsonlite"</span>)) <span class="fu">install.packages</span>(<span class="st">"jsonlite"</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(jsonlite)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="sc">!</span><span class="fu">require</span>(<span class="st">"dplyr"</span>)) <span class="fu">install.packages</span>(<span class="st">"dplyr"</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(dplyr)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="sc">!</span><span class="fu">require</span>(<span class="st">"readr"</span>)) <span class="fu">install.packages</span>(<span class="st">"readr"</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(readr)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  BATCH_SIZE <span class="ot">&lt;-</span> <span class="dv">50000</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  OFFSET     <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  END_OF_EXPORT <span class="ot">&lt;-</span> <span class="cn">FALSE</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  ALL_DATA <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span>(<span class="sc">!</span>END_OF_EXPORT){</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    req <span class="ot">&lt;-</span> <span class="fu">request</span>(ENDPOINT) <span class="sc">|&gt;</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>      <span class="fu">req_url_query</span>(<span class="st">`</span><span class="at">$limit</span><span class="st">`</span>  <span class="ot">=</span> BATCH_SIZE, </span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>                    <span class="st">`</span><span class="at">$offset</span><span class="st">`</span> <span class="ot">=</span> OFFSET)</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    resp <span class="ot">&lt;-</span> <span class="fu">req_perform</span>(req)</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    batch_data <span class="ot">&lt;-</span> <span class="fu">fromJSON</span>(<span class="fu">resp_body_string</span>(resp))</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    ALL_DATA <span class="ot">&lt;-</span> <span class="fu">c</span>(ALL_DATA, <span class="fu">list</span>(batch_data))</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">NROW</span>(batch_data) <span class="sc">!=</span> BATCH_SIZE){</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>      END_OF_EXPORT <span class="ot">&lt;-</span> <span class="cn">TRUE</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>      OFFSET <span class="ot">&lt;-</span> OFFSET <span class="sc">+</span> BATCH_SIZE</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>  ALL_DATA <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(ALL_DATA)</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write_csv</span>(ALL_DATA, <span class="st">"data/mp01/nyc_payroll_export.csv"</span>)</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
 <section id="data-preparation-and-cleaning" class="level2">
 <h2 class="anchored" data-anchor-id="data-preparation-and-cleaning">Data Preparation and Cleaning</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Attaching package: 'dplyr'</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="do">## The following objects are masked from 'package:stats':</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="do">##     filter, lag</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="do">## The following objects are masked from 'package:base':</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="do">##     intersect, setdiff, setequal, union</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(stringr)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>nyc_payroll <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/mp01/nyc_payroll_export.csv"</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="do">## Rows: 6225611 Columns: 17</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="do">## ── Column specification ────────────────────────────────────────────────────────</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="do">## Delimiter: ","</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="do">## chr  (8): agency_name, last_name, first_name, mid_init, work_location_boroug...</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="do">## dbl  (8): fiscal_year, payroll_number, base_salary, regular_hours, regular_g...</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="do">## dttm (1): agency_start_date</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="do">## ℹ Use `spec()` to retrieve the full column specification for this data.</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="do">## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>nyc_clean <span class="ot">&lt;-</span> nyc_payroll <span class="sc">|&gt;</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">total_salary =</span> base_salary <span class="sc">+</span> total_ot_paid <span class="sc">+</span> total_other_pay</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">across</span>(</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>      <span class="fu">c</span>(<span class="st">"agency_name"</span>, <span class="st">"last_name"</span>, <span class="st">"first_name"</span>, <span class="st">"work_location_borough"</span>, </span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>        <span class="st">"title_description"</span>, <span class="st">"leave_status_as_of_june_30"</span>), </span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>      str_to_title</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <p>#Initial Exploration # Eric L. Adams Salary Table</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>adams_salary_table <span class="ot">&lt;-</span> nyc_clean <span class="sc">|&gt;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(first_name <span class="sc">==</span> <span class="st">"Eric"</span>, last_name <span class="sc">==</span> <span class="st">"Adams"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(fiscal_year, title_description, agency_name, total_salary) <span class="sc">|&gt;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Fiscal Year"</span> <span class="ot">=</span> fiscal_year,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Position"</span> <span class="ot">=</span> title_description,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Agency"</span> <span class="ot">=</span> agency_name,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Total Salary"</span> <span class="ot">=</span> total_salary</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(adams_salary_table)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 15%">
+<col style="width: 32%">
+<col style="width: 35%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">Fiscal Year</th>
+<th style="text-align: left;">Position</th>
+<th style="text-align: left;">Agency</th>
+<th style="text-align: right;">Total Salary</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">2022</td>
+<td style="text-align: left;">Borough President</td>
+<td style="text-align: left;">Borough President-Brooklyn</td>
+<td style="text-align: right;">179200.62</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2021</td>
+<td style="text-align: left;">Borough President</td>
+<td style="text-align: left;">Borough President-Brooklyn</td>
+<td style="text-align: right;">179200.00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2020</td>
+<td style="text-align: left;">Borough President</td>
+<td style="text-align: left;">Borough President-Brooklyn</td>
+<td style="text-align: right;">179200.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2019</td>
+<td style="text-align: left;">Borough President</td>
+<td style="text-align: left;">Borough President-Brooklyn</td>
+<td style="text-align: right;">179200.00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2018</td>
+<td style="text-align: left;">Borough President</td>
+<td style="text-align: left;">Borough President-Brooklyn</td>
+<td style="text-align: right;">179200.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2017</td>
+<td style="text-align: left;">Borough President</td>
+<td style="text-align: left;">Borough President-Brooklyn</td>
+<td style="text-align: right;">179200.00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2016</td>
+<td style="text-align: left;">Borough President</td>
+<td style="text-align: left;">Borough President-Brooklyn</td>
+<td style="text-align: right;">179200.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2015</td>
+<td style="text-align: left;">Borough President</td>
+<td style="text-align: left;">Borough President-Brooklyn</td>
+<td style="text-align: right;">160000.00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2014</td>
+<td style="text-align: left;">Borough President</td>
+<td style="text-align: left;">Borough President-Brooklyn</td>
+<td style="text-align: right;">160000.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2020</td>
+<td style="text-align: left;">Job Training Participant</td>
+<td style="text-align: left;">Dept Of Parks &amp; Recreation</td>
+<td style="text-align: right;">404.64</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2019</td>
+<td style="text-align: left;">Job Training Participant</td>
+<td style="text-align: left;">Dept Of Parks &amp; Recreation</td>
+<td style="text-align: right;">310.76</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2018</td>
+<td style="text-align: left;">Job Training Participant</td>
+<td style="text-align: left;">Dept Of Parks &amp; Recreation</td>
+<td style="text-align: right;">165.90</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2024</td>
+<td style="text-align: left;">Mayor</td>
+<td style="text-align: left;">Office Of The Mayor</td>
+<td style="text-align: right;">258750.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2023</td>
+<td style="text-align: left;">Mayor</td>
+<td style="text-align: left;">Office Of The Mayor</td>
+<td style="text-align: right;">258750.00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2022</td>
+<td style="text-align: left;">Mayor</td>
+<td style="text-align: left;">Office Of The Mayor</td>
+<td style="text-align: right;">258750.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2024</td>
+<td style="text-align: left;">Police Officer</td>
+<td style="text-align: left;">Police Department</td>
+<td style="text-align: right;">88906.04</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2023</td>
+<td style="text-align: left;">Police Officer</td>
+<td style="text-align: left;">Police Department</td>
+<td style="text-align: right;">75896.35</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2022</td>
+<td style="text-align: left;">Police Officer</td>
+<td style="text-align: left;">Police Department</td>
+<td style="text-align: right;">59914.87</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2021</td>
+<td style="text-align: left;">Police Officer</td>
+<td style="text-align: left;">Police Department</td>
+<td style="text-align: right;">43788.14</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <section id="employee-compensation-analysis" class="level3">
 <h3 class="anchored" data-anchor-id="employee-compensation-analysis">Employee Compensation Analysis</h3>
 <p>Employee Compensation Table</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>nyc_clean <span class="ot">&lt;-</span> nyc_clean <span class="sc">|&gt;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">hourly_rate =</span> base_salary <span class="sc">/</span> <span class="dv">2080</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">total_compensation =</span> <span class="fu">case_when</span>(</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>      title_description <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Mayor"</span>) <span class="sc">~</span> total_salary,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>      <span class="sc">!</span><span class="fu">is.na</span>(hourly_rate) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(regular_hours) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(ot_hours) <span class="sc">~</span> (hourly_rate <span class="sc">*</span> regular_hours) <span class="sc">+</span> (hourly_rate <span class="sc">*</span> <span class="fl">1.5</span> <span class="sc">*</span> ot_hours),</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>      <span class="sc">!</span><span class="fu">is.na</span>(hourly_rate) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(regular_hours) <span class="sc">&amp;</span> <span class="fu">is.na</span>(ot_hours) <span class="sc">~</span> hourly_rate <span class="sc">*</span> regular_hours,</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_real_</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">head</span>(nyc_clean))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 3%">
+<col style="width: 4%">
+<col style="width: 8%">
+<col style="width: 3%">
+<col style="width: 3%">
+<col style="width: 2%">
+<col style="width: 5%">
+<col style="width: 6%">
+<col style="width: 8%">
+<col style="width: 8%">
+<col style="width: 3%">
+<col style="width: 3%">
+<col style="width: 4%">
+<col style="width: 6%">
+<col style="width: 2%">
+<col style="width: 4%">
+<col style="width: 5%">
+<col style="width: 4%">
+<col style="width: 3%">
+<col style="width: 6%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">fiscal_year</th>
+<th style="text-align: right;">payroll_number</th>
+<th style="text-align: left;">agency_name</th>
+<th style="text-align: left;">last_name</th>
+<th style="text-align: left;">first_name</th>
+<th style="text-align: left;">mid_init</th>
+<th style="text-align: left;">agency_start_date</th>
+<th style="text-align: left;">work_location_borough</th>
+<th style="text-align: left;">title_description</th>
+<th style="text-align: left;">leave_status_as_of_june_30</th>
+<th style="text-align: right;">base_salary</th>
+<th style="text-align: left;">pay_basis</th>
+<th style="text-align: right;">regular_hours</th>
+<th style="text-align: right;">regular_gross_paid</th>
+<th style="text-align: right;">ot_hours</th>
+<th style="text-align: right;">total_ot_paid</th>
+<th style="text-align: right;">total_other_pay</th>
+<th style="text-align: right;">total_salary</th>
+<th style="text-align: right;">hourly_rate</th>
+<th style="text-align: right;">total_compensation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">67</td>
+<td style="text-align: left;">Admin For Children’s Svcs</td>
+<td style="text-align: left;">Faye Fall</td>
+<td style="text-align: left;">Sokhna</td>
+<td style="text-align: left;">M</td>
+<td style="text-align: left;">2023-11-20</td>
+<td style="text-align: left;">Bronx</td>
+<td style="text-align: left;">Child Protective Specialist</td>
+<td style="text-align: left;">Active</td>
+<td style="text-align: right;">62043</td>
+<td style="text-align: left;">per Annum</td>
+<td style="text-align: right;">1050.00</td>
+<td style="text-align: right;">31267.96</td>
+<td style="text-align: right;">12.00</td>
+<td style="text-align: right;">425.00</td>
+<td style="text-align: right;">78.04</td>
+<td style="text-align: right;">62546.04</td>
+<td style="text-align: right;">29.82837</td>
+<td style="text-align: right;">31856.69</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">67</td>
+<td style="text-align: left;">Admin For Children’s Svcs</td>
+<td style="text-align: left;">Kilgore</td>
+<td style="text-align: left;">Orlantha</td>
+<td style="text-align: left;">B</td>
+<td style="text-align: left;">2023-08-28</td>
+<td style="text-align: left;">Brooklyn</td>
+<td style="text-align: left;">Child Protective Specialist</td>
+<td style="text-align: left;">Active</td>
+<td style="text-align: right;">62043</td>
+<td style="text-align: left;">per Annum</td>
+<td style="text-align: right;">1470.00</td>
+<td style="text-align: right;">44660.96</td>
+<td style="text-align: right;">99.75</td>
+<td style="text-align: right;">3859.84</td>
+<td style="text-align: right;">78.14</td>
+<td style="text-align: right;">65980.98</td>
+<td style="text-align: right;">29.82837</td>
+<td style="text-align: right;">48310.77</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">67</td>
+<td style="text-align: left;">Admin For Children’s Svcs</td>
+<td style="text-align: left;">Wisdom</td>
+<td style="text-align: left;">Cherise</td>
+<td style="text-align: left;">M</td>
+<td style="text-align: left;">2022-10-24</td>
+<td style="text-align: left;">Manhattan</td>
+<td style="text-align: left;">Community Associate</td>
+<td style="text-align: left;">On Leave</td>
+<td style="text-align: right;">43144</td>
+<td style="text-align: left;">per Annum</td>
+<td style="text-align: right;">1251.50</td>
+<td style="text-align: right;">28649.20</td>
+<td style="text-align: right;">30.00</td>
+<td style="text-align: right;">802.42</td>
+<td style="text-align: right;">78.26</td>
+<td style="text-align: right;">44024.68</td>
+<td style="text-align: right;">20.74231</td>
+<td style="text-align: right;">26892.40</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">67</td>
+<td style="text-align: left;">Admin For Children’s Svcs</td>
+<td style="text-align: left;">Miller</td>
+<td style="text-align: left;">Moya-Gaye</td>
+<td style="text-align: left;">S</td>
+<td style="text-align: left;">2023-02-27</td>
+<td style="text-align: left;">Manhattan</td>
+<td style="text-align: left;">Child Protective Specialist</td>
+<td style="text-align: left;">On Leave</td>
+<td style="text-align: right;">62043</td>
+<td style="text-align: left;">per Annum</td>
+<td style="text-align: right;">1400.75</td>
+<td style="text-align: right;">44515.43</td>
+<td style="text-align: right;">44.75</td>
+<td style="text-align: right;">1476.98</td>
+<td style="text-align: right;">78.37</td>
+<td style="text-align: right;">63598.35</td>
+<td style="text-align: right;">29.82837</td>
+<td style="text-align: right;">43784.31</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">67</td>
+<td style="text-align: left;">Admin For Children’s Svcs</td>
+<td style="text-align: left;">Bradley</td>
+<td style="text-align: left;">Yashika</td>
+<td style="text-align: left;">M</td>
+<td style="text-align: left;">2023-02-27</td>
+<td style="text-align: left;">Bronx</td>
+<td style="text-align: left;">Child Protective Specialist</td>
+<td style="text-align: left;">Ceased</td>
+<td style="text-align: right;">60236</td>
+<td style="text-align: left;">per Annum</td>
+<td style="text-align: right;">700.00</td>
+<td style="text-align: right;">22133.64</td>
+<td style="text-align: right;">53.00</td>
+<td style="text-align: right;">1933.33</td>
+<td style="text-align: right;">78.47</td>
+<td style="text-align: right;">62247.80</td>
+<td style="text-align: right;">28.95962</td>
+<td style="text-align: right;">22574.02</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">67</td>
+<td style="text-align: left;">Admin For Children’s Svcs</td>
+<td style="text-align: left;">Maurino</td>
+<td style="text-align: left;">Jennifer</td>
+<td style="text-align: left;">L</td>
+<td style="text-align: left;">2023-08-28</td>
+<td style="text-align: left;">Richmond</td>
+<td style="text-align: left;">Child Protective Specialist</td>
+<td style="text-align: left;">Active</td>
+<td style="text-align: right;">62043</td>
+<td style="text-align: left;">per Annum</td>
+<td style="text-align: right;">1470.00</td>
+<td style="text-align: right;">45940.44</td>
+<td style="text-align: right;">146.00</td>
+<td style="text-align: right;">5596.49</td>
+<td style="text-align: right;">78.86</td>
+<td style="text-align: right;">67718.35</td>
+<td style="text-align: right;">29.82837</td>
+<td style="text-align: right;">50380.11</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </section>
 </section>
 <section id="instructor-provided-questions" class="level2">
 <h2 class="anchored" data-anchor-id="instructor-provided-questions">Instructor Provided Questions</h2>
+</section>
+<section id="job-title-with-the-highest-base-rate" class="level1">
+<h1>Job title with the highest base rate</h1>
 <div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 1 × 2
-  title_description hourly_base_rate
-  &lt;chr&gt;                        &lt;dbl&gt;
-1 Chair                         207.</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>  fiscal_year first_name last_name total_payroll
-1        2024       Mark  Tettonis       1881523</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 1 × 3
-  first_name last_name   ot_hours
-  &lt;chr&gt;      &lt;chr&gt;          &lt;dbl&gt;
-1 James      Internicola    3693.</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 1 × 2
-  agency_name             avg_total_payroll
-  &lt;chr&gt;                               &lt;dbl&gt;
-1 Office Of Racial Equity           153134.</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 11 × 3
-# Groups:   fiscal_year [11]
-   fiscal_year agency_name            employee_count
-         &lt;dbl&gt; &lt;chr&gt;                           &lt;int&gt;
- 1        2014 Dept Of Ed Pedagogical         100589
- 2        2015 Dept Of Ed Pedagogical         111857
- 3        2016 Dept Of Ed Pedagogical         106263
- 4        2017 Dept Of Ed Pedagogical         104629
- 5        2018 Dept Of Ed Pedagogical         107956
- 6        2019 Dept Of Ed Pedagogical         112067
- 7        2020 Dept Of Ed Pedagogical         114999
- 8        2021 Dept Of Ed Pedagogical         113523
- 9        2022 Dept Of Ed Pedagogical         120453
-10        2023 Dept Of Ed Pedagogical         106882
-11        2024 Dept Of Ed Pedagogical         108209</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 1 × 4
-  agency_name       total_regular_hours total_ot_hours ot_to_regular_ratio
-  &lt;chr&gt;                           &lt;dbl&gt;          &lt;dbl&gt;               &lt;dbl&gt;
-1 Board Of Election           15339960.       3062029.               0.200</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 1 × 1
-  avg_salary_outside_boroughs
-                        &lt;dbl&gt;
-1                      53734.</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 11 × 2
-   fiscal_year aggregate_payroll
-         &lt;dbl&gt;             &lt;dbl&gt;
- 1        2014      24172586330.
- 2        2015      27173046540.
- 3        2016      28392240168.
- 4        2017      29195556714.
- 5        2018      29864346806.
- 6        2019      31374613682.
- 7        2020      34565222187.
- 8        2021      33330917876.
- 9        2022      37319692054.
-10        2023      35873673474.
-11        2024      36662138291.</code></pre>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(nyc_clean <span class="sc">|&gt;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">hourly_base_rate =</span> base_salary <span class="sc">/</span> <span class="dv">2000</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(hourly_base_rate)) <span class="sc">|&gt;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(title_description, hourly_base_rate))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">title_description</th>
+<th style="text-align: right;">hourly_base_rate</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Chair</td>
+<td style="text-align: right;">207.3535</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </section>
+<section id="individual-with-highest-total-payroll" class="level1">
+<h1>Individual with highest total payroll</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(nyc_clean <span class="sc">|&gt;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transform</span>(<span class="at">total_payroll =</span> total_salary <span class="sc">+</span> total_ot_paid) <span class="sc">|&gt;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(total_payroll)) <span class="sc">|&gt;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(fiscal_year, first_name, last_name, total_payroll))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;">fiscal_year</th>
+<th style="text-align: left;">first_name</th>
+<th style="text-align: left;">last_name</th>
+<th style="text-align: right;">total_payroll</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">2024</td>
+<td style="text-align: left;">Mark</td>
+<td style="text-align: left;">Tettonis</td>
+<td style="text-align: right;">1881523</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="most-overtime-hours-worked" class="level1">
+<h1>Most overtime hours worked</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(nyc_clean <span class="sc">|&gt;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(ot_hours)) <span class="sc">|&gt;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(first_name, last_name, ot_hours))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">first_name</th>
+<th style="text-align: left;">last_name</th>
+<th style="text-align: right;">ot_hours</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">James</td>
+<td style="text-align: left;">Internicola</td>
+<td style="text-align: right;">3692.9</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="agency-with-highest-total-payroll-per-employee" class="level1">
+<h1>Agency with highest total payroll per employee</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(nyc_clean <span class="sc">|&gt;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(agency_name) <span class="sc">|&gt;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">avg_total_payroll =</span> <span class="fu">mean</span>(total_salary <span class="sc">+</span> total_ot_paid, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(avg_total_payroll)) <span class="sc">|&gt;</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">agency_name</th>
+<th style="text-align: right;">avg_total_payroll</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Office Of Racial Equity</td>
+<td style="text-align: right;">153134.5</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="agency-with-most-employees-per-year" class="level1">
+<h1>Agency with most employees per year</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(nyc_clean <span class="sc">|&gt;</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(fiscal_year, agency_name) <span class="sc">|&gt;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">employee_count =</span> <span class="fu">n</span>(), <span class="at">.groups =</span> <span class="st">"keep"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(fiscal_year) <span class="sc">|&gt;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_max</span>(employee_count, <span class="at">n =</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;">fiscal_year</th>
+<th style="text-align: left;">agency_name</th>
+<th style="text-align: right;">employee_count</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">2014</td>
+<td style="text-align: left;">Dept Of Ed Pedagogical</td>
+<td style="text-align: right;">100589</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2015</td>
+<td style="text-align: left;">Dept Of Ed Pedagogical</td>
+<td style="text-align: right;">111857</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2016</td>
+<td style="text-align: left;">Dept Of Ed Pedagogical</td>
+<td style="text-align: right;">106263</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2017</td>
+<td style="text-align: left;">Dept Of Ed Pedagogical</td>
+<td style="text-align: right;">104629</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2018</td>
+<td style="text-align: left;">Dept Of Ed Pedagogical</td>
+<td style="text-align: right;">107956</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2019</td>
+<td style="text-align: left;">Dept Of Ed Pedagogical</td>
+<td style="text-align: right;">112067</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2020</td>
+<td style="text-align: left;">Dept Of Ed Pedagogical</td>
+<td style="text-align: right;">114999</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2021</td>
+<td style="text-align: left;">Dept Of Ed Pedagogical</td>
+<td style="text-align: right;">113523</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2022</td>
+<td style="text-align: left;">Dept Of Ed Pedagogical</td>
+<td style="text-align: right;">120453</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2023</td>
+<td style="text-align: left;">Dept Of Ed Pedagogical</td>
+<td style="text-align: right;">106882</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2024</td>
+<td style="text-align: left;">Dept Of Ed Pedagogical</td>
+<td style="text-align: right;">108209</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="agency-with-highest-overtime-usage" class="level1">
+<h1>Agency with highest overtime usage</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(nyc_clean <span class="sc">|&gt;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(agency_name) <span class="sc">|&gt;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">total_regular_hours =</span> <span class="fu">sum</span>(regular_hours, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">total_ot_hours =</span> <span class="fu">sum</span>(ot_hours, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">ot_to_regular_ratio =</span> total_ot_hours <span class="sc">/</span> total_regular_hours</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(ot_to_regular_ratio)) <span class="sc">|&gt;</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 24%">
+<col style="width: 27%">
+<col style="width: 20%">
+<col style="width: 27%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">agency_name</th>
+<th style="text-align: right;">total_regular_hours</th>
+<th style="text-align: right;">total_ot_hours</th>
+<th style="text-align: right;">ot_to_regular_ratio</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Board Of Election</td>
+<td style="text-align: right;">15339960</td>
+<td style="text-align: right;">3062029</td>
+<td style="text-align: right;">0.1996112</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="average-salary-of-employees-outside-the-five-boroughs" class="level1">
+<h1>Average salary of employees outside the five boroughs</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(nyc_clean <span class="sc">|&gt;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>(work_location_borough <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Manhattan"</span>, <span class="st">"Brooklyn"</span>, <span class="st">"Queens"</span>, <span class="st">"Bronx"</span>, <span class="st">"Staten Island"</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">avg_salary_outside_boroughs =</span> <span class="fu">mean</span>(base_salary, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;">avg_salary_outside_boroughs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">53734.13</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="aggregate-payroll-growth-over-10-years" class="level1">
+<h1>Aggregate payroll growth over 10 years</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(nyc_clean <span class="sc">|&gt;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(fiscal_year) <span class="sc">|&gt;</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">aggregate_payroll =</span> <span class="fu">sum</span>(total_salary <span class="sc">+</span> total_ot_paid, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(fiscal_year <span class="sc">&gt;=</span> (<span class="fu">max</span>(fiscal_year) <span class="sc">-</span> <span class="dv">10</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(fiscal_year))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;">fiscal_year</th>
+<th style="text-align: right;">aggregate_payroll</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">2014</td>
+<td style="text-align: right;">24172586330</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2015</td>
+<td style="text-align: right;">27173046540</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2016</td>
+<td style="text-align: right;">28392240168</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2017</td>
+<td style="text-align: right;">29195556714</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2018</td>
+<td style="text-align: right;">29864346806</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2019</td>
+<td style="text-align: right;">31374613682</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2020</td>
+<td style="text-align: right;">34565222187</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2021</td>
+<td style="text-align: right;">33330917876</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2022</td>
+<td style="text-align: right;">37319692054</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">35873673474</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">36662138291</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <section id="analysis" class="level2">
 <h2 class="anchored" data-anchor-id="analysis">Analysis</h2>
 <p>Effective management of New York City payroll is crucial for maintaining fiscal responsibility and ensuring optimal allocation of taxpayer money. The City Agency for Transportation Services (CATS) is committed to exploring policy reforms that can enhance efficiency and reduce expenditures without compromising service quality. This analysis examines three proposed policies aimed at achieving these objectives:</p>
@@ -210,25 +918,896 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Policy III:</strong> Implementing Performance-Based Pay Adjustments</li>
 </ul>
 </section>
+</section>
 <section id="policy-i-capping-salaries-at-the-mayoral-level" class="level1">
 <h1>Policy I: Capping Salaries at the Mayoral Level</h1>
 <p>For Policy I, which caps salaries at the mayor’s level, the approach began with calculating the total mayoral salary for each fiscal year. Employees earning above this threshold were identified, and their salaries were capped at the mayor’s level. The savings were then determined by comparing the original and capped salaries, aggregated by agency and job title. For instance, agencies like the Police Department and Fire Department exhibit significant potential savings. This analysis assumes that the mayor’s salary remains fixed over the period, while limitations include potential data gaps and external economic factors that might affect projections.</p>
 <div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 169 × 3
-   agency_name                   total_savings total_salaries
-   &lt;chr&gt;                                 &lt;dbl&gt;          &lt;dbl&gt;
- 1 Department Of Transportation      23262379.    4408888966.
- 2 Fire Department                   14619972.   22060046088.
- 3 Police Department                 14315546.   60812998875.
- 4 Department Of Correction          10120754.   13159615878.
- 5 Dept Of Ed Pedagogical             8069875.  114209257992.
- 6 Department Of Sanitation           2578045.   11549928064.
- 7 Office Of The Comptroller          2449374.     854674609.
- 8 Nyc Housing Authority              1595038.    8066183380.
- 9 Office Of The Mayor                1401843.     720750276.
-10 Dept Of Health/Mental Hygiene      1381175.    5401875298.
-# ℹ 159 more rows</code></pre>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Identify the Mayor's salary</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>mayor_salary <span class="ot">&lt;-</span> nyc_clean <span class="sc">|&gt;</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(title_description <span class="sc">==</span> <span class="st">"Mayor"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">mayor_salary =</span> <span class="fu">max</span>(total_salary, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Find employees earning more than the Mayor's salary</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>employees_above_mayor <span class="ot">&lt;-</span> nyc_clean <span class="sc">|&gt;</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(total_salary <span class="sc">&gt;</span> mayor_salary<span class="sc">$</span>mayor_salary)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute the total savings if employees' compensation were capped at the Mayor's salary</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>nyc_clean_with_cap <span class="ot">&lt;-</span> nyc_clean <span class="sc">|&gt;</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">capped_salary =</span> <span class="fu">ifelse</span>(total_salary <span class="sc">&gt;</span> mayor_salary<span class="sc">$</span>mayor_salary, mayor_salary<span class="sc">$</span>mayor_salary, total_salary),</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">savings_from_cap =</span> total_salary <span class="sc">-</span> capped_salary</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Summarize total savings by agency</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>total_savings_by_agency <span class="ot">&lt;-</span> nyc_clean_with_cap <span class="sc">|&gt;</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(agency_name) <span class="sc">|&gt;</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">total_savings =</span> <span class="fu">sum</span>(savings_from_cap, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">total_salaries =</span> <span class="fu">sum</span>(total_salary, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">'drop'</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(total_savings))</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the summary of savings by agency</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(total_savings_by_agency)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">agency_name</th>
+<th style="text-align: right;">total_savings</th>
+<th style="text-align: right;">total_salaries</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Department Of Transportation</td>
+<td style="text-align: right;">23262379.44</td>
+<td style="text-align: right;">4.408889e+09</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Fire Department</td>
+<td style="text-align: right;">14619971.51</td>
+<td style="text-align: right;">2.206005e+10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Police Department</td>
+<td style="text-align: right;">14315546.21</td>
+<td style="text-align: right;">6.081300e+10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Department Of Correction</td>
+<td style="text-align: right;">10120753.71</td>
+<td style="text-align: right;">1.315962e+10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Dept Of Ed Pedagogical</td>
+<td style="text-align: right;">8069874.98</td>
+<td style="text-align: right;">1.142093e+11</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Department Of Sanitation</td>
+<td style="text-align: right;">2578044.81</td>
+<td style="text-align: right;">1.154993e+10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Office Of The Comptroller</td>
+<td style="text-align: right;">2449373.76</td>
+<td style="text-align: right;">8.546746e+08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Nyc Housing Authority</td>
+<td style="text-align: right;">1595037.71</td>
+<td style="text-align: right;">8.066183e+09</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Office Of The Mayor</td>
+<td style="text-align: right;">1401842.64</td>
+<td style="text-align: right;">7.207503e+08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Dept Of Health/Mental Hygiene</td>
+<td style="text-align: right;">1381175.34</td>
+<td style="text-align: right;">5.401875e+09</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Office Of Management &amp; Budget</td>
+<td style="text-align: right;">1198224.86</td>
+<td style="text-align: right;">4.828763e+08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">District Attorney-Manhattan</td>
+<td style="text-align: right;">1117619.74</td>
+<td style="text-align: right;">1.498738e+09</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Dept Of Environment Protection</td>
+<td style="text-align: right;">1075434.09</td>
+<td style="text-align: right;">4.822756e+09</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Department Of Education Admin</td>
+<td style="text-align: right;">980527.00</td>
+<td style="text-align: right;">1.128867e+10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Community College (Laguardia)</td>
+<td style="text-align: right;">794397.34</td>
+<td style="text-align: right;">1.028869e+09</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Dept Of Citywide Admin Svcs</td>
+<td style="text-align: right;">783050.72</td>
+<td style="text-align: right;">1.856656e+09</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Department Of Finance</td>
+<td style="text-align: right;">698470.40</td>
+<td style="text-align: right;">1.902613e+09</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Law Department</td>
+<td style="text-align: right;">691481.77</td>
+<td style="text-align: right;">1.694329e+09</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Community College (Manhattan)</td>
+<td style="text-align: right;">597997.69</td>
+<td style="text-align: right;">1.252339e+09</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Office Of The Actuary</td>
+<td style="text-align: right;">561844.28</td>
+<td style="text-align: right;">5.561992e+07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Guttman Community College</td>
+<td style="text-align: right;">487525.72</td>
+<td style="text-align: right;">1.665956e+08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Community College (Queensboro)</td>
+<td style="text-align: right;">477351.89</td>
+<td style="text-align: right;">9.070125e+08</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">District Attorney Qns County</td>
+<td style="text-align: right;">476209.59</td>
+<td style="text-align: right;">7.283852e+08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Hra/Dept Of Social Services</td>
+<td style="text-align: right;">467405.99</td>
+<td style="text-align: right;">9.998147e+09</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Community College (Bronx)</td>
+<td style="text-align: right;">462233.22</td>
+<td style="text-align: right;">7.851923e+08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">District Attorney Richmond Cou</td>
+<td style="text-align: right;">445701.74</td>
+<td style="text-align: right;">1.683419e+08</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Community College (Kingsboro)</td>
+<td style="text-align: right;">375874.06</td>
+<td style="text-align: right;">8.353920e+08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Community College (Hostos)</td>
+<td style="text-align: right;">359637.59</td>
+<td style="text-align: right;">5.577059e+08</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Admin For Children’s Svcs</td>
+<td style="text-align: right;">324821.45</td>
+<td style="text-align: right;">6.509392e+09</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">District Attorney Kings County</td>
+<td style="text-align: right;">264686.18</td>
+<td style="text-align: right;">1.081279e+09</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Board Of Election</td>
+<td style="text-align: right;">239503.04</td>
+<td style="text-align: right;">5.092012e+08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Dept. Of Design &amp; Construction</td>
+<td style="text-align: right;">239439.57</td>
+<td style="text-align: right;">1.414466e+09</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Bronx District Attorney</td>
+<td style="text-align: right;">238380.97</td>
+<td style="text-align: right;">9.469805e+08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Independent Budget Office</td>
+<td style="text-align: right;">237502.65</td>
+<td style="text-align: right;">4.816115e+07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Dept Of Parks &amp; Recreation</td>
+<td style="text-align: right;">234100.04</td>
+<td style="text-align: right;">3.499512e+09</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Department Of Business Serv.</td>
+<td style="text-align: right;">220959.65</td>
+<td style="text-align: right;">2.970725e+08</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Department Of Buildings</td>
+<td style="text-align: right;">210788.98</td>
+<td style="text-align: right;">1.564728e+09</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Dept Of Info Tech &amp; Telecomm</td>
+<td style="text-align: right;">203298.15</td>
+<td style="text-align: right;">1.379621e+09</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Technology &amp; Innovation</td>
+<td style="text-align: right;">196575.09</td>
+<td style="text-align: right;">4.208813e+08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Department For The Aging</td>
+<td style="text-align: right;">194931.37</td>
+<td style="text-align: right;">3.016066e+08</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Office Of Emergency Management</td>
+<td style="text-align: right;">181585.87</td>
+<td style="text-align: right;">2.207965e+08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Department Of Probation</td>
+<td style="text-align: right;">181455.87</td>
+<td style="text-align: right;">8.792409e+08</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Nyc Police Pension Fund</td>
+<td style="text-align: right;">181161.97</td>
+<td style="text-align: right;">1.458320e+08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Financial Info Svcs Agency</td>
+<td style="text-align: right;">167809.41</td>
+<td style="text-align: right;">5.863772e+08</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Taxi &amp; Limousine Commission</td>
+<td style="text-align: right;">148026.80</td>
+<td style="text-align: right;">4.693783e+08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Business Integrity Commission</td>
+<td style="text-align: right;">134455.28</td>
+<td style="text-align: right;">8.012840e+07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">District Attorney-Special Narc</td>
+<td style="text-align: right;">96496.95</td>
+<td style="text-align: right;">2.543323e+08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Housing Preservation &amp; Dvlpmnt</td>
+<td style="text-align: right;">95163.50</td>
+<td style="text-align: right;">2.219371e+09</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Nyc Employees Retirement Sys</td>
+<td style="text-align: right;">94172.01</td>
+<td style="text-align: right;">4.218564e+08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">City Council</td>
+<td style="text-align: right;">92868.06</td>
+<td style="text-align: right;">7.484446e+08</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Department Of City Planning</td>
+<td style="text-align: right;">86248.48</td>
+<td style="text-align: right;">3.342969e+08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Borough President-Bronx</td>
+<td style="text-align: right;">85111.20</td>
+<td style="text-align: right;">5.662788e+07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Mayors Office Of Contract Svcs</td>
+<td style="text-align: right;">77061.51</td>
+<td style="text-align: right;">1.565924e+08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Office Of Labor Relations</td>
+<td style="text-align: right;">74372.63</td>
+<td style="text-align: right;">1.427679e+08</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Dept Of Youth &amp; Comm Dev Srvs</td>
+<td style="text-align: right;">72011.84</td>
+<td style="text-align: right;">5.229428e+08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Department Of Investigation</td>
+<td style="text-align: right;">65358.05</td>
+<td style="text-align: right;">3.409948e+08</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Human Rights Commission</td>
+<td style="text-align: right;">38814.59</td>
+<td style="text-align: right;">1.202115e+08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Admin Trials And Hearings</td>
+<td style="text-align: right;">36505.15</td>
+<td style="text-align: right;">3.108910e+08</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Teachers Retirement System</td>
+<td style="text-align: right;">32077.40</td>
+<td style="text-align: right;">3.800348e+08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Tax Commission</td>
+<td style="text-align: right;">29053.40</td>
+<td style="text-align: right;">5.803700e+07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Brooklyn Community Board #18</td>
+<td style="text-align: right;">25577.10</td>
+<td style="text-align: right;">2.723729e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Consumer And Worker Protection</td>
+<td style="text-align: right;">18097.22</td>
+<td style="text-align: right;">1.280888e+08</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Office Of Collective Bargainin</td>
+<td style="text-align: right;">17398.10</td>
+<td style="text-align: right;">2.356483e+07</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Off Of Payroll Administration</td>
+<td style="text-align: right;">11462.10</td>
+<td style="text-align: right;">1.667995e+08</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">City Clerk</td>
+<td style="text-align: right;">10741.10</td>
+<td style="text-align: right;">4.965622e+07</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Borough President-Staten Is</td>
+<td style="text-align: right;">8018.21</td>
+<td style="text-align: right;">3.596248e+07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Municipal Water Fin Authority</td>
+<td style="text-align: right;">6736.95</td>
+<td style="text-align: right;">1.530607e+07</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Campaign Finance Board</td>
+<td style="text-align: right;">5676.42</td>
+<td style="text-align: right;">1.343343e+08</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Bronx Community Board #3</td>
+<td style="text-align: right;">4321.08</td>
+<td style="text-align: right;">2.372400e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Bronx Community Board #1</td>
+<td style="text-align: right;">3831.94</td>
+<td style="text-align: right;">2.529123e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Brooklyn Community Board #1</td>
+<td style="text-align: right;">1955.10</td>
+<td style="text-align: right;">2.719686e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Board Of Correction</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.820943e+07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Board Of Corrections</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">1.224864e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Board Of Election Poll Workers</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">3.785467e+05</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Borough President-Brooklyn</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">7.000571e+07</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Borough President-Queens</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">6.020025e+07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Bronx Community Board #10</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">1.895505e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Bronx Community Board #11</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">1.973506e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Bronx Community Board #12</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.385030e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Bronx Community Board #2</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.219903e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Bronx Community Board #4</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.604911e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Bronx Community Board #5</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.017093e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Bronx Community Board #6</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.120627e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Bronx Community Board #7</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.648091e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Bronx Community Board #8</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.781548e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Bronx Community Board #9</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.267306e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Bronx Da</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">5.657590e+07</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Brooklyn Community Board #10</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.219011e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Brooklyn Community Board #11</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">1.865473e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Brooklyn Community Board #12</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.023821e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Brooklyn Community Board #13</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.143010e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Brooklyn Community Board #14</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.089408e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Brooklyn Community Board #15</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">1.880624e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Brooklyn Community Board #16</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.009013e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Brooklyn Community Board #17</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.503684e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Brooklyn Community Board #2</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.530362e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Brooklyn Community Board #3</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.235635e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Brooklyn Community Board #4</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.249407e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Brooklyn Community Board #5</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.304103e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Brooklyn Community Board #6</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.684037e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Brooklyn Community Board #7</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.444486e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Brooklyn Community Board #8</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.193174e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Brooklyn Community Board #9</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.036973e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Civil Service Commission</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">7.866896e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Civilian Complaint Review Bd</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">1.965252e+08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Commission On Racial Equity</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">8.201460e+05</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Conflicts Of Interest Board</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">3.000645e+07</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Consumer Affairs</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.414790e+08</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Cultural Affairs</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">5.715933e+07</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Cuny Central Office</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">5.659270e+07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Department Of Juvenile Justice</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">3.620852e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Dept Of Ed Hrly Support Staff</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">6.875049e+08</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Dept Of Ed Para Professionals</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">1.210118e+10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Dept Of Ed Per Diem Teachers</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.279797e+07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Dept Of Ed Per Session Teacher</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">8.789588e+07</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Dept Of Records &amp; Info Service</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">4.759742e+07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Dept. Of Homeless Services</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">1.850509e+09</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Districting Commission</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">3.529347e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Doe Custodial Payrol</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">8.875604e+08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Equal Employ Practices Comm</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">1.265717e+07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Hunter College High School</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">1.941480e+08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Kings Da</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">8.107290e+07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Landmarks Preservation Comm</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">6.905594e+07</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Manhattan Community Board #1</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.877356e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Manhattan Community Board #10</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.499583e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Manhattan Community Board #11</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.225051e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Manhattan Community Board #12</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.172867e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Manhattan Community Board #2</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.769546e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Manhattan Community Board #3</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.870944e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Manhattan Community Board #4</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.422075e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Manhattan Community Board #5</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.933688e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Manhattan Community Board #6</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.608639e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Manhattan Community Board #7</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.898005e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Manhattan Community Board #8</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.829394e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Manhattan Community Board #9</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">1.658570e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Manhattan Da</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">1.044171e+08</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Nyc Dept Of Veterans’ Services</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">3.581958e+07</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Nyc Fire Pension Fund</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">3.121199e+07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Office Of Criminal Justice</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">7.717037e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Office Of Racial Equity</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">1.684119e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Personnel Monitors</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">1.478259e+05</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">President Borough Of Manhattan</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">5.995574e+07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Public Administrator-Bronx</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">7.727298e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Public Administrator-Kings</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">1.097729e+07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Public Administrator-New York</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">9.169896e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Public Administrator-Queens</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">6.675591e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Public Administrator-Richmond</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">6.364227e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Public Advocate</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">5.294604e+07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Public Service Corps</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">3.164161e+04</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Queens Community Board #1</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">1.945380e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Queens Community Board #10</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.291530e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Queens Community Board #11</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.440963e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Queens Community Board #12</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.317512e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Queens Community Board #13</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.419709e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Queens Community Board #14</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.657304e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Queens Community Board #2</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.205498e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Queens Community Board #3</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.230140e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Queens Community Board #4</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.583381e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Queens Community Board #5</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">1.809844e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Queens Community Board #6</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.510126e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Queens Community Board #7</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.263086e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Queens Community Board #8</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.888172e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Queens Community Board #9</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.149244e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Queens Da</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">4.848865e+07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Richmond Da</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">7.982856e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Spec Narcs-Da</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">1.995172e+07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Staten Island Community Bd #1</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.552513e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Staten Island Community Bd #2</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">1.397197e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Staten Island Community Bd #3</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.554774e+06</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </section>
@@ -240,21 +1819,714 @@ ul.task-list li input[type="checkbox"] {
 <h1>Policy II: Increasing Staffing to Reduce Overtime Expenses</h1>
 <p>Policy II suggests increasing staffing to reduce overtime expenses. The analysis focused on measuring overtime hours across agencies and job titles and calculated the number of additional employees needed to eliminate overtime. Agencies with high overtime usage, such as the Police and Fire Departments, are highlighted as key areas for this staffing increase. The projected savings are based on the replacement of overtime with regular hours, which cost less. However, this analysis assumes a direct proportional reduction in overtime with increased staffing and acknowledges that variability in overtime needs and scheduling challenges may limit these projections.</p>
 <div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 169 × 2
-   agency_name                    total_savings
-   &lt;chr&gt;                                  &lt;dbl&gt;
- 1 Police Department                2549625387.
- 2 Fire Department                  1140739521.
- 3 Department Of Correction          987736396.
- 4 Department Of Sanitation          660917523.
- 5 Hra/Dept Of Social Services       200262519.
- 6 Nyc Housing Authority             170227734.
- 7 Admin For Children's Svcs         154794773.
- 8 Department Of Transportation      134156491.
- 9 Dept Of Environment Protection     92301340.
-10 Dept. Of Homeless Services         57953982.
-# ℹ 159 more rows</code></pre>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate potential savings from reducing overtime by hiring more employees</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>agency_ot_replacement <span class="ot">&lt;-</span> nyc_clean <span class="sc">|&gt;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(agency_name, title_description) <span class="sc">|&gt;</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">total_ot_hours =</span> <span class="fu">sum</span>(ot_hours, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">hourly_rate =</span> <span class="fu">first</span>(base_salary) <span class="sc">/</span> <span class="dv">2080</span>,</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">potential_savings =</span> total_ot_hours <span class="sc">*</span> (<span class="fl">1.5</span> <span class="sc">*</span> hourly_rate) <span class="sc">-</span> total_ot_hours <span class="sc">*</span> hourly_rate,</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">'drop'</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Summarize total savings by agency</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>total_savings_by_agency_ot <span class="ot">&lt;-</span> agency_ot_replacement <span class="sc">|&gt;</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(agency_name) <span class="sc">|&gt;</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">total_savings =</span> <span class="fu">sum</span>(potential_savings, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">'drop'</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(total_savings))</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the summary of savings by agency</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(total_savings_by_agency_ot)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">agency_name</th>
+<th style="text-align: right;">total_savings</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Police Department</td>
+<td style="text-align: right;">2.549625e+09</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Fire Department</td>
+<td style="text-align: right;">1.140740e+09</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Department Of Correction</td>
+<td style="text-align: right;">9.877364e+08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Department Of Sanitation</td>
+<td style="text-align: right;">6.609175e+08</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Hra/Dept Of Social Services</td>
+<td style="text-align: right;">2.002625e+08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Nyc Housing Authority</td>
+<td style="text-align: right;">1.702277e+08</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Admin For Children’s Svcs</td>
+<td style="text-align: right;">1.547948e+08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Department Of Transportation</td>
+<td style="text-align: right;">1.341565e+08</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Dept Of Environment Protection</td>
+<td style="text-align: right;">9.230134e+07</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Dept. Of Homeless Services</td>
+<td style="text-align: right;">5.795398e+07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Dept Of Health/Mental Hygiene</td>
+<td style="text-align: right;">5.393095e+07</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Dept Of Parks &amp; Recreation</td>
+<td style="text-align: right;">5.119567e+07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Department Of Education Admin</td>
+<td style="text-align: right;">4.016317e+07</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Dept Of Citywide Admin Svcs</td>
+<td style="text-align: right;">3.963756e+07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Board Of Election</td>
+<td style="text-align: right;">3.203702e+07</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Department Of Buildings</td>
+<td style="text-align: right;">3.029411e+07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Department Of Finance</td>
+<td style="text-align: right;">1.835580e+07</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Housing Preservation &amp; Dvlpmnt</td>
+<td style="text-align: right;">1.195806e+07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Dept. Of Design &amp; Construction</td>
+<td style="text-align: right;">9.567346e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">District Attorney-Manhattan</td>
+<td style="text-align: right;">8.734744e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Nyc Employees Retirement Sys</td>
+<td style="text-align: right;">6.672094e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Department Of Probation</td>
+<td style="text-align: right;">6.238693e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">District Attorney Kings County</td>
+<td style="text-align: right;">5.847620e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Taxi &amp; Limousine Commission</td>
+<td style="text-align: right;">4.619962e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Dept Of Info Tech &amp; Telecomm</td>
+<td style="text-align: right;">4.481370e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">District Attorney Qns County</td>
+<td style="text-align: right;">4.299686e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Office Of Management &amp; Budget</td>
+<td style="text-align: right;">3.698047e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Community College (Manhattan)</td>
+<td style="text-align: right;">3.537992e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Law Department</td>
+<td style="text-align: right;">3.291644e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Office Of Emergency Management</td>
+<td style="text-align: right;">3.221641e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Campaign Finance Board</td>
+<td style="text-align: right;">3.190870e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Bronx District Attorney</td>
+<td style="text-align: right;">3.007933e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Department Of Investigation</td>
+<td style="text-align: right;">2.893797e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Community College (Hostos)</td>
+<td style="text-align: right;">2.266253e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Community College (Laguardia)</td>
+<td style="text-align: right;">1.978083e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Civilian Complaint Review Bd</td>
+<td style="text-align: right;">1.820682e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Financial Info Svcs Agency</td>
+<td style="text-align: right;">1.675055e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Community College (Bronx)</td>
+<td style="text-align: right;">1.457707e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Community College (Queensboro)</td>
+<td style="text-align: right;">1.395259e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Community College (Kingsboro)</td>
+<td style="text-align: right;">1.354146e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Consumer Affairs</td>
+<td style="text-align: right;">1.299172e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Nyc Police Pension Fund</td>
+<td style="text-align: right;">1.279757e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Technology &amp; Innovation</td>
+<td style="text-align: right;">1.109026e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Office Of The Comptroller</td>
+<td style="text-align: right;">1.093051e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Teachers Retirement System</td>
+<td style="text-align: right;">8.121484e+05</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Dept Of Youth &amp; Comm Dev Srvs</td>
+<td style="text-align: right;">7.115151e+05</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Office Of The Mayor</td>
+<td style="text-align: right;">7.011249e+05</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Tax Commission</td>
+<td style="text-align: right;">6.048863e+05</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Manhattan Da</td>
+<td style="text-align: right;">5.744799e+05</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Guttman Community College</td>
+<td style="text-align: right;">4.740899e+05</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Business Integrity Commission</td>
+<td style="text-align: right;">4.305421e+05</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Bronx Da</td>
+<td style="text-align: right;">3.420790e+05</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Department Of Business Serv.</td>
+<td style="text-align: right;">3.191693e+05</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Admin Trials And Hearings</td>
+<td style="text-align: right;">3.097609e+05</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Queens Da</td>
+<td style="text-align: right;">3.009396e+05</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">District Attorney-Special Narc</td>
+<td style="text-align: right;">2.949231e+05</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Nyc Fire Pension Fund</td>
+<td style="text-align: right;">2.945275e+05</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">District Attorney Richmond Cou</td>
+<td style="text-align: right;">2.680327e+05</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Office Of The Actuary</td>
+<td style="text-align: right;">2.500876e+05</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Off Of Payroll Administration</td>
+<td style="text-align: right;">2.200898e+05</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Kings Da</td>
+<td style="text-align: right;">2.108864e+05</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Department Of City Planning</td>
+<td style="text-align: right;">1.779395e+05</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Department For The Aging</td>
+<td style="text-align: right;">1.460020e+05</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Consumer And Worker Protection</td>
+<td style="text-align: right;">8.843227e+04</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Hunter College High School</td>
+<td style="text-align: right;">6.371701e+04</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Nyc Dept Of Veterans’ Services</td>
+<td style="text-align: right;">6.165466e+04</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Borough President-Brooklyn</td>
+<td style="text-align: right;">6.125954e+04</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Landmarks Preservation Comm</td>
+<td style="text-align: right;">5.174967e+04</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Mayors Office Of Contract Svcs</td>
+<td style="text-align: right;">4.048597e+04</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Richmond Da</td>
+<td style="text-align: right;">3.326678e+04</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">City Clerk</td>
+<td style="text-align: right;">2.895876e+04</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Civil Service Commission</td>
+<td style="text-align: right;">2.517326e+04</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Spec Narcs-Da</td>
+<td style="text-align: right;">2.357169e+04</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Cuny Central Office</td>
+<td style="text-align: right;">2.351143e+04</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Municipal Water Fin Authority</td>
+<td style="text-align: right;">1.874712e+04</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Human Rights Commission</td>
+<td style="text-align: right;">1.595298e+04</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Borough President-Bronx</td>
+<td style="text-align: right;">1.434546e+04</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Dept Of Records &amp; Info Service</td>
+<td style="text-align: right;">9.375944e+03</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Cultural Affairs</td>
+<td style="text-align: right;">8.223958e+03</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Brooklyn Community Board #2</td>
+<td style="text-align: right;">7.551261e+03</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Public Administrator-New York</td>
+<td style="text-align: right;">6.404667e+03</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Borough President-Queens</td>
+<td style="text-align: right;">2.695416e+03</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Office Of Labor Relations</td>
+<td style="text-align: right;">1.751493e+03</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Office Of Criminal Justice</td>
+<td style="text-align: right;">8.617952e+02</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Office Of Collective Bargainin</td>
+<td style="text-align: right;">4.572173e+02</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Public Administrator-Kings</td>
+<td style="text-align: right;">4.025769e+02</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Board Of Correction</td>
+<td style="text-align: right;">2.824163e+02</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Conflicts Of Interest Board</td>
+<td style="text-align: right;">2.110693e+02</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">President Borough Of Manhattan</td>
+<td style="text-align: right;">1.856971e+02</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Office Of Racial Equity</td>
+<td style="text-align: right;">1.583534e+02</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">City Council</td>
+<td style="text-align: right;">1.148236e+02</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Manhattan Community Board #12</td>
+<td style="text-align: right;">7.801280e+01</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Board Of Corrections</td>
+<td style="text-align: right;">5.735192e+01</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Manhattan Community Board #9</td>
+<td style="text-align: right;">5.691037e+01</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Personnel Monitors</td>
+<td style="text-align: right;">5.319916e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Board Of Election Poll Workers</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Borough President-Staten Is</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Bronx Community Board #1</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Bronx Community Board #10</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Bronx Community Board #11</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Bronx Community Board #12</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Bronx Community Board #2</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Bronx Community Board #3</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Bronx Community Board #4</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Bronx Community Board #5</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Bronx Community Board #6</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Bronx Community Board #7</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Bronx Community Board #8</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Bronx Community Board #9</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Brooklyn Community Board #1</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Brooklyn Community Board #10</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Brooklyn Community Board #11</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Brooklyn Community Board #12</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Brooklyn Community Board #13</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Brooklyn Community Board #14</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Brooklyn Community Board #15</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Brooklyn Community Board #16</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Brooklyn Community Board #17</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Brooklyn Community Board #18</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Brooklyn Community Board #3</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Brooklyn Community Board #4</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Brooklyn Community Board #5</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Brooklyn Community Board #6</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Brooklyn Community Board #7</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Brooklyn Community Board #8</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Brooklyn Community Board #9</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Commission On Racial Equity</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Department Of Juvenile Justice</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Dept Of Ed Hrly Support Staff</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Dept Of Ed Para Professionals</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Dept Of Ed Pedagogical</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Dept Of Ed Per Diem Teachers</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Dept Of Ed Per Session Teacher</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Districting Commission</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Doe Custodial Payrol</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Equal Employ Practices Comm</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Independent Budget Office</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Manhattan Community Board #1</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Manhattan Community Board #10</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Manhattan Community Board #11</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Manhattan Community Board #2</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Manhattan Community Board #3</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Manhattan Community Board #4</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Manhattan Community Board #5</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Manhattan Community Board #6</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Manhattan Community Board #7</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Manhattan Community Board #8</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Public Administrator-Bronx</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Public Administrator-Queens</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Public Administrator-Richmond</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Public Advocate</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Public Service Corps</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Queens Community Board #1</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Queens Community Board #10</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Queens Community Board #11</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Queens Community Board #12</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Queens Community Board #13</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Queens Community Board #14</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Queens Community Board #2</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Queens Community Board #3</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Queens Community Board #4</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Queens Community Board #5</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Queens Community Board #6</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Queens Community Board #7</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Queens Community Board #8</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Queens Community Board #9</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Staten Island Community Bd #1</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Staten Island Community Bd #2</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Staten Island Community Bd #3</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </section>
@@ -266,21 +2538,726 @@ ul.task-list li input[type="checkbox"] {
 <h1>Policy III: Optimizing Employee Shifts and Job Distribution</h1>
 <p>In Policy III, the focus shifts to optimizing employee shifts and redistributing workloads to reduce the need for overtime. Improved shift scheduling and task redistribution are proposed to convert overtime hours into regular hours, thus lowering payroll expenses. This strategy identifies which agencies can achieve the greatest savings by balancing workloads more efficiently. While the analysis assumes that work demands remain constant following these changes, it also notes that unforeseen changes in workload distribution and staffing flexibility could affect the outcomes.</p>
 <div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 169 × 2
-   agency_name                    total_savings
-   &lt;chr&gt;                                  &lt;dbl&gt;
- 1 Admin For Children's Svcs        148044480. 
- 2 Admin Trials And Hearings           243139. 
- 3 Board Of Correction                    248. 
- 4 Board Of Corrections                    57.2
- 5 Board Of Election                 29917333. 
- 6 Board Of Election Poll Workers           0  
- 7 Borough President-Bronx             144680. 
- 8 Borough President-Brooklyn           55524. 
- 9 Borough President-Queens              2461. 
-10 Borough President-Staten Is              0  
-# ℹ 159 more rows</code></pre>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 1: Calculate hourly rate for each employee in the nyc_clean dataset</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>nyc_clean <span class="ot">&lt;-</span> nyc_clean <span class="sc">|&gt;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">hourly_rate =</span> base_salary <span class="sc">/</span> <span class="dv">2080</span>  <span class="co"># Assuming 2080 work hours per year for full-time employees</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 2: Calculate total overtime hours and regular hours by agency and job title</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>agency_ot_hours <span class="ot">&lt;-</span> nyc_clean <span class="sc">|&gt;</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(agency_name, title_description) <span class="sc">|&gt;</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">total_ot_hours =</span> <span class="fu">sum</span>(ot_hours, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">total_regular_hours =</span> <span class="fu">sum</span>(regular_hours, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">hourly_rate =</span> <span class="fu">mean</span>(hourly_rate, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),  <span class="co"># Include hourly_rate here to use it later</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">'drop'</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 3: Calculate potential savings from reducing overtime by hiring more employees</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>agency_ot_replacement <span class="ot">&lt;-</span> agency_ot_hours <span class="sc">|&gt;</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculating the potential savings from replacing overtime with regular hours</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">potential_savings =</span> total_ot_hours <span class="sc">*</span> (<span class="fl">1.5</span> <span class="sc">*</span> hourly_rate) <span class="sc">-</span> total_ot_hours <span class="sc">*</span> hourly_rate</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 4: Summarize the total potential savings by agency</span></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>agency_ot_replacement_summary <span class="ot">&lt;-</span> agency_ot_replacement <span class="sc">|&gt;</span></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(agency_name) <span class="sc">|&gt;</span></span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">total_savings =</span> <span class="fu">sum</span>(potential_savings, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">'drop'</span></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the results</span></span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(agency_ot_replacement_summary)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">agency_name</th>
+<th style="text-align: right;">total_savings</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Admin For Children’s Svcs</td>
+<td style="text-align: right;">1.480445e+08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Admin Trials And Hearings</td>
+<td style="text-align: right;">2.431394e+05</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Board Of Correction</td>
+<td style="text-align: right;">2.476597e+02</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Board Of Corrections</td>
+<td style="text-align: right;">5.719990e+01</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Board Of Election</td>
+<td style="text-align: right;">2.991733e+07</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Board Of Election Poll Workers</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Borough President-Bronx</td>
+<td style="text-align: right;">1.446800e+05</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Borough President-Brooklyn</td>
+<td style="text-align: right;">5.552418e+04</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Borough President-Queens</td>
+<td style="text-align: right;">2.461394e+03</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Borough President-Staten Is</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Bronx Community Board #1</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Bronx Community Board #10</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Bronx Community Board #11</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Bronx Community Board #12</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Bronx Community Board #2</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Bronx Community Board #3</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Bronx Community Board #4</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Bronx Community Board #5</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Bronx Community Board #6</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Bronx Community Board #7</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Bronx Community Board #8</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Bronx Community Board #9</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Bronx Da</td>
+<td style="text-align: right;">3.480429e+05</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Bronx District Attorney</td>
+<td style="text-align: right;">2.790691e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Brooklyn Community Board #1</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Brooklyn Community Board #10</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Brooklyn Community Board #11</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Brooklyn Community Board #12</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Brooklyn Community Board #13</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Brooklyn Community Board #14</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Brooklyn Community Board #15</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Brooklyn Community Board #16</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Brooklyn Community Board #17</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Brooklyn Community Board #18</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Brooklyn Community Board #2</td>
+<td style="text-align: right;">7.116925e+03</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Brooklyn Community Board #3</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Brooklyn Community Board #4</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Brooklyn Community Board #5</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Brooklyn Community Board #6</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Brooklyn Community Board #7</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Brooklyn Community Board #8</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Brooklyn Community Board #9</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Business Integrity Commission</td>
+<td style="text-align: right;">3.487010e+05</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Campaign Finance Board</td>
+<td style="text-align: right;">1.353752e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">City Clerk</td>
+<td style="text-align: right;">2.422937e+04</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">City Council</td>
+<td style="text-align: right;">1.073414e+02</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Civil Service Commission</td>
+<td style="text-align: right;">2.377704e+04</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Civilian Complaint Review Bd</td>
+<td style="text-align: right;">1.364452e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Commission On Racial Equity</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Community College (Bronx)</td>
+<td style="text-align: right;">1.476105e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Community College (Hostos)</td>
+<td style="text-align: right;">1.898149e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Community College (Kingsboro)</td>
+<td style="text-align: right;">1.320393e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Community College (Laguardia)</td>
+<td style="text-align: right;">1.821683e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Community College (Manhattan)</td>
+<td style="text-align: right;">2.794439e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Community College (Queensboro)</td>
+<td style="text-align: right;">1.745136e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Conflicts Of Interest Board</td>
+<td style="text-align: right;">1.842276e+02</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Consumer Affairs</td>
+<td style="text-align: right;">9.392867e+05</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Consumer And Worker Protection</td>
+<td style="text-align: right;">8.309981e+04</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Cultural Affairs</td>
+<td style="text-align: right;">8.544528e+03</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Cuny Central Office</td>
+<td style="text-align: right;">2.180036e+04</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Department For The Aging</td>
+<td style="text-align: right;">1.030777e+05</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Department Of Buildings</td>
+<td style="text-align: right;">2.840175e+07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Department Of Business Serv.</td>
+<td style="text-align: right;">2.274792e+05</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Department Of City Planning</td>
+<td style="text-align: right;">1.487147e+05</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Department Of Correction</td>
+<td style="text-align: right;">7.415932e+08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Department Of Education Admin</td>
+<td style="text-align: right;">4.287417e+07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Department Of Finance</td>
+<td style="text-align: right;">1.770569e+07</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Department Of Investigation</td>
+<td style="text-align: right;">2.482829e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Department Of Juvenile Justice</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Department Of Probation</td>
+<td style="text-align: right;">6.246200e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Department Of Sanitation</td>
+<td style="text-align: right;">5.350149e+08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Department Of Transportation</td>
+<td style="text-align: right;">1.261306e+08</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Dept Of Citywide Admin Svcs</td>
+<td style="text-align: right;">3.795746e+07</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Dept Of Ed Hrly Support Staff</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Dept Of Ed Para Professionals</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Dept Of Ed Pedagogical</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Dept Of Ed Per Diem Teachers</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Dept Of Ed Per Session Teacher</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Dept Of Environment Protection</td>
+<td style="text-align: right;">7.852405e+07</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Dept Of Health/Mental Hygiene</td>
+<td style="text-align: right;">4.913829e+07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Dept Of Info Tech &amp; Telecomm</td>
+<td style="text-align: right;">4.529676e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Dept Of Parks &amp; Recreation</td>
+<td style="text-align: right;">4.401757e+07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Dept Of Records &amp; Info Service</td>
+<td style="text-align: right;">2.056781e+04</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Dept Of Youth &amp; Comm Dev Srvs</td>
+<td style="text-align: right;">6.346755e+05</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Dept. Of Design &amp; Construction</td>
+<td style="text-align: right;">8.625666e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Dept. Of Homeless Services</td>
+<td style="text-align: right;">5.156993e+07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">District Attorney Kings County</td>
+<td style="text-align: right;">5.269344e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">District Attorney Qns County</td>
+<td style="text-align: right;">3.621054e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">District Attorney Richmond Cou</td>
+<td style="text-align: right;">1.992786e+05</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">District Attorney-Manhattan</td>
+<td style="text-align: right;">7.811830e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">District Attorney-Special Narc</td>
+<td style="text-align: right;">2.788246e+05</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Districting Commission</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Doe Custodial Payrol</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Equal Employ Practices Comm</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Financial Info Svcs Agency</td>
+<td style="text-align: right;">1.594666e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Fire Department</td>
+<td style="text-align: right;">1.333483e+09</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Guttman Community College</td>
+<td style="text-align: right;">4.478889e+05</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Housing Preservation &amp; Dvlpmnt</td>
+<td style="text-align: right;">1.044589e+07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Hra/Dept Of Social Services</td>
+<td style="text-align: right;">1.715910e+08</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Human Rights Commission</td>
+<td style="text-align: right;">1.504292e+04</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Hunter College High School</td>
+<td style="text-align: right;">5.992265e+04</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Independent Budget Office</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Kings Da</td>
+<td style="text-align: right;">2.207840e+05</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Landmarks Preservation Comm</td>
+<td style="text-align: right;">3.952403e+04</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Law Department</td>
+<td style="text-align: right;">5.180117e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Manhattan Community Board #1</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Manhattan Community Board #10</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Manhattan Community Board #11</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Manhattan Community Board #12</td>
+<td style="text-align: right;">7.502276e+01</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Manhattan Community Board #2</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Manhattan Community Board #3</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Manhattan Community Board #4</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Manhattan Community Board #5</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Manhattan Community Board #6</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Manhattan Community Board #7</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Manhattan Community Board #8</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Manhattan Community Board #9</td>
+<td style="text-align: right;">4.229907e+01</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Manhattan Da</td>
+<td style="text-align: right;">5.127410e+05</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Mayors Office Of Contract Svcs</td>
+<td style="text-align: right;">3.396563e+04</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Municipal Water Fin Authority</td>
+<td style="text-align: right;">2.307374e+04</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Nyc Dept Of Veterans’ Services</td>
+<td style="text-align: right;">5.494729e+04</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Nyc Employees Retirement Sys</td>
+<td style="text-align: right;">6.139293e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Nyc Fire Pension Fund</td>
+<td style="text-align: right;">2.927621e+05</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Nyc Housing Authority</td>
+<td style="text-align: right;">1.725760e+08</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Nyc Police Pension Fund</td>
+<td style="text-align: right;">1.182901e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Off Of Payroll Administration</td>
+<td style="text-align: right;">1.984084e+05</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Office Of Collective Bargainin</td>
+<td style="text-align: right;">4.111584e+02</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Office Of Criminal Justice</td>
+<td style="text-align: right;">8.617952e+02</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Office Of Emergency Management</td>
+<td style="text-align: right;">3.143232e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Office Of Labor Relations</td>
+<td style="text-align: right;">1.719639e+03</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Office Of Management &amp; Budget</td>
+<td style="text-align: right;">2.549742e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Office Of Racial Equity</td>
+<td style="text-align: right;">1.583534e+02</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Office Of The Actuary</td>
+<td style="text-align: right;">2.522535e+05</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Office Of The Comptroller</td>
+<td style="text-align: right;">1.071857e+06</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Office Of The Mayor</td>
+<td style="text-align: right;">6.339881e+05</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Personnel Monitors</td>
+<td style="text-align: right;">9.027015e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Police Department</td>
+<td style="text-align: right;">2.614143e+09</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">President Borough Of Manhattan</td>
+<td style="text-align: right;">1.555005e+02</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Public Administrator-Bronx</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Public Administrator-Kings</td>
+<td style="text-align: right;">3.522226e+02</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Public Administrator-New York</td>
+<td style="text-align: right;">5.494528e+03</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Public Administrator-Queens</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Public Administrator-Richmond</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Public Advocate</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Public Service Corps</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Queens Community Board #1</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Queens Community Board #10</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Queens Community Board #11</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Queens Community Board #12</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Queens Community Board #13</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Queens Community Board #14</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Queens Community Board #2</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Queens Community Board #3</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Queens Community Board #4</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Queens Community Board #5</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Queens Community Board #6</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Queens Community Board #7</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Queens Community Board #8</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Queens Community Board #9</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Queens Da</td>
+<td style="text-align: right;">2.726900e+05</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Richmond Da</td>
+<td style="text-align: right;">2.890185e+04</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Spec Narcs-Da</td>
+<td style="text-align: right;">2.307310e+04</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Staten Island Community Bd #1</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Staten Island Community Bd #2</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Staten Island Community Bd #3</td>
+<td style="text-align: right;">0.000000e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Tax Commission</td>
+<td style="text-align: right;">6.112551e+05</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Taxi &amp; Limousine Commission</td>
+<td style="text-align: right;">4.007795e+06</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Teachers Retirement System</td>
+<td style="text-align: right;">8.220732e+05</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Technology &amp; Innovation</td>
+<td style="text-align: right;">1.124642e+06</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </section>
