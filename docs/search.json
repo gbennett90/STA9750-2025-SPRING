@@ -18,6 +18,251 @@
     "href": "index.html#skills-im-learning",
     "title": "Welcome to My Website",
     "section": "Skills I’m Learning",
-    "text": "Skills I’m Learning\n🚀 Big Data & Cloud Computing: AWS EMR, Apache Spark\n\n\nThank you for visiting! Stay tuned for more updates on my data analytics journey.\n\nLast Updated: Thursday 02 13, 2025 at 17:11PM"
+    "text": "Skills I’m Learning\n🚀 Big Data & Cloud Computing: AWS EMR, Apache Spark\n\n\nThank you for visiting! Stay tuned for more updates on my data analytics journey.\n\nLast Updated: Monday 03 03, 2025 at 00:09AM"
+  },
+  {
+    "objectID": "test.html",
+    "href": "test.html",
+    "title": "Mini Project 1",
+    "section": "",
+    "text": "nyc_clean &lt;- nyc_payroll %&gt;% mutate(total_salary = base_salary + total_ot_paid + total_other_pay)\n\nChange formatting of certain columns\nnyc_clean &lt;- nyc_clean %&gt;% mutate(across(c(“agency_name”, “last_name”, “first_name”, “work_location_borough”, “title_description”, “leave_status_as_of_june_30”), str_to_title))\n\n\nCreating career table for Mr. Adams\nadams_career &lt;- nyc_clean %&gt;% filter(first_name == “Eric”, last_name == “Adams”, mid_init == “L”) %&gt;% rename( “Fiscal Year” = fiscal_year, “Position” = title_description, “Agency” = agency_name, “Total Salary” = total_salary )\nprint(adams_career)"
+  },
+  {
+    "objectID": "docs/MP01.html",
+    "href": "docs/MP01.html",
+    "title": "NYC Payroll Policy Analysis",
+    "section": "",
+    "text": "Download Data\nif(!file.exists(“data/mp01/nyc_payroll_export.csv”)){ dir.create(“data/mp01”, showWarnings=FALSE, recursive=TRUE)\nENDPOINT &lt;- \"https://data.cityofnewyork.us/resource/k397-673e.json\"\n\nif(!require(\"httr2\")) install.packages(\"httr2\")\nlibrary(httr2)\n\nif(!require(\"jsonlite\")) install.packages(\"jsonlite\")\nlibrary(jsonlite)\n\nif(!require(\"dplyr\")) install.packages(\"dplyr\")\nlibrary(dplyr)\n\nif(!require(\"readr\")) install.packages(\"readr\")\nlibrary(readr)\n\nBATCH_SIZE &lt;- 50000\nOFFSET     &lt;- 0\nEND_OF_EXPORT &lt;- FALSE\nALL_DATA &lt;- list()\n\nwhile(!END_OF_EXPORT){\n    cat(\"Requesting items\", OFFSET, \"to\", BATCH_SIZE + OFFSET, \"\\n\")\n    \n    req &lt;- request(ENDPOINT) |&gt;\n              req_url_query(`$limit`  = BATCH_SIZE, \n                            `$offset` = OFFSET)\n    \n    resp &lt;- req_perform(req)\n    \n    batch_data &lt;- fromJSON(resp_body_string(resp))\n    \n    ALL_DATA &lt;- c(ALL_DATA, list(batch_data))\n    \n    if(NROW(batch_data) != BATCH_SIZE){\n        END_OF_EXPORT &lt;- TRUE\n        \n        cat(\"End of Data Export Reached\\n\")\n    } else {\n        OFFSET &lt;- OFFSET + BATCH_SIZE\n    }\n}\n\nALL_DATA &lt;- bind_rows(ALL_DATA)\n\ncat(\"Data export complete:\", NROW(ALL_DATA), \"rows and\", NCOL(ALL_DATA), \"columns.\")\n\nwrite_csv(ALL_DATA, \"data/mp01/nyc_payroll_export.csv\")\n}\n\n\nImport and clean the data\nnyc_payroll &lt;- read_csv(“data/mp01/nyc_payroll_export.csv”)\n\n\nAdd a total salary column if it doesn’t exist\nnyc_clean &lt;- nyc_payroll |&gt; mutate( total_salary = base_salary + total_ot_paid + total_other_pay ) |&gt; mutate( across( c(“agency_name”, “last_name”, “first_name”, “work_location_borough”, “title_description”, “leave_status_as_of_june_30”), str_to_title ) )\n\n\nTake a glimpse at the cleaned data\nglimpse(nyc_clean)\n\n\nEmployee salary table for Eric L. Adams\nadams_salary_table &lt;- nyc_clean |&gt; filter(first_name == “Eric”, last_name == “Adams”) |&gt; select(fiscal_year, title_description, agency_name, total_salary)\n\n\nView the result\nprint(adams_salary_table)\n\n\nVisualize salary data using DT\nlibrary(DT)\nadams_salary_table |&gt; mutate(Total Salary = scales::dollar(total_salary)) |&gt; datatable(options = list(searching = FALSE, paging = FALSE, info = FALSE))\n\n\nCompute total compensation for all employees using case_when\nnyc_clean &lt;- nyc_clean |&gt; mutate( hourly_rate = base_salary / 2080, total_compensation = case_when( title_description %in% c(“Mayor”) ~ total_salary, !is.na(hourly_rate) & !is.na(regular_hours) & !is.na(ot_hours) ~ (hourly_rate * regular_hours) + (hourly_rate * 1.5 * ot_hours), !is.na(hourly_rate) & !is.na(regular_hours) & is.na(ot_hours) ~ hourly_rate * regular_hours, TRUE ~ NA_real_ ) )\n\n\nView the first few rows to verify the total compensation\nhead(nyc_clean)\n\n\nView the first few rows to check the compensation values\nhead(nyc_clean |&gt; select(first_name, last_name, title_description, total_compensation))\n\n\nCheck for any missing values in total_compensation\nnyc_clean |&gt; filter(is.na(total_compensation))\n\n\nSummarize total compensation for different titles\nnyc_clean |&gt; group_by(title_description) |&gt; summarise( avg_total_compensation = mean(total_compensation, na.rm = TRUE) )\n\n\nWhich job title has the highest base rate of pay? (Assuming a standard 2,000-hour work year and no overtime.) Chair hourly rate $207\nnyc_clean |&gt; mutate(hourly_base_rate = base_salary / 2000) |&gt; arrange(desc(hourly_base_rate)) |&gt; slice(1) |&gt; select(title_description, hourly_base_rate)\n\n\nWhich individual and in what year had the single highest city total payroll (regular and overtime combined)? Mark Tettonis $1,881,523\nnyc_clean |&gt; transform(total_payroll = total_salary + total_ot_paid) |&gt; arrange(desc(total_payroll)) |&gt; slice(1) |&gt; select(fiscal_year, first_name, last_name, total_payroll)\n\n\nWhich individual worked the most overtime hours in this data set? James Internicola 3693 hours\nnyc_clean |&gt; arrange(desc(ot_hours)) |&gt; slice(1) |&gt; select(first_name, last_name, ot_hours)\n\n\nWhich agency has the highest average total annual payroll (base and overtime pay per employee)? Office of Racial Equity $15314\nnyc_clean |&gt; group_by(agency_name) |&gt; summarise(avg_total_payroll = mean(total_salary + total_ot_paid, na.rm = TRUE)) |&gt; arrange(desc(avg_total_payroll)) |&gt; slice(1)\n\n\nWhich agency has the most employees on payroll in each year? Dept of Ed Pedagogical\nnyc_clean |&gt; group_by(fiscal_year, agency_name) |&gt; summarise(employee_count = n()) |&gt; group_by(fiscal_year) |&gt; slice_max(employee_count, n = 1)\n\n\nWhich agency has the highest overtime usage (compared to regular hours)? Board of Election\nnyc_clean |&gt; group_by(agency_name) |&gt; summarise( total_regular_hours = sum(regular_hours, na.rm = TRUE), total_ot_hours = sum(ot_hours, na.rm = TRUE), ot_to_regular_ratio = total_ot_hours / total_regular_hours ) |&gt; arrange(desc(ot_to_regular_ratio)) |&gt; slice(1)\n\n\nWhat is the average salary of employees who work outside the five boroughs? (i.e., whose work_location_borough is not one of the five counties.) $53,734\nnyc_clean |&gt; filter(!(work_location_borough %in% c(“Manhattan”, “Brooklyn”, “Queens”, “Bronx”, “Staten Island”))) |&gt; summarise(avg_salary_outside_boroughs = mean(base_salary, na.rm = TRUE))\n\n\nHow much has the city’s aggregate payroll grown over the past 10 years?\nnyc_clean |&gt; group_by(fiscal_year) |&gt; summarise(aggregate_payroll = sum(total_salary + total_ot_paid, na.rm = TRUE)) |&gt; filter(fiscal_year &gt;= (max(fiscal_year) - 10)) |&gt; arrange(fiscal_year)"
+  },
+  {
+    "objectID": "mp01.html#eric-l.-adams",
+    "href": "mp01.html#eric-l.-adams",
+    "title": "NYC Payroll Policy Analysis",
+    "section": "Eric L. Adams",
+    "text": "Eric L. Adams\n\n# Employee salary table for Eric L. Adams\nadams_salary_table &lt;- nyc_clean |&gt;\n  filter(first_name == \"Eric\", last_name == \"Adams\") |&gt;\n  select(fiscal_year, title_description, agency_name, total_salary) |&gt;\n  rename(\n    \"Fiscal Year\" = fiscal_year,\n    \"Position\" = title_description,\n    \"Agency\" = agency_name,\n    \"Total Salary\" = total_salary\n  )\n\nError in rename(select(filter(nyc_clean, first_name == \"Eric\", last_name == : could not find function \"rename\"\n\nlibrary(knitr)\nadams_salary_table |&gt;\n  mutate(`Total Salary` = scales::dollar(`Total Salary`)) |&gt;\n  kable(format = \"html\", col.names = c(\"Fiscal Year\", \"Position\", \"Agency\", \"Total Salary\"))\n\nError in mutate(adams_salary_table, `Total Salary` = scales::dollar(`Total Salary`)): could not find function \"mutate\""
+  },
+  {
+    "objectID": "mp01.html#all-employees-in-our-dataset",
+    "href": "mp01.html#all-employees-in-our-dataset",
+    "title": "NYC Payroll Policy Analysis",
+    "section": "All Employees in our dataset",
+    "text": "All Employees in our dataset\n\n# Compute total compensation for all employees using case_when\nnyc_clean &lt;- nyc_clean |&gt;\n  mutate(\n    hourly_rate = base_salary / 2080,\n    total_compensation = case_when(\n      title_description %in% c(\"Mayor\") ~ total_salary,\n      !is.na(hourly_rate) & !is.na(regular_hours) & !is.na(ot_hours) ~ (hourly_rate * regular_hours) + (hourly_rate * 1.5 * ot_hours),\n      !is.na(hourly_rate) & !is.na(regular_hours) & is.na(ot_hours) ~ hourly_rate * regular_hours,\n      TRUE ~ NA_real_\n    )\n  )\n\nError in mutate(nyc_clean, hourly_rate = base_salary/2080, total_compensation = case_when(title_description %in% : could not find function \"mutate\"\n\n# View the first few rows to verify the total compensation\n\nhead(nyc_clean)\n\nError: object 'nyc_clean' not found\n\n# View the first few rows to check the compensation values\nhead(nyc_clean |&gt;\n       select(first_name, last_name, title_description, total_compensation))\n\nError in select(nyc_clean, first_name, last_name, title_description, total_compensation): could not find function \"select\"\n\n# Check for any missing values in total_compensation\nnyc_clean |&gt;\n  filter(is.na(total_compensation))\n\nError: object 'nyc_clean' not found\n\n# Summarize total compensation for different titles\n\nnyc_clean |&gt;\n  group_by(title_description) |&gt;\n  summarise(\n    avg_total_compensation = mean(total_compensation, na.rm = TRUE)\n  )\n\nError in summarise(group_by(nyc_clean, title_description), avg_total_compensation = mean(total_compensation, : could not find function \"summarise\""
+  },
+  {
+    "objectID": "mp01.html#instructor-provided-questions",
+    "href": "mp01.html#instructor-provided-questions",
+    "title": "Mini Project 1",
+    "section": "Instructor Provided Questions",
+    "text": "Instructor Provided Questions"
+  },
+  {
+    "objectID": "rest.html",
+    "href": "rest.html",
+    "title": "Mini Project 1",
+    "section": "",
+    "text": "New York City’s payroll expenses form a major part of its budget, prompting the Commission to Analyze Taxpayer Spending (CATS) to explore cost-saving policies. This project evaluates three proposals: capping salaries at the mayoral level, increasing staffing to reduce overtime costs, and implementing a custom policy to control excessive overtime pay. Using NYC payroll data and R for analysis, we assess each policy’s financial impact and feasibility. The findings will guide policymakers in optimizing taxpayer spending while maintaining city services."
+  },
+  {
+    "objectID": "rest.html#github-documents",
+    "href": "rest.html#github-documents",
+    "title": "Mini Project 1",
+    "section": "",
+    "text": "This is an R Markdown format used for publishing markdown documents to GitHub. When you click the Knit button all R code chunks are run and a markdown file (.md) suitable for publishing to GitHub is generated."
+  },
+  {
+    "objectID": "rest.html#including-code",
+    "href": "rest.html#including-code",
+    "title": "Mini Project 1",
+    "section": "Including Code",
+    "text": "Including Code\nData Acquisition and :\n\nif(!file.exists(\"data/mp01/nyc_payroll_export.csv\")){\n  dir.create(\"data/mp01\", showWarnings=FALSE, recursive=TRUE)\n  \n  ENDPOINT &lt;- \"https://data.cityofnewyork.us/resource/k397-673e.json\"\n  \n  if(!require(\"httr2\")) install.packages(\"httr2\")\n  library(httr2)\n  \n  if(!require(\"jsonlite\")) install.packages(\"jsonlite\")\n  library(jsonlite)\n  \n  if(!require(\"dplyr\")) install.packages(\"dplyr\")\n  library(dplyr)\n  \n  if(!require(\"readr\")) install.packages(\"readr\")\n  library(readr)\n  \n  BATCH_SIZE &lt;- 50000\n  OFFSET     &lt;- 0\n  END_OF_EXPORT &lt;- FALSE\n  ALL_DATA &lt;- list()\n  \n  while(!END_OF_EXPORT){\n    cat(\"Requesting items\", OFFSET, \"to\", BATCH_SIZE + OFFSET, \"\\n\")\n    \n    req &lt;- request(ENDPOINT) |&gt;\n      req_url_query(`$limit`  = BATCH_SIZE, \n                    `$offset` = OFFSET)\n    \n    resp &lt;- req_perform(req)\n    \n    batch_data &lt;- fromJSON(resp_body_string(resp))\n    \n    ALL_DATA &lt;- c(ALL_DATA, list(batch_data))\n    \n    if(NROW(batch_data) != BATCH_SIZE){\n      END_OF_EXPORT &lt;- TRUE\n      \n      cat(\"End of Data Export Reached\\n\")\n    } else {\n      OFFSET &lt;- OFFSET + BATCH_SIZE\n    }\n  }\n  \n  ALL_DATA &lt;- bind_rows(ALL_DATA)\n  \n  cat(\"Data export complete:\", NROW(ALL_DATA), \"rows and\", NCOL(ALL_DATA), \"columns.\")\n  \n  write_csv(ALL_DATA, \"data/mp01/nyc_payroll_export.csv\")\n}"
+  },
+  {
+    "objectID": "rest.html#including-plots",
+    "href": "rest.html#including-plots",
+    "title": "Mini Project 1",
+    "section": "Including Plots",
+    "text": "Including Plots\nYou can also embed plots, for example:\n\n\n\n\n\n\n\n\n\nNote that the echo = FALSE parameter was added to the code chunk to prevent printing of the R code that generated the plot."
+  },
+  {
+    "objectID": "rest.html#introduction",
+    "href": "rest.html#introduction",
+    "title": "Mini Project 1",
+    "section": "Introduction",
+    "text": "Introduction\nNew York City’s payroll expenses form a major part of its budget, prompting the Commission to Analyze Taxpayer Spending (CATS) to explore cost-saving policies. This project evaluates three proposals: capping salaries at the mayoral level, increasing staffing to reduce overtime costs, and implementing a custom policy to control excessive overtime pay. Using NYC payroll data and R for analysis, we assess each policy’s financial impact and feasibility. The findings will guide policymakers in optimizing taxpayer spending while maintaining city services."
+  },
+  {
+    "objectID": "rest.html#acquiring-payroll-data",
+    "href": "rest.html#acquiring-payroll-data",
+    "title": "Mini Project 1",
+    "section": "Acquiring Payroll Data",
+    "text": "Acquiring Payroll Data"
+  },
+  {
+    "objectID": "rest.html#data-preparation-and-cleaning",
+    "href": "rest.html#data-preparation-and-cleaning",
+    "title": "Mini Project 1",
+    "section": "Data Preparation and Cleaning",
+    "text": "Data Preparation and Cleaning\n#Initial Exploration # Eric L. Adams Salary Table\n\nEmployee Compensation Analysis\nEmployee Compensation Table"
+  },
+  {
+    "objectID": "rest.html#initial-exploration",
+    "href": "rest.html#initial-exploration",
+    "title": "Mini Project 1",
+    "section": "Initial Exploration",
+    "text": "Initial Exploration\n\nEric L. Adams Salary Table\n\n\nEmployee Compensation Analysis"
+  },
+  {
+    "objectID": "rest.html#instructor-provided-questions",
+    "href": "rest.html#instructor-provided-questions",
+    "title": "Mini Project 1",
+    "section": "Instructor Provided Questions",
+    "text": "Instructor Provided Questions\n\n\n# A tibble: 1 × 2\n  title_description hourly_base_rate\n  &lt;chr&gt;                        &lt;dbl&gt;\n1 Chair                         207.\n\n\n  fiscal_year first_name last_name total_payroll\n1        2024       Mark  Tettonis       1881523\n\n\n# A tibble: 1 × 3\n  first_name last_name   ot_hours\n  &lt;chr&gt;      &lt;chr&gt;          &lt;dbl&gt;\n1 James      Internicola    3693.\n\n\n# A tibble: 1 × 2\n  agency_name             avg_total_payroll\n  &lt;chr&gt;                               &lt;dbl&gt;\n1 Office Of Racial Equity           153134.\n\n\n# A tibble: 11 × 3\n# Groups:   fiscal_year [11]\n   fiscal_year agency_name            employee_count\n         &lt;dbl&gt; &lt;chr&gt;                           &lt;int&gt;\n 1        2014 Dept Of Ed Pedagogical         100589\n 2        2015 Dept Of Ed Pedagogical         111857\n 3        2016 Dept Of Ed Pedagogical         106263\n 4        2017 Dept Of Ed Pedagogical         104629\n 5        2018 Dept Of Ed Pedagogical         107956\n 6        2019 Dept Of Ed Pedagogical         112067\n 7        2020 Dept Of Ed Pedagogical         114999\n 8        2021 Dept Of Ed Pedagogical         113523\n 9        2022 Dept Of Ed Pedagogical         120453\n10        2023 Dept Of Ed Pedagogical         106882\n11        2024 Dept Of Ed Pedagogical         108209\n\n\n# A tibble: 1 × 4\n  agency_name       total_regular_hours total_ot_hours ot_to_regular_ratio\n  &lt;chr&gt;                           &lt;dbl&gt;          &lt;dbl&gt;               &lt;dbl&gt;\n1 Board Of Election           15339960.       3062029.               0.200\n\n\n# A tibble: 1 × 1\n  avg_salary_outside_boroughs\n                        &lt;dbl&gt;\n1                      53734.\n\n\n# A tibble: 11 × 2\n   fiscal_year aggregate_payroll\n         &lt;dbl&gt;             &lt;dbl&gt;\n 1        2014      24172586330.\n 2        2015      27173046540.\n 3        2016      28392240168.\n 4        2017      29195556714.\n 5        2018      29864346806.\n 6        2019      31374613682.\n 7        2020      34565222187.\n 8        2021      33330917876.\n 9        2022      37319692054.\n10        2023      35873673474.\n11        2024      36662138291."
+  },
+  {
+    "objectID": "rest.html#analysis",
+    "href": "rest.html#analysis",
+    "title": "Mini Project 1",
+    "section": "Analysis",
+    "text": "Analysis\nEffective management of New York City payroll is crucial for maintaining fiscal responsibility and ensuring optimal allocation of taxpayer money. The City Agency for Transportation Services (CATS) is committed to exploring policy reforms that can enhance efficiency and reduce expenditures without compromising service quality. This analysis examines three proposed policies aimed at achieving these objectives:\n\nPolicy I: Capping Salaries at Mayoral Level\nPolicy II: Increasing Staffing to Reduce Overtime Expenses\nPolicy III: Implementing Performance-Based Pay Adjustments"
+  },
+  {
+    "objectID": "mp01.html#introduction",
+    "href": "mp01.html#introduction",
+    "title": "Mini Project 1",
+    "section": "",
+    "text": "New York City’s payroll expenses form a major part of its budget, prompting the Commission to Analyze Taxpayer Spending (CATS) to explore cost-saving policies. This project evaluates three proposals: capping salaries at the mayoral level, increasing staffing to reduce overtime costs, and implementing a custom policy to control excessive overtime pay. Using NYC payroll data and R for analysis, we assess each policy’s financial impact and feasibility. The findings will guide policymakers in optimizing taxpayer spending while maintaining city services."
+  },
+  {
+    "objectID": "mp01.html#acquiring-payroll-data",
+    "href": "mp01.html#acquiring-payroll-data",
+    "title": "Mini Project 1",
+    "section": "Acquiring Payroll Data",
+    "text": "Acquiring Payroll Data\n\nif(!file.exists(\"data/mp01/nyc_payroll_export.csv\")){\n  dir.create(\"data/mp01\", showWarnings=FALSE, recursive=TRUE)\n  \n  ENDPOINT &lt;- \"https://data.cityofnewyork.us/resource/k397-673e.json\"\n  \n  if(!require(\"httr2\")) install.packages(\"httr2\")\n  library(httr2)\n  \n  if(!require(\"jsonlite\")) install.packages(\"jsonlite\")\n  library(jsonlite)\n  \n  if(!require(\"dplyr\")) install.packages(\"dplyr\")\n  library(dplyr)\n  \n  if(!require(\"readr\")) install.packages(\"readr\")\n  library(readr)\n  \n  BATCH_SIZE &lt;- 50000\n  OFFSET     &lt;- 0\n  END_OF_EXPORT &lt;- FALSE\n  ALL_DATA &lt;- list()\n  \n  while(!END_OF_EXPORT){\n    req &lt;- request(ENDPOINT) |&gt;\n      req_url_query(`$limit`  = BATCH_SIZE, \n                    `$offset` = OFFSET)\n    \n    resp &lt;- req_perform(req)\n    batch_data &lt;- fromJSON(resp_body_string(resp))\n    ALL_DATA &lt;- c(ALL_DATA, list(batch_data))\n    \n    if(NROW(batch_data) != BATCH_SIZE){\n      END_OF_EXPORT &lt;- TRUE\n    } else {\n      OFFSET &lt;- OFFSET + BATCH_SIZE\n    }\n  }\n  \n  ALL_DATA &lt;- bind_rows(ALL_DATA)\n  write_csv(ALL_DATA, \"data/mp01/nyc_payroll_export.csv\")\n}"
+  },
+  {
+    "objectID": "mp01.html#data-preparation-and-cleaning",
+    "href": "mp01.html#data-preparation-and-cleaning",
+    "title": "Mini Project 1",
+    "section": "Data Preparation and Cleaning",
+    "text": "Data Preparation and Cleaning\n\nlibrary(readr)\nlibrary(dplyr)\n## \n## Attaching package: 'dplyr'\n## The following objects are masked from 'package:stats':\n## \n##     filter, lag\n## The following objects are masked from 'package:base':\n## \n##     intersect, setdiff, setequal, union\nlibrary(stringr)\n\nnyc_payroll &lt;- read_csv(\"data/mp01/nyc_payroll_export.csv\")\n## Rows: 6225611 Columns: 17\n## ── Column specification ────────────────────────────────────────────────────────\n## Delimiter: \",\"\n## chr  (8): agency_name, last_name, first_name, mid_init, work_location_boroug...\n## dbl  (8): fiscal_year, payroll_number, base_salary, regular_hours, regular_g...\n## dttm (1): agency_start_date\n## \n## ℹ Use `spec()` to retrieve the full column specification for this data.\n## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.\n\nnyc_clean &lt;- nyc_payroll |&gt;\n  mutate(\n    total_salary = base_salary + total_ot_paid + total_other_pay\n  ) |&gt;\n  mutate(\n    across(\n      c(\"agency_name\", \"last_name\", \"first_name\", \"work_location_borough\", \n        \"title_description\", \"leave_status_as_of_june_30\"), \n      str_to_title\n    )\n  )\n\n#Initial Exploration # Eric L. Adams Salary Table\n\nlibrary(knitr)\nadams_salary_table &lt;- nyc_clean |&gt;\n  filter(first_name == \"Eric\", last_name == \"Adams\") |&gt;\n  select(fiscal_year, title_description, agency_name, total_salary) |&gt;\n  rename(\n    \"Fiscal Year\" = fiscal_year,\n    \"Position\" = title_description,\n    \"Agency\" = agency_name,\n    \"Total Salary\" = total_salary\n  )\nkable(adams_salary_table)\n\n\n\n\n\n\n\n\n\n\nFiscal Year\nPosition\nAgency\nTotal Salary\n\n\n\n\n2022\nBorough President\nBorough President-Brooklyn\n179200.62\n\n\n2021\nBorough President\nBorough President-Brooklyn\n179200.00\n\n\n2020\nBorough President\nBorough President-Brooklyn\n179200.00\n\n\n2019\nBorough President\nBorough President-Brooklyn\n179200.00\n\n\n2018\nBorough President\nBorough President-Brooklyn\n179200.00\n\n\n2017\nBorough President\nBorough President-Brooklyn\n179200.00\n\n\n2016\nBorough President\nBorough President-Brooklyn\n179200.00\n\n\n2015\nBorough President\nBorough President-Brooklyn\n160000.00\n\n\n2014\nBorough President\nBorough President-Brooklyn\n160000.00\n\n\n2020\nJob Training Participant\nDept Of Parks & Recreation\n404.64\n\n\n2019\nJob Training Participant\nDept Of Parks & Recreation\n310.76\n\n\n2018\nJob Training Participant\nDept Of Parks & Recreation\n165.90\n\n\n2024\nMayor\nOffice Of The Mayor\n258750.00\n\n\n2023\nMayor\nOffice Of The Mayor\n258750.00\n\n\n2022\nMayor\nOffice Of The Mayor\n258750.00\n\n\n2024\nPolice Officer\nPolice Department\n88906.04\n\n\n2023\nPolice Officer\nPolice Department\n75896.35\n\n\n2022\nPolice Officer\nPolice Department\n59914.87\n\n\n2021\nPolice Officer\nPolice Department\n43788.14\n\n\n\n\n\n\nEmployee Compensation Analysis\nEmployee Compensation Table\n\nnyc_clean &lt;- nyc_clean |&gt;\n  mutate(\n    hourly_rate = base_salary / 2080,\n    total_compensation = case_when(\n      title_description %in% c(\"Mayor\") ~ total_salary,\n      !is.na(hourly_rate) & !is.na(regular_hours) & !is.na(ot_hours) ~ (hourly_rate * regular_hours) + (hourly_rate * 1.5 * ot_hours),\n      !is.na(hourly_rate) & !is.na(regular_hours) & is.na(ot_hours) ~ hourly_rate * regular_hours,\n      TRUE ~ NA_real_\n    )\n  )\nkable(head(nyc_clean))\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nfiscal_year\npayroll_number\nagency_name\nlast_name\nfirst_name\nmid_init\nagency_start_date\nwork_location_borough\ntitle_description\nleave_status_as_of_june_30\nbase_salary\npay_basis\nregular_hours\nregular_gross_paid\not_hours\ntotal_ot_paid\ntotal_other_pay\ntotal_salary\nhourly_rate\ntotal_compensation\n\n\n\n\n2024\n67\nAdmin For Children’s Svcs\nFaye Fall\nSokhna\nM\n2023-11-20\nBronx\nChild Protective Specialist\nActive\n62043\nper Annum\n1050.00\n31267.96\n12.00\n425.00\n78.04\n62546.04\n29.82837\n31856.69\n\n\n2024\n67\nAdmin For Children’s Svcs\nKilgore\nOrlantha\nB\n2023-08-28\nBrooklyn\nChild Protective Specialist\nActive\n62043\nper Annum\n1470.00\n44660.96\n99.75\n3859.84\n78.14\n65980.98\n29.82837\n48310.77\n\n\n2024\n67\nAdmin For Children’s Svcs\nWisdom\nCherise\nM\n2022-10-24\nManhattan\nCommunity Associate\nOn Leave\n43144\nper Annum\n1251.50\n28649.20\n30.00\n802.42\n78.26\n44024.68\n20.74231\n26892.40\n\n\n2024\n67\nAdmin For Children’s Svcs\nMiller\nMoya-Gaye\nS\n2023-02-27\nManhattan\nChild Protective Specialist\nOn Leave\n62043\nper Annum\n1400.75\n44515.43\n44.75\n1476.98\n78.37\n63598.35\n29.82837\n43784.31\n\n\n2024\n67\nAdmin For Children’s Svcs\nBradley\nYashika\nM\n2023-02-27\nBronx\nChild Protective Specialist\nCeased\n60236\nper Annum\n700.00\n22133.64\n53.00\n1933.33\n78.47\n62247.80\n28.95962\n22574.02\n\n\n2024\n67\nAdmin For Children’s Svcs\nMaurino\nJennifer\nL\n2023-08-28\nRichmond\nChild Protective Specialist\nActive\n62043\nper Annum\n1470.00\n45940.44\n146.00\n5596.49\n78.86\n67718.35\n29.82837\n50380.11"
+  },
+  {
+    "objectID": "mp01.html#analysis",
+    "href": "mp01.html#analysis",
+    "title": "Mini Project 1",
+    "section": "Analysis",
+    "text": "Analysis\nEffective management of New York City payroll is crucial for maintaining fiscal responsibility and ensuring optimal allocation of taxpayer money. The City Agency for Transportation Services (CATS) is committed to exploring policy reforms that can enhance efficiency and reduce expenditures without compromising service quality. This analysis examines three proposed policies aimed at achieving these objectives:\n\nPolicy I: Capping Salaries at Mayoral Level\nPolicy II: Increasing Staffing to Reduce Overtime Expenses\nPolicy III: Implementing Performance-Based Pay Adjustments"
+  },
+  {
+    "objectID": "mp01.html",
+    "href": "mp01.html",
+    "title": "Mini Project 1",
+    "section": "",
+    "text": "New York City’s payroll expenses form a major part of its budget, prompting the Commission to Analyze Taxpayer Spending (CATS) to explore cost-saving policies. This project evaluates three proposals: capping salaries at the mayoral level, increasing staffing to reduce overtime costs, and implementing a custom policy to control excessive overtime pay. Using NYC payroll data and R for analysis, we assess each policy’s financial impact and feasibility. The findings will guide policymakers in optimizing taxpayer spending while maintaining city services."
+  },
+  {
+    "objectID": "FinalProject.html#nyc-doe-open-data",
+    "href": "FinalProject.html#nyc-doe-open-data",
+    "title": "Final Project Proposal",
+    "section": "NYC DOE Open Data",
+    "text": "NYC DOE Open Data\n\nSchool funding and budget data: This will provide insights into how much money each school or district receives.\nStudent performance data: Look for data on standardized test scores (e.g., NYS Regents exams), graduation rates, and academic progress.\nStudent demographics: Data on enrollment numbers, student diversity (race/ethnicity), and socioeconomic status (e.g., free/reduced lunch eligibility).\nSchool resources: Data on teacher-student ratios, availability of advanced placement courses, extracurricular programs, etc."
+  },
+  {
+    "objectID": "FinalProject.html#nysed-data",
+    "href": "FinalProject.html#nysed-data",
+    "title": "Final Project Proposal",
+    "section": "NYSED Data",
+    "text": "NYSED Data\n\nData on school performance (test scores, graduation rates, etc.)\nReports on funding formulas and how schools are allocated resources\nReports and statistics on school equity, teacher qualification data, and student performance by district."
+  },
+  {
+    "objectID": "FinalProject.html#the-college-board",
+    "href": "FinalProject.html#the-college-board",
+    "title": "Final Project Proposal",
+    "section": "The College Board",
+    "text": "The College Board\n\nData on SAT/ACT scores by school or district\nCollege readiness and participation data\nAP exam performance by region or school"
+  },
+  {
+    "objectID": "FinalProject.html#access-to-relevant-data-on-school-facilities",
+    "href": "FinalProject.html#access-to-relevant-data-on-school-facilities",
+    "title": "Final Project Proposal",
+    "section": "Access to Relevant Data on School Facilities",
+    "text": "Access to Relevant Data on School Facilities\nChallenge: School facility data (such as the availability of technology, classroom conditions, extracurricular opportunities) might not always be publicly available or could vary widely across schools, making it harder to quantify access."
+  },
+  {
+    "objectID": "FinalProject.html#sample-bias-in-educational-data",
+    "href": "FinalProject.html#sample-bias-in-educational-data",
+    "title": "Final Project Proposal",
+    "section": "Sample Bias in Educational Data",
+    "text": "Sample Bias in Educational Data\nChallenge: The data you are analyzing might be biased if certain schools or districts are over- or underrepresented in the data sources. For instance, certain districts may have more resources for data collection and reporting, skewing the results."
+  },
+  {
+    "objectID": "mp02.html",
+    "href": "mp02.html",
+    "title": "Mini Project 2",
+    "section": "",
+    "text": "Public transit systems play a crucial role in reducing urban congestion and providing a more sustainable alternative to personal vehicles. However, the environmental efficiency of these systems varies significantly based on ridership levels, travel distances, and the emissions generated by different modes of transportation. This project aims to assess the environmental efficiency of U.S. public transit systems by analyzing key factors such as ridership, average travel distances, and associated emissions.\nUsing data from sources such as the National Transit Database (NTD) and the U.S. Energy Information Administration (EIA) State Electricity Profiles, this study will explore how many riders are served by different transit agencies, how far an average rider travels, and the effective emissions produced by each transit mode. By quantifying these factors, this analysis will provide insights into the sustainability of various transit systems and identify potential areas for improvement in reducing transit-related emissions."
+  },
+  {
+    "objectID": "mp02.html#data-acquisition",
+    "href": "mp02.html#data-acquisition",
+    "title": "Mini Project 2",
+    "section": "",
+    "text": "The first step is to gather relevant datasets. The EIA State Electricity Profile will be used to estimate the environmental impact of electricity consumption in transit systems.\n\n## Loading required package: scales\n## \n## Attaching package: 'scales'\n## The following object is masked from 'package:purrr':\n## \n##     discard\n\n\n\n\n\nWe’ve collected data on effective emissions per MWh², electricity prices, and total statewide generation capacity. This will help us compare emissions across different public transit modes. Before exploring the National Transit Database for details on various transit agencies, let’s first analyze the SEP data and address a few key questions."
+  },
+  {
+    "objectID": "mp02.html#r-markdown",
+    "href": "mp02.html#r-markdown",
+    "title": "Mini Project 2: Identifying Environmentally Responsible US Public Transit Systems",
+    "section": "",
+    "text": "This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see http://rmarkdown.rstudio.com.\nWhen you click the Knit button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:\n\nsummary(cars)\n\n     speed           dist       \n Min.   : 4.0   Min.   :  2.00  \n 1st Qu.:12.0   1st Qu.: 26.00  \n Median :15.0   Median : 36.00  \n Mean   :15.4   Mean   : 42.98  \n 3rd Qu.:19.0   3rd Qu.: 56.00  \n Max.   :25.0   Max.   :120.00"
+  },
+  {
+    "objectID": "mp02.html#including-plots",
+    "href": "mp02.html#including-plots",
+    "title": "Mini Project 2: Identifying Environmentally Responsible US Public Transit Systems",
+    "section": "",
+    "text": "You can also embed plots, for example:\n\n\n\n\n\n\n\n\n\nNote that the echo = FALSE parameter was added to the code chunk to prevent printing of the R code that generated the plot."
+  },
+  {
+    "objectID": "mp02.html#which-state-has-the-most-expensive-retail-electricity",
+    "href": "mp02.html#which-state-has-the-most-expensive-retail-electricity",
+    "title": "Mini Project 2",
+    "section": "",
+    "text": "most_expensive_state &lt;- EIA_SEP_REPORT |&gt; \n  arrange(desc(electricity_price_MWh)) |&gt; \n  slice(1) |&gt; \n  select(state, electricity_price_MWh)\n\nprint(most_expensive_state)\n##    state electricity_price_MWh\n## 1 Hawaii                   386"
+  },
+  {
+    "objectID": "mp02.html#key-questions",
+    "href": "mp02.html#key-questions",
+    "title": "Mini Project 2",
+    "section": "Key Questions",
+    "text": "Key Questions\n\nWhich state has the most expensive retail electricity?\n\n\n##    state electricity_price_MWh\n## 1 Hawaii                   386\n\n\nWhich state has the ‘dirtiest’ electricity mix?\n\n\n##           state CO2_MWh\n## 1 West Virginia    1925\n\n\nOn average, how many pounds of CO2 are emitted per MWh of electricity produced in the US? (Note that you will need to use a suitably weighted average here.)\n\n\n## [1] 805.3703\n\n\nWhat is the rarest primary energy source in the US? What is the associated cost of electricity and where is it used?\n\n\n##    state primary_source electricity_price_MWh\n## 1 Hawaii      Petroleum                   386\n\n\nTexas, has a reputation as being the home of “dirty fossil fuels” while NY has a reputation as a leader in clean energy. How many times cleaner is NY’s energy mix than that of Texas?\n\n\n## [1] 1.637931"
+  },
+  {
+    "objectID": "mp02.html#energy-consumption",
+    "href": "mp02.html#energy-consumption",
+    "title": "Mini Project 2",
+    "section": "Energy Consumption",
+    "text": "Energy Consumption\nNext, we will load, clean, and transform the 2023 Energy Consumption dataset by removing unnecessary columns, converting non-numeric values to numeric, grouping by key attributes, and filtering out irrelevant rows. A random sample of the cleaned data will then be displayed.\n\n## Loading required package: readxl\n## Warning: package 'readxl' was built under R version 4.4.3\n## Warning: Expecting numeric in R1197 / R1197C18: got '-'\n\n\n## Loading required package: tidyr\n## # A tibble: 10 × 16\n##    `NTD ID` Mode  `Agency Name`       `Bio-Diesel` `Bunker Fuel` `C Natural Gas`\n##       &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;                      &lt;dbl&gt;         &lt;dbl&gt;           &lt;dbl&gt;\n##  1    50015 LR    The Greater Clevel…            0             0               0\n##  2    50149 DR    Michiana Area Coun…            0             0               0\n##  3    40171 DR    Knoxville-Knox Cou…            0             0               0\n##  4    50035 DR    Central County Tra…            0             0               0\n##  5    90031 DR    Riverside Transit …            0             0               0\n##  6    40044 MB    City of Montgomery         19733             0               0\n##  7        2 DR    Spokane Transit Au…            0             0               0\n##  8    70271 SR    Kansas City, City …            0             0               0\n##  9    40018 MB    Transit Authority …      1425558             0               0\n## 10    70275 VP    Nebraska Departmen…            0             0               0\n## # ℹ 10 more variables: `Diesel Fuel` &lt;dbl&gt;, `Electric Battery` &lt;dbl&gt;,\n## #   `Electric Propulsion` &lt;dbl&gt;, Ethanol &lt;dbl&gt;, Methonal &lt;dbl&gt;, Gasoline &lt;dbl&gt;,\n## #   Hydrogen &lt;dbl&gt;, Kerosene &lt;dbl&gt;, `Liquified Nat Gas` &lt;dbl&gt;,\n## #   `Liquified Petroleum Gas` &lt;dbl&gt;"
+  },
+  {
+    "objectID": "mp02.html#state-electricity-profiles",
+    "href": "mp02.html#state-electricity-profiles",
+    "title": "Mini Project 2",
+    "section": "State Electricity Profiles",
+    "text": "State Electricity Profiles\nThe first step is to gather relevant datasets. The EIA State Electricity Profile will be used to estimate the environmental impact of electricity consumption in transit systems.\n\n## Loading required package: scales\n## \n## Attaching package: 'scales'\n## The following object is masked from 'package:purrr':\n## \n##     discard\n\n\n\n\n\nWe’ve collected data on effective emissions per MWh², electricity prices, and total statewide generation capacity. This will help us compare emissions across different public transit modes. Before exploring the National Transit Database for details on various transit agencies, let’s first analyze the SEP data and address a few key questions."
+  },
+  {
+    "objectID": "mp02.html#annual-database-energy-consumption",
+    "href": "mp02.html#annual-database-energy-consumption",
+    "title": "Mini Project 2",
+    "section": "2023 Annual Database Energy Consumption",
+    "text": "2023 Annual Database Energy Consumption\nNext, we will load, clean, and transform the 2023 Energy Consumption dataset by removing unnecessary columns, converting non-numeric values to numeric, grouping by key attributes, and filtering out irrelevant rows. A random sample of the cleaned data will then be displayed.\n\n## Loading required package: readxl\n## Warning: package 'readxl' was built under R version 4.4.3\n## Warning: Expecting numeric in R1197 / R1197C18: got '-'\n\n\n## Loading required package: tidyr\n## # A tibble: 10 × 16\n##    `NTD ID` Mode  `Agency Name`       `Bio-Diesel` `Bunker Fuel` `C Natural Gas`\n##       &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;                      &lt;dbl&gt;         &lt;dbl&gt;           &lt;dbl&gt;\n##  1    99424 MB    City of Pasadena               0             0          246584\n##  2    90164 MB    Ventura County Tra…            0             0               0\n##  3    50004 DR    City of La Crosse              0             0               0\n##  4    30011 DR    Altoona Metro Tran…            0             0               0\n##  5    20100 CR    MTA Long Island Ra…            0             0               0\n##  6        8 MB    Tri-County Metropo…            0             0               0\n##  7    50198 DR    Medina County                  0             0               0\n##  8    40928 DR    Baldwin County Com…            0             0               0\n##  9    40008 LR    City of Charlotte …            0             0               0\n## 10    40178 VP    The Transportation…            0             0               0\n## # ℹ 10 more variables: `Diesel Fuel` &lt;dbl&gt;, `Electric Battery` &lt;dbl&gt;,\n## #   `Electric Propulsion` &lt;dbl&gt;, Ethanol &lt;dbl&gt;, Methonal &lt;dbl&gt;, Gasoline &lt;dbl&gt;,\n## #   Hydrogen &lt;dbl&gt;, Kerosene &lt;dbl&gt;, `Liquified Nat Gas` &lt;dbl&gt;,\n## #   `Liquified Petroleum Gas` &lt;dbl&gt;\n\n\n# Find unique Mode codes\ndistinct_modes &lt;- NTD_ENERGY %&gt;%\n  distinct(Mode)\n\n# Recode the Mode column\nNTD_ENERGY &lt;- NTD_ENERGY |&gt;\n  mutate(Mode = case_when(\n      Mode == \"HR\" ~ \"Heavy Rail\", \n      Mode == \"LR\" ~ \"Light Rail\", \n      Mode == \"CR\" ~ \"Commuter Rail\",\n      Mode == \"BU\" ~ \"Bus\", \n      Mode == \"FT\" ~ \"Ferry\",\n      Mode == \"HD\" ~ \"Hybrid Bus\",\n      Mode == \"EB\" ~ \"Electric Bus\",\n      Mode == \"TB\" ~ \"Trolley Bus\",\n      Mode == \"OT\" ~ \"Other\", \n      TRUE ~ \"Unknown\"\n  ))"
+  },
+  {
+    "objectID": "mp02.html#analysis",
+    "href": "mp02.html#analysis",
+    "title": "Mini Project 2",
+    "section": "Analysis",
+    "text": "Analysis\nThis analysis focuses on determining which transit agencies across the United States are the “greenest” based on their emissions, energy use, and passenger service metrics. The goal is to assess the environmental efficiency of these agencies and recognize those that are reducing their carbon footprint in relation to transit usage.\n\nData Integration and Preparation\n\nThe first step is to join and clean the datasets that provide the necessary data on transit services, energy consumption, and CO2 emissions factors. We will join these datasets using key identifiers such as Agency, Mode, and Fuel Source to create a combined dataset that contains the required variables: emissions, energy usage, and passenger metrics."
   }
 ]
