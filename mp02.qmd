@@ -480,7 +480,7 @@ ggplot(transit_data, aes(x = Ridership, y = RidershipToEmission, color = Agency)
 
 ```
 
-GTA IV Green Transit Awards Press Release
+## GTA IV Green Transit Awards Press Release
 
 The GTA IV Green Transit Awards recognize transit agencies excelling in sustainability. Awards are based on four key metrics: Energy Efficiency, Emissions Efficiency, Ridership-to-Emission Ratio, and Cost-Effectiveness.
 
