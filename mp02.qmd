@@ -13,19 +13,21 @@ knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, message = FALSE, warning = F
 ```
 
 # Introduction
+
 Public transit systems reduce urban congestion and offer sustainable alternatives to personal vehicles. However, environmental efficiency varies across systems due to ridership, travel distances, and emissions. This project evaluates the environmental efficiency of U.S. public transit systems using data from the National Transit Database (NTD) and the U.S. Energy Information Administration (EIA) State Electricity Profiles.
 
 Key areas of analysis include:
 
-- Ridership levels across transit agencies
+-   Ridership levels across transit agencies
 
-- Average travel distances per passenger
+-   Average travel distances per passenger
 
-- Emissions associated with different transit modes
+-   Emissions associated with different transit modes
 
 This study aims to identify sustainability trends and potential areas for reducing transit-related emissions.
 
 # Data Acquisition
+
 State Electricity Profiles
 
 We use EIA's State Electricity Profiles to estimate the environmental impact of electricity use in transit systems.
@@ -109,6 +111,7 @@ EIA_SEP_REPORT <- purrr::map2(state.name, state.abb, get_eia_sep) |>
 ```
 
 ### Data Summary
+
 ```{r, echo=FALSE}
 ensure_package(scales)
 ensure_package(DT)
@@ -210,7 +213,6 @@ print(cleaner_ratio)
 
 Next, we will load, clean, and transform the 2023 Energy Consumption dataset by removing unnecessary columns, converting non-numeric values to numeric, grouping by key attributes, and filtering out irrelevant rows. A random sample of the cleaned data will then be displayed.
 
-
 ```{r}
 #| echo: false
 ensure_package(readxl)
@@ -281,7 +283,6 @@ NTD_ENERGY <- NTD_ENERGY |>
         Mode == "DR" ~ "Demand Response",
         TRUE ~ "Unknown"))
 ```
-
 
 #### 2023 Annual Database Service by Agency
 
@@ -406,8 +407,8 @@ ggplot(TRANSIT_DATA, aes(x = State, y = Total_Emissions, fill = State)) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))  # Rotate x-axis labels for readability
 ```
 
-
 Calculate the Metrics
+
 ```{r}
 #| echo: false
 library(dplyr)
@@ -427,7 +428,8 @@ transit_data <- transit_data %>%
 print(transit_data)
 ```
 
-Determine Winners 
+Determine Winners
+
 ```{r}
 #| echo: false
 # Find the agency with the lowest energy efficiency (best performance)
@@ -438,6 +440,7 @@ print(winner)
 ```
 
 Energy Efficiency Comparison
+
 ```{r}
 #| echo: false
 library(ggplot2)
@@ -454,6 +457,7 @@ ggplot(transit_data, aes(x = Agency, y = EnergyEfficiency, fill = Agency)) +
 ```
 
 Ridership-to-Emissions Ratio
+
 ```{r}
 #| echo: false
 transit_data <- data.frame(
@@ -476,12 +480,11 @@ ggplot(transit_data, aes(x = Ridership, y = RidershipToEmission, color = Agency)
 
 ```
 
-
 GTA IV Green Transit Awards Press Release
 
 The GTA IV Green Transit Awards recognize transit agencies excelling in sustainability. Awards are based on four key metrics: Energy Efficiency, Emissions Efficiency, Ridership-to-Emission Ratio, and Cost-Effectiveness.
 
-1. Energy Efficiency
+1.  Energy Efficiency
 
 Awarded to the agency with the lowest energy consumption per passenger mile.
 
@@ -491,7 +494,7 @@ Energy Efficiency: 0.02 kWh per passenger mile
 
 Reference: Median: 0.04 kWh. Agency A’s performance is 50% better than the median.
 
-2. Emissions Efficiency
+2.  Emissions Efficiency
 
 Awarded to the agency with the lowest CO2 emissions per passenger mile.
 
@@ -501,7 +504,7 @@ Emissions Efficiency: 0.05 g CO2 per passenger mile
 
 Reference: Median: 0.10 g CO2. Agency B is twice as efficient in emissions.
 
-3. Ridership-to-Emission Ratio
+3.  Ridership-to-Emission Ratio
 
 Awarded to the agency with the highest ridership per unit of emissions.
 
@@ -511,25 +514,18 @@ Ridership-to-Emission Ratio: 200 passengers per gram of CO2
 
 Reference: Median: 120 passengers per gram of CO2. Agency C shows superior ridership efficiency.
 
-4. Cost-Effectiveness
+4.  Cost-Effectiveness
 
 Awarded to the agency that maximizes environmental sustainability per dollar spent.
 
 Winner: Agency D
 
-Cost-Effectiveness: $0.01 per gram of CO2
+Cost-Effectiveness: \$0.01 per gram of CO2
 
-Reference: Median: $0.03 per gram of CO2. Agency D leads in cost-efficiency.
+Reference: Median: \$0.03 per gram of CO2. Agency D leads in cost-efficiency.
 
 Visualizations
 
 Included are visualizations that highlight the performance of our winners, showcasing their leadership in energy and emissions efficiency, as well as ridership optimization.
 
 The GTA IV Green Transit Awards highlight the most sustainable transit systems, celebrating the efforts of agencies committed to reducing their environmental footprint. Congratulations to all winners!
-
-
-```{r}
-
-```
-
-
