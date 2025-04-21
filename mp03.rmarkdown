@@ -12,11 +12,15 @@ format:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+
+
 # 📘 Introduction
 
 This mini-project explores a large Spotify playlist dataset and corresponding song characteristics. The goal is to analyze how user-created playlists reflect patterns in music preference and how these patterns align with musical attributes like energy, danceability, and valence.
 
 ## 🎵 Song Characteristics Dataset
+
+
 
 ```{r}
 #| code-fold: true
@@ -63,9 +67,13 @@ songs_df <- load_songs()
 head(songs_df)
 ```
 
+
+
 ## 📝 Spotify Million Playlist Dataset
 
 In Task 2, I encountered an issue where the Spotify Million Playlist Dataset was no longer available for download from the original GitHub URL, as pointed out in the Piazza review and feedback from both the professor and students. Many of the files returned 404 errors, so I focused on downloading the first chunk (mpd.slice.0-999.json) to determine if any data was still accessible. Using the httr package, I checked the file's availability and downloaded it if found. If there were errors or missing files, the script would notify me. This approach enabled me to proceed with the analysis despite the missing data.
+
+
 
 ```{r}
 #| message: false
@@ -124,10 +132,14 @@ if (file.exists(local_file_path)) {
 }
 ```
 
+
+
 ## Questions
 ### Identifying Characteristics of Popular Songs
 
 1. How many distinct tracks and artists are represented in the playlist data?
+
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -147,7 +159,11 @@ distinct_artists <- songs_df |>
 print(paste("Distinct tracks:", distinct_tracks$n))
 print(paste("Distinct artists:", distinct_artists$n))
 ```
+
+
 2. What are the 5 most popular tracks in the playlist data?
+
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -163,7 +179,11 @@ top_5_popular_tracks <- songs_df |>
 print(top_5_popular_tracks)
 ```
 
+
+
 3. What is the most popular track in the playlist data that does not have a corresponding entry in the song characteristics data?
+
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -180,7 +200,11 @@ tracks_missing_characteristics <- songs_df |>
 print(tracks_missing_characteristics)
 ```
 
+
+
 4. According to the song characteristics data, what is the most “danceable” track? How often does it appear in a playlist?
+
+
 
 ```{r}
 #| code-fold: true
@@ -202,7 +226,11 @@ most_danceable_count <- songs_df |>
 print(most_danceable_track)
 ```
 
+
+
 5. Which playlist has the longest average track length?
+
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -218,7 +246,11 @@ longest_track <- songs_df |>
 print(longest_track)
 ```
 
+
+
 6. What is the most popular playlist on Spotify?
+
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -234,9 +266,13 @@ most_popular_track <- songs_df |>
 print(most_popular_track)
 ```
 
+
+
 ### Visually Identifying Characteristics of Popular Songs
 
 1. Is the popularity column correlated with the number of playlist appearances?
+
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"

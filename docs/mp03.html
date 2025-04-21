@@ -134,6 +134,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#song-characteristics-dataset" id="toc-song-characteristics-dataset" class="nav-link" data-scroll-target="#song-characteristics-dataset"><span class="header-section-number">1.1</span> 🎵 Song Characteristics Dataset</a></li>
   <li><a href="#spotify-million-playlist-dataset" id="toc-spotify-million-playlist-dataset" class="nav-link" data-scroll-target="#spotify-million-playlist-dataset"><span class="header-section-number">1.2</span> 📝 Spotify Million Playlist Dataset</a></li>
+  <li><a href="#questions" id="toc-questions" class="nav-link" data-scroll-target="#questions"><span class="header-section-number">1.3</span> Questions</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -231,8 +232,92 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="spotify-million-playlist-dataset" class="level2" data-number="1.2">
 <h2 data-number="1.2" class="anchored" data-anchor-id="spotify-million-playlist-dataset"><span class="header-section-number">1.2</span> 📝 Spotify Million Playlist Dataset</h2>
 <p>In Task 2, I encountered an issue where the Spotify Million Playlist Dataset was no longer available for download from the original GitHub URL, as pointed out in the Piazza review and feedback from both the professor and students. Many of the files returned 404 errors, so I focused on downloading the first chunk (mpd.slice.0-999.json) to determine if any data was still accessible. Using the httr package, I checked the file’s availability and downloaded it if found. If there were errors or missing files, the script would notify me. This approach enabled me to proceed with the analysis despite the missing data.</p>
+</section>
+<section id="questions" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="questions"><span class="header-section-number">1.3</span> Questions</h2>
+<section id="identifying-characteristics-of-popular-songs" class="level3" data-number="1.3.1">
+<h3 data-number="1.3.1" class="anchored" data-anchor-id="identifying-characteristics-of-popular-songs"><span class="header-section-number">1.3.1</span> Identifying Characteristics of Popular Songs</h3>
+<ol type="1">
+<li>How many distinct tracks and artists are represented in the playlist data?</li>
+</ol>
+<div class="cell">
+<details class="code-fold">
+<summary>Show Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Number of distinct tracks</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>distinct_tracks <span class="ot">&lt;-</span> songs_df <span class="sc">|&gt;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(name) <span class="sc">|&gt;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>()</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Number of distinct artists</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>distinct_artists <span class="ot">&lt;-</span> songs_df <span class="sc">|&gt;</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(artist) <span class="sc">|&gt;</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>()</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"Distinct tracks:"</span>, distinct_tracks<span class="sc">$</span>n))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Distinct tracks: 132939"</code></pre>
+</div>
+<details class="code-fold">
+<summary>Show Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"Distinct artists:"</span>, distinct_artists<span class="sc">$</span>n))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Distinct artists: 27755"</code></pre>
+</div>
+</div>
+<ol start="2" type="1">
+<li>What are the 5 most popular tracks in the playlist data?</li>
+</ol>
+<div class="cell">
+<details class="code-fold">
+<summary>Show Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Top 5 most popular tracks</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>top_5_popular_tracks <span class="ot">&lt;-</span> songs_df <span class="sc">|&gt;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(popularity)) <span class="sc">|&gt;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">5</span>) <span class="sc">|&gt;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(name, popularity)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(top_5_popular_tracks)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 2
+  name                                                 popularity
+  &lt;chr&gt;                                                     &lt;dbl&gt;
+1 Blinding Lights                                             100
+2 ROCKSTAR (feat. Roddy Ricch)                                 99
+3 ROCKSTAR (feat. Roddy Ricch)                                 99
+4 death bed (coffee for your head) (feat. beabadoobee)         97
+5 death bed (coffee for your head) (feat. beabadoobee)         97</code></pre>
+</div>
+</div>
+<ol start="3" type="1">
+<li>What is the most popular track in the playlist data that does not have a corresponding entry in the song characteristics data?</li>
+</ol>
+<div class="cell">
+<details class="code-fold">
+<summary>Show Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Find tracks that have missing characteristics (acousticness, danceability, etc.)</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>tracks_missing_characteristics <span class="ot">&lt;-</span> songs_df <span class="sc">|&gt;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">is.na</span>(acousticness) <span class="sc">|</span> <span class="fu">is.na</span>(danceability) <span class="sc">|</span> <span class="fu">is.na</span>(energy) <span class="sc">|</span> <span class="fu">is.na</span>(instrumentalness)) <span class="sc">|&gt;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(popularity)) <span class="sc">|&gt;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">1</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Print the most popular track without characteristics</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(tracks_missing_characteristics)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 0 × 19
+# ℹ 19 variables: id &lt;chr&gt;, name &lt;chr&gt;, artist &lt;chr&gt;, duration_ms &lt;dbl&gt;,
+#   release_date &lt;chr&gt;, year &lt;dbl&gt;, acousticness &lt;dbl&gt;, danceability &lt;dbl&gt;,
+#   energy &lt;dbl&gt;, instrumentalness &lt;dbl&gt;, liveness &lt;dbl&gt;, loudness &lt;dbl&gt;,
+#   speechiness &lt;dbl&gt;, tempo &lt;dbl&gt;, valence &lt;dbl&gt;, mode &lt;dbl&gt;, key &lt;dbl&gt;,
+#   popularity &lt;dbl&gt;, explicit &lt;dbl&gt;</code></pre>
+</div>
+</div>
 
 
+</section>
 </section>
 </section>
 
