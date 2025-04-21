@@ -48,10 +48,10 @@ load_songs <- function() {
   # Clean and split artist list
   SONGS_clean <- SONGS |>
     mutate(
-      artists = str_remove_all(artists, "\\[|\\]|'")  # remove brackets and quotes
+      artists = str_remove_all(artists, "\\[|\\]|'") 
     ) |>
-    separate_rows(artists, sep = ",\\s*") |>           # split on comma + optional space
-    rename(artist = artists)                           # rename for clarity
+    separate_rows(artists, sep = ",\\s*") |>           
+    rename(artist = artists)                           
 
   return(SONGS_clean)
 }
@@ -122,9 +122,6 @@ if (file.exists(local_file_path)) {
 
 ```
 
-```{r}
-
-```
 
 ```{r}
 #| code-fold: true
@@ -134,102 +131,6 @@ if (file.exists(local_file_path)) {
 
 ```
 
-```{r}
-#| code-fold: true
-#| code-summary: "Show Code"
-#| warning: false
-#| message: false
 
-```
 
-```{r}
-#| code-fold: true
-#| code-summary: "Show Code"
-#| warning: false
-#| message: false
 
-```
-
-```{r}
-#| code-fold: true
-#| code-summary: "Show Code"
-#| warning: false
-#| message: false
-
-```
-
-```{r}
-#| code-fold: true
-#| code-summary: "Show Code"
-#| warning: false
-#| message: false
-
-```
-
-```{r}
-#| code-fold: true
-#| code-summary: "Show Code"
-#| warning: false
-#| message: false
-
-```
-
-```{r}
-#| code-fold: true
-#| code-summary: "Show Code"
-#| warning: false
-#| message: false
-
-```
-
-```{r}
-#| code-fold: true
-#| code-summary: "Show Code"
-#| warning: false
-#| message: false
-
-```
-
-```{r}
-#| code-fold: true
-#| code-summary: "Show Code"
-#| warning: false
-#| message: false
-
-```
-
-```{r}
-#| code-fold: true
-#| code-summary: "Show Code"
-#| warning: false
-#| message: false
-
-```
-
-```{r}
-#| code-fold: true
-#| code-summary: "Show Code"
-#| warning: false
-#| message: false
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
