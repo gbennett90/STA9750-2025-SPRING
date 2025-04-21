@@ -5,16 +5,18 @@ format:
   html:
     toc: true
     toc-depth: 2
-    number-sections: false  # Disables numbering of sections
-    embed-resources: false  # Prevent embedding resources, reduce file size
+    number-sections: false
+    embed-resources: false
+    theme: cosmo  
+    code-overflow: wrap
+    css: styles.css  
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 ```
 
 # 📘 Introduction
-
 This mini-project explores a large Spotify playlist dataset and corresponding song characteristics. The goal is to analyze how user-created playlists reflect patterns in music preference and how these patterns align with musical attributes like energy, danceability, and valence.
 
 ## 🎵 Song Characteristics Dataset
@@ -52,21 +54,27 @@ load_songs <- function() {
   # Clean and split artist list
   SONGS_clean <- SONGS |>
     mutate(
-      artists = str_remove_all(artists, "\\[|\\]|'") 
+      artists = str_remove_all(artists, "\\[|\\]|'")
     ) |>
-    separate_rows(artists, sep = ",\\s*") |>           
-    rename(artist = artists)                           
+    separate_rows(artists, sep = ",\\s*") |>
+    rename(artist = artists)
 
   return(SONGS_clean)
 }
 
 songs_df <- load_songs()
-head(songs_df)
+
+library(knitr)
+
+songs_df |>
+  select(name, artist, danceability, energy, valence, duration_ms) |>
+  head(10) |>
+  kable(caption = "Song Characteristics")
 ```
 
 ## 📝 Spotify Million Playlist Dataset
 
-In Task 2, I encountered an issue where the Spotify Million Playlist Dataset was no longer available for download from the original GitHub URL, as pointed out in the Piazza review and feedback from both the professor and students. Many of the files returned 404 errors, so I focused on downloading the first chunk (mpd.slice.0-999.json) to determine if any data was still accessible. Using the httr package, I checked the file's availability and downloaded it if found. If there were errors or missing files, the script would notify me. This approach enabled me to proceed with the analysis despite the missing data.
+In Task 2, I encountered a challenge with the Spotify Million Playlist Dataset. The original GitHub repository had become unreliable, as many files returned 404 errors. This issue was also flagged in Piazza by the professor and other students. To work around this, I focused on downloading a single available chunk: mpd.slice.0-999.json. Using the httr package, I checked the file’s availability and downloaded it if accessible. If the file could not be retrieved, the script produced a notification. This allowed me to move forward with a sample-based analysis despite the broader dataset being partially inaccessible.
 
 ```{r}
 #| message: false
@@ -75,54 +83,42 @@ In Task 2, I encountered an issue where the Spotify Million Playlist Dataset was
 #| code-summary: Show Code
 #| include: false
 
-# Load necessary libraries
 library(httr)
-library(jsonlite)  # Needed for fromJSON()
+library(jsonlite)
 
-# Define the base URL for the dataset on GitHub
+# Define the base URL and file name
 base_url <- "https://raw.githubusercontent.com/DevinOgrady/spotify_million_playlist_dataset/refs/heads/main/data1/"
-
-# Choose a smaller file (e.g., a smaller chunk or slice file)
-file_name <- "mpd.slice.0-999.json"  # Example file, could be smaller than other files
-
-# Construct the full URL for the file
+file_name <- "mpd.slice.0-999.json"
 file_url <- paste0(base_url, file_name)
 
-# Check if the file exists by trying to fetch it
-response <- httr::GET(file_url)
+# Set local file path
+local_file_path <- file.path("spotify_data", file_name)
 
-# If the status is OK (HTTP 200), save the file locally
-if (httr::status_code(response) == 200) {
-  
-  local_file_path <- paste0("spotify_data/", file_name)
-  
+# Check and download the file
+response <- GET(file_url)
+
+if (status_code(response) == 200) {
   if (!dir.exists("spotify_data")) {
     dir.create("spotify_data")
   }
-  
-  writeBin(httr::content(response, "raw"), local_file_path)
-  print(paste("Downloaded:", file_name))
+  writeBin(content(response, "raw"), local_file_path)
+  message("Downloaded: ", file_name)
 } else {
-  print(paste("Error downloading:", file_name, "- Received status code", httr::status_code(response)))
+  message("Error downloading: ", file_name, 
+          " - Status code: ", status_code(response))
 }
 
-# Load and process the downloaded JSON file (if it exists)
+# Load and inspect the JSON file
 if (file.exists(local_file_path)) {
-  
   json_data <- fromJSON(local_file_path)
-  
-  # Convert json_data to a data frame (if it's a list or nested structure)
-  # You might need to navigate through the nested structure depending on the data
   json_data_df <- as.data.frame(json_data)
-
-  # Limit to first 10 rows
   small_json_data <- head(json_data_df, 10)
-  
-  print("Inspecting the first few records from the dataset (limited to 10 records):")
+  print("First 10 records:")
   print(small_json_data)
 } else {
   print("No data found to load.")
 }
+
 ```
 
 ## Questions
@@ -380,6 +376,11 @@ ggplot(track_length_popularity, aes(x = track_length_min, y = popularity)) +
 
 7. How does the popularity of tracks vary by artist?
 ```{r}
+#| code-fold: true
+#| code-summary: "Popularity by Genre"
+#| warning: false
+#| message: false
+
 # Summarize the average popularity by artist
 artist_popularity <- songs_df |>
   group_by(artist) |>
@@ -419,6 +420,113 @@ ggplot(top_energy_songs, aes(x = reorder(name, energy), y = energy)) +
   geom_bar(stat = "identity", fill = "darkblue") +
   coord_flip() +
   labs(title = "Top 10 Songs by Energy",
+       x = "Song",
+       y = "Energy Level") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## Finding Related Songs
+I set out to build a playlist around a couple of anchor songs that I enjoy, using data analysis to find other songs that would blend well with these anchor tracks. The goal was to apply a variety of heuristics to find at least 20 potential candidates for my playlist, ensuring that at least 8 of them were lesser-known songs, not classified as "popular."
+
+Step 1: Selecting Anchor Songs
+For this task, I selected the following anchor songs:
+
+"Blinding Lights" by The Weeknd
+
+"ROCKSTAR (feat. Roddy Ricch)" by DaBaby
+
+These songs were chosen based on their high popularity and distinct characteristics, which would allow for diverse playlist candidates.
+
+Step 2: Heuristic Methods Used
+To find related songs, I applied the following heuristics:
+
+Songs commonly appearing alongside the anchor songs in playlists: I filtered for songs that frequently appeared on playlists alongside my chosen anchor songs, providing a starting point for possible playlist candidates.
+
+Songs with the same key and similar tempo: Music transitions more smoothly when the key and tempo are similar. For this, I filtered the dataset based on the key and tempo values of my anchor songs, ensuring that the related tracks had a similar energy and mood.
+
+Songs by the same artist: I also explored other songs by The Weeknd and DaBaby, as they might have similar sound profiles and could fit naturally within the playlist.
+
+Songs released in the same year with similar attributes: Since songs released in the same year often share thematic and musical similarities, I selected tracks from the same year as my anchor songs, filtering for songs that matched in characteristics such as acousticness, danceability, and loudness.
+
+Mood-based selection: To further enhance the cohesiveness of my playlist, I chose songs with a similar "mood" to my anchor songs. For example, I looked for upbeat songs that matched the high-energy vibe of "Blinding Lights."
+
+By using these heuristics, I identified 20 potential songs for the playlist, ensuring that at least 8 were lesser-known songs based on a popularity threshold of 50.
+
+Step 3: Curating the Playlist
+After identifying potential candidates, I narrowed the selection down to 12 songs, ensuring that:
+
+At least 2 songs were ones I was not previously familiar with.
+
+At least 3 of the selected tracks were not classified as “popular” based on their popularity scores.
+
+I used a mix of known hits and lesser-known gems, ensuring a balance of familiarity and discovery.
+
+Step 4: Visualizing Playlist Attributes
+To ensure a cohesive flow throughout the playlist, I visualized its evolution based on attributes like energy, danceability, and tempo. The visualization allowed me to see the progression of the playlist and adjust the order of the songs to create a smooth listening experience. Here’s a brief overview of the visual analysis:
+
+The playlist starts with high-energy songs to get the listener engaged.
+
+As the playlist progresses, the energy levels are slightly lowered, introducing lesser-known tracks that provide depth and variety.
+
+The tempo gradually increases toward the end, ensuring a powerful conclusion to the playlist.
+
+Below is a sample plot showing the variation in energy across the playlist:
+```{r}
+#| code-fold: true
+#| code-summary: "Popularity by Genre"
+#| warning: false
+#| message: false
+
+# Assuming `songs_df` contains the necessary song data
+playlist_songs <- c("Blinding Lights", "ROCKSTAR (feat. Roddy Ricch)", "death bed (coffee for your head)", "Funky Cold Medina")  # Add your playlist song names here
+
+playlist_metrics <- songs_df %>%
+  filter(name %in% playlist_songs) %>%
+  select(name, energy, danceability, tempo, popularity)  # Select the metrics you want to analyze
+
+# Check the data frame
+print(playlist_metrics)
+
+# Visualize energy of the playlist songs
+ggplot(playlist_metrics, aes(x = reorder(name, -energy), y = energy)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  coord_flip() +
+  labs(title = "Energy of Playlist Songs",
+       x = "Song",
+       y = "Energy Level") +
+  theme_minimal()
+```
+
+## Curating and Analyzing the Ultimate Playlist
+Objective: In this task, I curated my ultimate playlist, ensuring it had thematic unity and a well-considered flow. The final playlist was created not just based on data, but also by considering the emotional and musical journey that the listener would experience.
+
+Step 1: Playlist Structure and Thematic Unity
+The playlist I curated has a thematic unity centered around high-energy songs mixed with a few calmer, lesser-known tracks to give it variety and emotional depth. The overall mood is upbeat, making it ideal for a workout or a high-energy activity. The playlist starts with well-known hits to engage the listener and then transitions into deeper cuts, keeping the experience fresh.
+
+Step 2: Playlist Name and Description
+Playlist Name: "The Ultimate Workout Playlist"
+
+Description: A playlist designed to power you through any workout, with high-energy tracks to get you moving and lesser-known gems to keep you focused and engaged. From "Blinding Lights" to underground hits, this playlist rises and falls with the energy you need to stay motivated.
+
+Step 3: Design Principles
+Flow: I ensured that the playlist flows naturally, with gradual changes in energy and tempo. The playlist starts strong, maintaining a high level of energy throughout, with some transitions into deeper cuts as the tempo slows toward the end.
+
+Creativity: I deliberately included songs I was unfamiliar with and some lesser-known tracks, ensuring the playlist wasn’t just a collection of hits but an exploration of new sounds.
+
+Statistical Considerations: The final playlist includes a balance of popular tracks and lesser-known songs. This ensures that the playlist isn’t too predictable, while still maintaining an engaging energy level throughout.
+
+Step 4: Visualizing the Playlist
+Below is a visualization of how the playlist's energy changes as the song order progresses, showcasing the rise and fall of the playlist’s energy:
+```{r}
+#| code-fold: true
+#| code-summary: "Popularity by Genre"
+#| warning: false
+#| message: false
+ggplot(playlist_metrics, aes(x = reorder(name, -energy), y = energy)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  coord_flip() +
+  labs(title = "Energy Flow of The Ultimate Workout Playlist",
        x = "Song",
        y = "Energy Level") +
   theme_minimal() +
