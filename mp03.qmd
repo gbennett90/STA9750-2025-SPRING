@@ -110,7 +110,9 @@ if (file.exists(local_file_path)) {
   print("No data found to load.")
 }
 ```
+
 ## Task 3
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
