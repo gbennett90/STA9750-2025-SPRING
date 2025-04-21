@@ -105,7 +105,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </head>
 
-<body class="nav-fixed fullcontent">
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -125,7 +125,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul class="collapse">
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> 📘 Introduction</a>
+  <ul class="collapse">
+  <li><a href="#song-characteristics-dataset" id="toc-song-characteristics-dataset" class="nav-link" data-scroll-target="#song-characteristics-dataset"><span class="header-section-number">1.1</span> 🎵 Song Characteristics Dataset</a></li>
+  <li><a href="#spotify-million-playlist-dataset" id="toc-spotify-million-playlist-dataset" class="nav-link" data-scroll-target="#spotify-million-playlist-dataset"><span class="header-section-number">1.2</span> 📝 Spotify Million Playlist Dataset</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
@@ -154,11 +166,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="introduction" class="level1">
-<h1>📘 Introduction</h1>
+<section id="introduction" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> 📘 Introduction</h1>
 <p>This mini-project explores a large Spotify playlist dataset and corresponding song characteristics. The goal is to analyze how user-created playlists reflect patterns in music preference and how these patterns align with musical attributes like energy, danceability, and valence.</p>
-<section id="song-characteristics-dataset" class="level2">
-<h2 class="anchored" data-anchor-id="song-characteristics-dataset">🎵 Song Characteristics Dataset</h2>
+<section id="song-characteristics-dataset" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="song-characteristics-dataset"><span class="header-section-number">1.1</span> 🎵 Song Characteristics Dataset</h2>
 <div class="cell">
 <details class="code-fold">
 <summary>Show Code</summary>
@@ -216,12 +228,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="spotify-million-playlist-dataset" class="level2">
-<h2 class="anchored" data-anchor-id="spotify-million-playlist-dataset">📝 Spotify Million Playlist Dataset</h2>
+<section id="spotify-million-playlist-dataset" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="spotify-million-playlist-dataset"><span class="header-section-number">1.2</span> 📝 Spotify Million Playlist Dataset</h2>
 <p>In Task 2, I encountered an issue where the Spotify Million Playlist Dataset was no longer available for download from the original GitHub URL, as pointed out in the Piazza review and feedback from both the professor and students. Many of the files returned 404 errors, so I focused on downloading the first chunk (mpd.slice.0-999.json) to determine if any data was still accessible. Using the httr package, I checked the file’s availability and downloaded it if found. If there were errors or missing files, the script would notify me. This approach enabled me to proceed with the analysis despite the missing data.</p>
-</section>
-<section id="task-3" class="level2">
-<h2 class="anchored" data-anchor-id="task-3">Task 3</h2>
 
 
 </section>
