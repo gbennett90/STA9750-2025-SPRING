@@ -80,7 +80,9 @@ library(jsonlite)  # Needed for fromJSON()
 
 # Define the base URL for the dataset on GitHub
 base_url <- "https://raw.githubusercontent.com/DevinOgrady/spotify_million_playlist_dataset/refs/heads/main/data1/"
-file_name <- "mpd.slice.0-999.json"
+
+# Choose a smaller file (e.g., a smaller chunk or slice file)
+file_name <- "mpd.slice.0-999.json"  # Example file, could be smaller than other files
 
 # Construct the full URL for the file
 file_url <- paste0(base_url, file_name)
@@ -103,13 +105,20 @@ if (httr::status_code(response) == 200) {
   print(paste("Error downloading:", file_name, "- Received status code", httr::status_code(response)))
 }
 
-# Load the downloaded JSON file (if it exists)
+# Load and process the downloaded JSON file (if it exists)
 if (file.exists(local_file_path)) {
   
   json_data <- fromJSON(local_file_path)
   
-  print("Inspecting the first few records from the dataset:")
-  head(json_data)
+  # Convert json_data to a data frame (if it's a list or nested structure)
+  # You might need to navigate through the nested structure depending on the data
+  json_data_df <- as.data.frame(json_data)
+
+  # Limit to first 10 rows
+  small_json_data <- head(json_data_df, 10)
+  
+  print("Inspecting the first few records from the dataset (limited to 10 records):")
+  print(small_json_data)
 } else {
   print("No data found to load.")
 }
