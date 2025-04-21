@@ -18,3 +18,7 @@ data/**
 .Rhistory
 /.quarto/*
 /.quarto/
+
+data/
+data/mp01/
+*.csv

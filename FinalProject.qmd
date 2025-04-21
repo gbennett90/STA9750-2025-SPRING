@@ -1,0 +1,66 @@
+---
+title: "Final Project Proposal"
+format: revealjs
+---
+# Members
+
+
+
+# Agenda
+
+- Topic Proposal
+- Specific questions
+- Analytical Plan
+- Anticipated Challenges
+
+---
+
+# Overarching Question
+How does the distribution of school funding across NYC districts impact educationaln outcomes, particularly in underserved communities?
+
+---
+# Specific Questions:
+
+- What is the correlation between funding levels and student outcomes (e.g., test scores, graduation rates)?
+
+- How do resource allocation differences affect access to extracurricular activities, advanced coursework, and college prep programs?
+
+- What role does teacher-student ratio or access to specialized resources (like counselors or special education programs) play in student success?
+
+---
+# Public Resources:
+
+## NYC DOE Open Data
+
+- School funding and budget data: This will provide insights into how much money each school or district receives.
+
+- Student performance data: Look for data on standardized test scores (e.g., NYS Regents exams), graduation rates, and academic progress.
+
+- Student demographics: Data on enrollment numbers, student diversity (race/ethnicity), and socioeconomic status (e.g., free/reduced lunch eligibility).
+
+- School resources: Data on teacher-student ratios, availability of advanced placement courses, extracurricular programs, etc.
+
+## NYSED Data
+
+- Data on school performance (test scores, graduation rates, etc.)
+
+- Reports on funding formulas and how schools are allocated resources
+
+- Reports and statistics on school equity, teacher qualification data, and student performance by district.
+
+## The College Board
+
+- Data on SAT/ACT scores by school or district
+
+- College readiness and participation data
+
+- AP exam performance by region or school
+
+# Anticipated Challenges
+
+## Access to Relevant Data on School Facilities
+
+Challenge: School facility data (such as the availability of technology, classroom conditions, extracurricular opportunities) might not always be publicly available or could vary widely across schools, making it harder to quantify access.
+
+## Sample Bias in Educational Data
+Challenge: The data you are analyzing might be biased if certain schools or districts are over- or underrepresented in the data sources. For instance, certain districts may have more resources for data collection and reporting, skewing the results.
