@@ -5,6 +5,7 @@ format:
   html:
     toc: true
     toc-depth: 2
+    number-sections: false  # Disables numbering of sections
     embed-resources: false  # Prevent embedding resources, reduce file size
 ---
 
@@ -170,14 +171,21 @@ print(top_5_popular_tracks)
 #| warning: false
 #| message: false
 
-# Find tracks that have missing characteristics (acousticness, danceability, etc.)
-tracks_missing_characteristics <- songs_df |>
-  filter(is.na(acousticness) | is.na(danceability) | is.na(energy) | is.na(instrumentalness)) |>
-  arrange(desc(popularity)) |>
-  slice_head(n = 1)
+# Summarize and calculate the number of appearances for each track
+track_appearances <- songs_df |>
+  group_by(name) |>
+  summarise(num_appearances = n(), .groups = 'drop') |>
+  arrange(desc(num_appearances))
 
-# Print the most popular track without characteristics
-print(tracks_missing_characteristics)
+# Check if there are any tracks with 0 appearances and print only the count of such tracks
+zero_appearance_tracks <- track_appearances |>
+  filter(num_appearances == 0)
+
+if (nrow(zero_appearance_tracks) == 0) {
+  print(0)  # Print 0 if there are no tracks with 0 appearances
+} else {
+  print(zero_appearance_tracks)
+}
 ```
 
 4. According to the song characteristics data, what is the most “danceable” track? How often does it appear in a playlist?
@@ -212,7 +220,8 @@ print(most_danceable_track)
 # Find the track with the longest duration
 longest_track <- songs_df |>
   arrange(desc(duration_ms)) |>
-  slice_head(n = 1)
+  slice_head(n = 1) |>
+  select(name, duration_ms)  # Select only the name and duration columns
 
 # Print the longest track
 print(longest_track)
@@ -228,7 +237,8 @@ print(longest_track)
 # Find the most popular track in the dataset
 most_popular_track <- songs_df |>
   arrange(desc(popularity)) |>
-  slice_head(n = 1)
+  slice_head(n = 1) |>
+  select(name, popularity)  # Select only the name and popularity columns
 
 # Print the most popular track
 print(most_popular_track)
@@ -243,20 +253,127 @@ print(most_popular_track)
 #| warning: false
 #| message: false
 
-library(ggplot2)
+# Set CRAN mirror
+options(repos = c(CRAN = "https://cran.rstudio.com"))
 
-# Calculate the number of appearances for each track
+# Install and load necessary packages
+install.packages("ggplot2")
+install.packages("dplyr")
+library(ggplot2)
+library(dplyr)
+
+# Summarize and calculate the number of appearances for each track
 track_appearances <- songs_df |>
   group_by(name) |>
   summarise(num_appearances = n(), .groups = 'drop') |>
   arrange(desc(num_appearances))
 
-# Create a plot of the number of appearances
-ggplot(track_appearances, aes(x = reorder(name, num_appearances), y = num_appearances)) +
+# Limit to the top 10 tracks
+top_tracks <- head(track_appearances, 10)
+
+# Create a single bar plot of the number of appearances for the top 10 tracks
+ggplot(top_tracks, aes(x = reorder(name, num_appearances), y = num_appearances)) +
   geom_bar(stat = "identity", fill = "steelblue") +
   coord_flip() +
-  labs(title = "Number of Appearances for Each Track",
+  labs(title = "Top 10 Tracks by Number of Appearances",
        x = "Track Name",
        y = "Number of Appearances") +
-  theme_minimal()
+  theme_minimal() +
+  theme(axis.text.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10))
+```
+
+2. In what year were the most popular songs released?
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+# Popularity vs. release year
+most_popular_year <- songs_df |>
+  group_by(year) |>
+  summarise(avg_popularity = mean(popularity, na.rm = TRUE)) |>
+  arrange(desc(avg_popularity)) |>
+  slice_head(n = 1)
+
+print(most_popular_year)
+```
+
+3. In what year did danceability peak?
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+# Danceability by year
+danceability_by_year <- songs_df |>
+  group_by(year) |>
+  summarise(avg_danceability = mean(danceability, na.rm = TRUE)) |>
+  arrange(desc(avg_danceability)) |>
+  slice_head(n = 1)
+
+print(danceability_by_year)
+```
+
+4. Which decade is most represented on user playlists?
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+# Group songs by decade
+songs_df |>
+  mutate(decade = (year %/% 10) * 10) |>
+  group_by(decade) |>
+  summarise(count = n()) |>
+  arrange(desc(count)) |>
+  slice_head(n = 1) |>
+  print()
+```
+
+5.Create a plot of key frequency among songs.
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+# Plot key frequency using polar coordinates
+ggplot(songs_df, aes(x = factor(key))) +
+  geom_bar() +
+  labs(title = "Key Distribution of Tracks",
+       x = "Key",
+       y = "Frequency")
+```
+
+6. What are the most popular track lengths?
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+# Most popular track lengths with improvements for a cleaner chart
+track_length_popularity <- songs_df |>
+  mutate(track_length_min = duration_ms / 60000) |>
+  group_by(track_length_min) |>
+  summarise(popularity = mean(popularity, na.rm = TRUE)) |>
+  arrange(desc(popularity))
+
+# Create a scatter plot with a smoother to show the trend
+ggplot(track_length_popularity, aes(x = track_length_min, y = popularity)) +
+  geom_point(alpha = 0.5, size = 2, color = "steelblue") +  # Adjust transparency and size of points
+  geom_smooth(method = "loess", color = "darkred", se = FALSE) +  # Add a smoother line
+  labs(title = "Track Length vs. Popularity",
+       x = "Track Length (minutes)",
+       y = "Popularity") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16),  # Center title and adjust font size
+    axis.title = element_text(size = 12),  # Adjust axis titles
+    axis.text = element_text(size = 10)  # Adjust axis labels
+  )
 ```
