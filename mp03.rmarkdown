@@ -9,11 +9,15 @@ format:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+
+
 # 📘 Introduction
 
 This mini-project explores a large Spotify playlist dataset and corresponding song characteristics. The goal is to analyze how user-created playlists reflect patterns in music preference and how these patterns align with musical attributes like energy, danceability, and valence.
 
 ## 🎵 Song Characteristics Dataset
+
+
 
 ```{r}
 #| code-fold: true
@@ -60,9 +64,13 @@ songs_df <- load_songs()
 head(songs_df)
 ```
 
+
+
 ## 📝 Spotify Million Playlist Dataset
 
 In Task 2, I encountered an issue where the Spotify Million Playlist Dataset was no longer available for download from the original GitHub URL, as pointed out in the Piazza review and feedback from both the professor and students. Many of the files returned 404 errors, so I focused on downloading the first chunk (mpd.slice.0-999.json) to determine if any data was still accessible. Using the httr package, I checked the file's availability and downloaded it if found. If there were errors or missing files, the script would notify me. This approach enabled me to proceed with the analysis despite the missing data.
+
+
 
 ```{r}
 #| code-fold: true
@@ -111,7 +119,11 @@ if (file.exists(local_file_path)) {
 }
 ```
 
+
+
 ## Task 3
+
+
 
 ```{r}
 #| code-fold: true
@@ -121,7 +133,6 @@ if (file.exists(local_file_path)) {
 
 
 ```
-
 
 ```{r}
 #| code-fold: true

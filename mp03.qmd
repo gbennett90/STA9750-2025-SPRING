@@ -122,7 +122,6 @@ if (file.exists(local_file_path)) {
 
 ```
 
-
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -130,7 +129,3 @@ if (file.exists(local_file_path)) {
 #| message: false
 
 ```
-
-
-
-
