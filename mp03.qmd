@@ -111,21 +111,4 @@ if (file.exists(local_file_path)) {
 }
 ```
 
-## Task 3
 
-```{r}
-#| code-fold: true
-#| code-summary: "Show Code"
-#| warning: false
-#| message: false
-
-
-```
-
-```{r}
-#| code-fold: true
-#| code-summary: "Show Code"
-#| warning: false
-#| message: false
-
-```
