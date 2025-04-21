@@ -377,3 +377,50 @@ ggplot(track_length_popularity, aes(x = track_length_min, y = popularity)) +
     axis.text = element_text(size = 10)  # Adjust axis labels
   )
 ```
+
+7. How does the popularity of tracks vary by artist?
+```{r}
+# Summarize the average popularity by artist
+artist_popularity <- songs_df |>
+  group_by(artist) |>
+  summarise(average_popularity = mean(popularity, na.rm = TRUE)) |>
+  arrange(desc(average_popularity))
+
+# Limit to top 10 artists for better readability
+top_artist_popularity <- head(artist_popularity, 10)
+
+# Plot popularity by top 10 artists
+ggplot(top_artist_popularity, aes(x = reorder(artist, average_popularity), y = average_popularity)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  coord_flip() +
+  labs(title = "Top 10 Artists by Average Popularity",
+       x = "Artist",
+       y = "Average Popularity") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), 
+        axis.text.y = element_text(size = 10),  
+        plot.title = element_text(size = 14, face = "bold")) 
+```
+
+8. Which songs have the highest energy?
+```{r}
+#| code-fold: true
+#| code-summary: "Popularity by Genre"
+#| warning: false
+#| message: false
+
+# Find the top 10 songs with the highest energy
+top_energy_songs <- songs_df |>
+  arrange(desc(energy)) |>
+  slice_head(n = 10)
+
+# Plot top 10 songs with the highest energy
+ggplot(top_energy_songs, aes(x = reorder(name, energy), y = energy)) +
+  geom_bar(stat = "identity", fill = "darkblue") +
+  coord_flip() +
+  labs(title = "Top 10 Songs by Energy",
+       x = "Song",
+       y = "Energy Level") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
