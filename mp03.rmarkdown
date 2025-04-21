@@ -1,0 +1,144 @@
+---
+title: "Spotify Songs Analysis"
+author: "Gisell Bennett"
+format:
+  html
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+# 📘 Introduction
+
+This mini-project explores a large Spotify playlist dataset and corresponding song characteristics. The goal is to analyze how user-created playlists reflect patterns in music preference and how these patterns align with musical attributes like energy, danceability, and valence.
+
+## 🎵 Song Characteristics Dataset
+
+
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+load_songs <- function() {
+  library(readr)
+  library(dplyr)
+  library(tidyr)
+  library(stringr)
+
+  # Define directory, file path, and URL
+  dir_path <- "data/mp03"
+  file_path <- file.path(dir_path, "songs.csv")
+  url <- "https://raw.githubusercontent.com/gabminamedez/spotify-data/refs/heads/master/data.csv"
+
+  # Create directory if it doesn't exist
+  if (!dir.exists(dir_path)) {
+    dir.create(dir_path, recursive = TRUE)
+  }
+
+  # Download the file if it doesn't exist
+  if (!file.exists(file_path)) {
+    download.file(url, file_path, method = "libcurl")
+  }
+
+  # Read the CSV
+  SONGS <- read_csv(file_path, show_col_types = FALSE)
+
+  # Clean and split artist list
+  SONGS_clean <- SONGS |>
+    mutate(
+      artists = str_remove_all(artists, "\\[|\\]|'") 
+    ) |>
+    separate_rows(artists, sep = ",\\s*") |>           
+    rename(artist = artists)                           
+
+  return(SONGS_clean)
+}
+
+songs_df <- load_songs()
+head(songs_df)
+```
+
+
+
+## 📝 Spotify Million Playlist Dataset
+
+In Task 2, I encountered an issue where the Spotify Million Playlist Dataset was no longer available for download from the original GitHub URL, as pointed out in the Piazza review and feedback from both the professor and students. Many of the files returned 404 errors, so I focused on downloading the first chunk (mpd.slice.0-999.json) to determine if any data was still accessible. Using the httr package, I checked the file's availability and downloaded it if found. If there were errors or missing files, the script would notify me. This approach enabled me to proceed with the analysis despite the missing data.
+
+
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+# Load necessary libraries
+library(httr)
+library(jsonlite)  # Needed for fromJSON()
+
+# Define the base URL for the dataset on GitHub
+base_url <- "https://raw.githubusercontent.com/DevinOgrady/spotify_million_playlist_dataset/refs/heads/main/data1/"
+file_name <- "mpd.slice.0-999.json"
+
+# Construct the full URL for the file
+file_url <- paste0(base_url, file_name)
+
+# Check if the file exists by trying to fetch it
+response <- httr::GET(file_url)
+
+# If the status is OK (HTTP 200), save the file locally
+if (httr::status_code(response) == 200) {
+  
+  local_file_path <- paste0("spotify_data/", file_name)
+  
+  if (!dir.exists("spotify_data")) {
+    dir.create("spotify_data")
+  }
+  
+  writeBin(httr::content(response, "raw"), local_file_path)
+  print(paste("Downloaded:", file_name))
+} else {
+  print(paste("Error downloading:", file_name, "- Received status code", httr::status_code(response)))
+}
+
+# Load the downloaded JSON file (if it exists)
+if (file.exists(local_file_path)) {
+  
+  json_data <- fromJSON(local_file_path)
+  
+  print("Inspecting the first few records from the dataset:")
+  head(json_data)
+} else {
+  print("No data found to load.")
+}
+```
+
+
+
+## Task 3
+
+
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+```
+
