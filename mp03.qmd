@@ -74,7 +74,7 @@ songs_df |>
 
 ## 📝 Spotify Million Playlist Dataset
 
-In Task 2, I encountered a challenge with the Spotify Million Playlist Dataset. The original GitHub repository had become unreliable, as many files returned 404 errors. This issue was also flagged in Piazza by the professor and other students. To work around this, I focused on downloading a single available chunk: mpd.slice.0-999.json. Using the httr package, I checked the file’s availability and downloaded it if accessible. If the file could not be retrieved, the script produced a notification. This allowed me to move forward with a sample-based analysis despite the broader dataset being partially inaccessible.
+Due to ongoing issues with the GitHub repository originally hosting the Spotify Million Playlist Dataset (flagged by students and the professor), only a single JSON file mpd.slice.0-999.json was accessible. While this limits broader generalization, the selected slice provides a representative sample to conduct exploratory analysis.
 
 ```{r}
 #| message: false
@@ -121,7 +121,7 @@ if (file.exists(local_file_path)) {
 
 ```
 
-## Questions
+## 📊 Questions
 ### Identifying Characteristics of Popular Songs
 
 1. How many distinct tracks and artists are represented in the playlist data?
@@ -144,6 +144,7 @@ distinct_artists <- songs_df |>
 print(paste("Distinct tracks:", distinct_tracks$n))
 print(paste("Distinct artists:", distinct_artists$n))
 ```
+
 2. What are the 5 most popular tracks in the playlist data?
 ```{r}
 #| code-fold: true
@@ -185,7 +186,6 @@ if (nrow(zero_appearance_tracks) == 0) {
 ```
 
 4. According to the song characteristics data, what is the most “danceable” track? How often does it appear in a playlist?
-
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -240,7 +240,7 @@ most_popular_track <- songs_df |>
 print(most_popular_track)
 ```
 
-### Visually Identifying Characteristics of Popular Songs
+### 📉 Visually Identifying Characteristics of Popular Songs
 
 1. Is the popularity column correlated with the number of playlist appearances?
 ```{r}
@@ -249,34 +249,23 @@ print(most_popular_track)
 #| warning: false
 #| message: false
 
-# Set CRAN mirror
-options(repos = c(CRAN = "https://cran.rstudio.com"))
-
-# Install and load necessary packages
-install.packages("ggplot2")
-install.packages("dplyr")
+# Correlation between popularity and number of playlist appearances
 library(ggplot2)
-library(dplyr)
 
-# Summarize and calculate the number of appearances for each track
-track_appearances <- songs_df |>
-  group_by(name) |>
-  summarise(num_appearances = n(), .groups = 'drop') |>
+# Summarize the number of appearances
+track_appearances <- songs_df %>%
+  group_by(name) %>%
+  summarise(num_appearances = n(), popularity = mean(popularity, na.rm = TRUE)) %>%
   arrange(desc(num_appearances))
 
-# Limit to the top 10 tracks
-top_tracks <- head(track_appearances, 10)
-
-# Create a single bar plot of the number of appearances for the top 10 tracks
-ggplot(top_tracks, aes(x = reorder(name, num_appearances), y = num_appearances)) +
-  geom_bar(stat = "identity", fill = "steelblue") +
-  coord_flip() +
-  labs(title = "Top 10 Tracks by Number of Appearances",
-       x = "Track Name",
-       y = "Number of Appearances") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(size = 10),
-        axis.text.y = element_text(size = 10))
+# Scatter plot with linear regression line
+ggplot(track_appearances, aes(x = num_appearances, y = popularity)) +
+  geom_point(color = "steelblue") +
+  geom_smooth(method = "lm", color = "red") +
+  labs(title = "Correlation Between Popularity and Number of Playlist Appearances",
+       x = "Number of Playlist Appearances",
+       y = "Popularity") +
+  theme_minimal()
 ```
 
 2. In what year were the most popular songs released?
