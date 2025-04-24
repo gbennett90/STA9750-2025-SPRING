@@ -622,11 +622,7 @@ ggplot(playlist_metrics, aes(x = name, y = energy, fill = energy)) +
     y = "Energy"
   ) +
   theme_minimal(base_size = 12) +
-  geom_text(
-    aes(label = scales::percent(energy, accuracy = 1)),
-    hjust = -0.2,
-    size = 3
-  )
+  theme(axis.text = element_blank())  
 ```
 **Insight:** 🎢  
 - The chart mimics a rollercoaster ride, emphasizing the deliberate peaks and valleys in energy.  
