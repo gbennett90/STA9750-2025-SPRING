@@ -81,43 +81,54 @@ Due to ongoing issues with the GitHub repository originally hosting the Spotify 
 #| warning: false
 #| code-fold: true
 #| code-summary: Show Code
-#| include: false
+#| include: true
 
 library(httr)
 library(jsonlite)
+library(knitr)
+library(dplyr)
+library(tibble)
 
+# Define file details
 base_url <- "https://raw.githubusercontent.com/DevinOgrady/spotify_million_playlist_dataset/refs/heads/main/data1/"
 file_name <- "mpd.slice.0-999.json"
 file_url <- paste0(base_url, file_name)
-
 local_file_path <- file.path("spotify_data", file_name)
 
-# Check and download the file
-response <- GET(file_url)
-
-if (status_code(response) == 200) {
-  if (!dir.exists("spotify_data")) {
-    dir.create("spotify_data")
+# Download JSON file if not already present
+if (!file.exists(local_file_path)) {
+  response <- GET(file_url)
+  if (status_code(response) == 200) {
+    dir.create("spotify_data", showWarnings = FALSE)
+    writeBin(content(response, "raw"), local_file_path)
+    message("Downloaded: ", file_name)
+  } else {
+    stop("Error downloading file. Status code: ", status_code(response))
   }
-  writeBin(content(response, "raw"), local_file_path)
-  message("Downloaded: ", file_name)
-} else {
-  message("Error downloading: ", file_name, 
-          " - Status code: ", status_code(response))
 }
 
-# Load and inspect the JSON file
+# Load just a few playlists and tracks to avoid overload
 if (file.exists(local_file_path)) {
-  json_data <- fromJSON(local_file_path)
-  json_data_df <- as.data.frame(json_data)
-  small_json_data <- head(json_data_df, 10)
-  print("First 10 records:")
-  print(small_json_data)
+  json_data <- fromJSON(local_file_path, simplifyDataFrame = FALSE)
+
+  # Extract only the first 3 playlists and 2 tracks from each
+  small_sample <- lapply(json_data$playlists[1:3], function(pl) {
+    tibble(
+      Playlist_Name = pl$name,
+      Track_1 = pl$tracks[[1]]$track_name,
+      Track_2 = pl$tracks[[2]]$track_name
+    )
+  })
+
+
+  sample_df <- bind_rows(small_sample)
+  kable(sample_df, caption = "Playlists with 2 Tracks Each", align = 'l')
+  
 } else {
   print("No data found to load.")
 }
-
 ```
+
 ***
 ## 📊 Questions
 ### Identifying Characteristics of Popular Songs
@@ -129,18 +140,20 @@ if (file.exists(local_file_path)) {
 #| warning: false
 #| message: false
 
-# Number of distinct tracks
-distinct_tracks <- songs_df |>
-  distinct(name) |>
-  count()
+library(dplyr)
+library(knitr)
 
-# Number of distinct artists
-distinct_artists <- songs_df |>
-  distinct(artist) |>
-  count()
+# Calculate distinct counts
+distinct_counts <- tibble(
+  Metric = c("Distinct Tracks", "Distinct Artists"),
+  Count = c(
+    songs_df |> distinct(name) |> nrow(),
+    songs_df |> distinct(artist) |> nrow()
+  )
+)
 
-print(paste("Distinct tracks:", distinct_tracks$n))
-print(paste("Distinct artists:", distinct_artists$n))
+# Display 
+kable(distinct_counts, caption = "🎼 Overview of Unique Tracks and Artists", align = 'l')
 ```
 
 **2. What are the 5 most popular tracks in the playlist data?**
@@ -150,13 +163,14 @@ print(paste("Distinct artists:", distinct_artists$n))
 #| warning: false
 #| message: false
 
+
 # Top 5 most popular tracks
 top_5_popular_tracks <- songs_df |>
   arrange(desc(popularity)) |>
   slice_head(n = 5) |>
-  select(name, popularity)
+  select(Track = name, Popularity = popularity)
 
-print(top_5_popular_tracks)
+kable(top_5_popular_tracks, caption = "🎧 Top 5 Most Popular Tracks", align = 'l')
 ```
 
 **3. What is the most popular track in the playlist data that does not have a corresponding entry in the song characteristics data?**
@@ -166,20 +180,28 @@ print(top_5_popular_tracks)
 #| warning: false
 #| message: false
 
-# Summarize and calculate the number of appearances for each track
+# Summarize appearances
 track_appearances <- songs_df |>
   group_by(name) |>
   summarise(num_appearances = n(), .groups = 'drop') |>
   arrange(desc(num_appearances))
 
-# Check if there are any tracks with 0 appearances and print only the count of such tracks
+# Identify tracks with 0 appearances
 zero_appearance_tracks <- track_appearances |>
   filter(num_appearances == 0)
 
+# Output
 if (nrow(zero_appearance_tracks) == 0) {
-  print(0)  # Print 0 if there are no tracks with 0 appearances
+  kable(
+    tibble(Message = "✅ No tracks with 0 appearances."),
+    caption = "Track Appearance Check"
+  )
 } else {
-  print(zero_appearance_tracks)
+  kable(
+    zero_appearance_tracks,
+    caption = "Tracks with 0 Appearances",
+    align = 'l'
+  )
 }
 ```
 
@@ -190,18 +212,30 @@ if (nrow(zero_appearance_tracks) == 0) {
 #| warning: false
 #| message: false
 
-# Most danceable track
+# Identify the most danceable track
 most_danceable_track <- songs_df |>
   arrange(desc(danceability)) |>
   slice_head(n = 1) |>
   select(name, danceability)
 
-# Count how often it appears in playlists
+# Count how many times this track appears in playlists
 most_danceable_count <- songs_df |>
   filter(name == most_danceable_track$name) |>
   count()
 
-print(most_danceable_track)
+# Display the most danceable track info
+kable(
+  most_danceable_track,
+  caption = "🎶 Most Danceable Track",
+  align = 'l'
+)
+
+# Display how many times it appears
+kable(
+  tibble(Appearances = most_danceable_count$n),
+  caption = "📊 Playlist Appearances of Most Danceable Track",
+  align = 'c'
+)
 ```
 
 **5. Which playlist has the longest average track length?**
@@ -211,14 +245,26 @@ print(most_danceable_track)
 #| warning: false
 #| message: false
 
+library(scales)  # for formatting time
+
 # Find the track with the longest duration
 longest_track <- songs_df |>
   arrange(desc(duration_ms)) |>
   slice_head(n = 1) |>
-  select(name, duration_ms)  
+  select(name, duration_ms)
 
-# Print the longest track
-print(longest_track)
+# Convert duration from milliseconds to minutes and seconds
+longest_track <- longest_track |>
+  mutate(duration_formatted = sprintf("%d:%02d", duration_ms %/% 60000, (duration_ms %% 60000) %/% 1000)) |>
+  select(name, duration_formatted)
+
+# Display formatted table
+kable(
+  longest_track,
+  caption = "⏱️ Longest Track by Duration",
+  col.names = c("Track Name", "Duration (min:sec)"),
+  align = 'l'
+)
 ```
 
 **6. What is the most popular playlist on Spotify?**
@@ -228,14 +274,23 @@ print(longest_track)
 #| warning: false
 #| message: false
 
+library(dplyr)
+library(knitr)
+
 # Find the most popular track in the dataset
 most_popular_track <- songs_df |>
   arrange(desc(popularity)) |>
   slice_head(n = 1) |>
-  select(name, popularity)  # Select only the name and popularity columns
+  select(name, popularity)
 
-# Print the most popular track
-print(most_popular_track)
+# Display the most popular track 
+kable(
+  most_popular_track,
+  caption = "🎶 Most Popular Track",
+  col.names = c("Track Name", "Popularity Score"),
+  align = 'l',
+  format = "pipe"
+)
 ```
 
 ### 📉 Visually Identifying Characteristics of Popular Songs
@@ -278,16 +333,30 @@ ggplot(track_appearances, aes(x = num_appearances, y = popularity)) +
 #| warning: false
 #| message: false
 
+
 # Filter top popular songs and extract release years
 top_popular_songs <- songs_df %>%
   filter(popularity > quantile(popularity, 0.95, na.rm = TRUE))  # Top 5% most popular songs
 
-# Check if 'year' exists
-head(top_popular_songs)
-
 # Remove rows where 'year' is missing
 top_popular_songs <- top_popular_songs %>%
   filter(!is.na(year))
+
+# Display top 5 popular release years with their song count
+top_popular_songs_summary <- top_popular_songs %>%
+  group_by(year) %>%
+  summarise(song_count = n()) %>%
+  arrange(desc(song_count)) %>%
+  slice_head(n = 10)  # Show only top 10
+
+# Display the table
+kable(
+  top_popular_songs_summary,
+  caption = "Top 5 Popular Songs by Release Year",
+  col.names = c("Release Year", "Number of Songs"),
+  align = 'l',
+  format = "pipe"
+)
 
 # Plot release years for these top songs
 ggplot(top_popular_songs, aes(x = year)) +
@@ -464,16 +533,24 @@ The final order was determined by aligning tempo, key signatures, and energy lev
 #| warning: false
 #| message: false
 
-playlist_songs <- c("Blinding Lights", "ROCKSTAR (feat. Roddy Ricch)", "death bed (coffee for your head)", "Funky Cold Medina")  
+playlist_songs <- c("Blinding Lights", "ROCKSTAR (feat. Roddy Ricch)", 
+                    "death bed (coffee for your head)", "Funky Cold Medina")  
 
+# Filter and select relevant metrics
 playlist_metrics <- songs_df %>%
   filter(name %in% playlist_songs) %>%
-  select(name, energy, danceability, tempo, popularity)  # Select the metrics you want to analyze
+  select(name, energy, danceability, tempo, popularity)
 
-# Check the data frame
-print(playlist_metrics)
+# Display 
+kable(
+  playlist_metrics,
+  caption = "Selected Metrics for Playlist Songs",
+  col.names = c("Song", "Energy", "Danceability", "Tempo", "Popularity"),
+  format = "pipe",
+  align = "lcccc"
+)
 
-# Visualize energy of the playlist songs
+# Plot energy levels
 ggplot(playlist_metrics, aes(x = reorder(name, -energy), y = energy)) +
   geom_bar(stat = "identity", fill = "steelblue") +
   coord_flip() +
