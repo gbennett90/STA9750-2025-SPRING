@@ -111,8 +111,8 @@ if (!file.exists(local_file_path)) {
 if (file.exists(local_file_path)) {
   json_data <- fromJSON(local_file_path, simplifyDataFrame = FALSE)
 
-  # Extract only the first 3 playlists and 2 tracks from each
-  small_sample <- lapply(json_data$playlists[1:3], function(pl) {
+  # Extract only the first 5 playlists and 2 tracks from each
+  small_sample <- lapply(json_data$playlists[1:10], function(pl) {
     tibble(
       Playlist_Name = pl$name,
       Track_1 = pl$tracks[[1]]$track_name,

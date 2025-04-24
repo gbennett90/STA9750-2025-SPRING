@@ -366,8 +366,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">file.exists</span>(local_file_path)) {</span>
 <span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>  json_data <span class="ot">&lt;-</span> <span class="fu">fromJSON</span>(local_file_path, <span class="at">simplifyDataFrame =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Extract only the first 3 playlists and 2 tracks from each</span></span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>  small_sample <span class="ot">&lt;-</span> <span class="fu">lapply</span>(json_data<span class="sc">$</span>playlists[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>], <span class="cf">function</span>(pl) {</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Extract only the first 5 playlists and 2 tracks from each</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>  small_sample <span class="ot">&lt;-</span> <span class="fu">lapply</span>(json_data<span class="sc">$</span>playlists[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>], <span class="cf">function</span>(pl) {</span>
 <span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tibble</span>(</span>
 <span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>      <span class="at">Playlist_Name =</span> pl<span class="sc">$</span>name,</span>
 <span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>      <span class="at">Track_1 =</span> pl<span class="sc">$</span>tracks[[<span class="dv">1</span>]]<span class="sc">$</span>track_name,</span>
@@ -387,9 +387,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <table class="caption-top table table-sm table-striped small">
 <caption>Playlists with 2 Tracks Each</caption>
 <colgroup>
-<col style="width: 15%">
-<col style="width: 39%">
-<col style="width: 44%">
+<col style="width: 12%">
+<col style="width: 25%">
+<col style="width: 62%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -413,6 +413,41 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: left;">korean</td>
 <td style="text-align: left;">Like You</td>
 <td style="text-align: left;">GOOD (feat. ELO)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">mat</td>
+<td style="text-align: left;">Danse macabre</td>
+<td style="text-align: left;">Piano concerto No.&nbsp;2 in G Minor, Op. 22: Piano concerto No.&nbsp;2 in G Minor, Op. 22: II. Allegro scherzando</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">90s</td>
+<td style="text-align: left;">Tonight, Tonight</td>
+<td style="text-align: left;">Wonderwall - Remastered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Wedding</td>
+<td style="text-align: left;">Teach Me How to Dougie</td>
+<td style="text-align: left;">Party In The U.S.A.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">I Put A Spell On You</td>
+<td style="text-align: left;">I Put A Spell On You</td>
+<td style="text-align: left;">Bury Us Alive</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2017</td>
+<td style="text-align: left;">Hard To See You Happy</td>
+<td style="text-align: left;">One Thousand Times</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">BOP</td>
+<td style="text-align: left;">Twice</td>
+<td style="text-align: left;">7</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">old country</td>
+<td style="text-align: left;">Highwayman</td>
+<td style="text-align: left;">Highwayman</td>
 </tr>
 </tbody>
 </table>
