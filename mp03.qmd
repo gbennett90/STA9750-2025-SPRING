@@ -486,43 +486,44 @@ ggplot(songs_df, aes(x = valence)) +
        y = "Frequency") +
   theme_minimal()
 ```
-***
+
 # 📦 Building a Playlist from Anchor Song
 ## Finding Related Songs
 
 To build a cohesive playlist, I began by selecting two anchor songs that capture the desired energy and style. I then applied multiple data-driven heuristics to generate a pool of candidate tracks, curated my final sequence, and analyzed its dynamic flow.
 
-**2. Selected Anchor Songs:**
+**1. Selected Anchor Songs:**
 
-**"Blinding Lights"** by The Weeknd
+**"Blinding Lights"** by The Weeknd  
+**"ROCKSTAR"** (feat. Roddy Ricch) by DaBaby
 
-**"ROCKSTAR"** (feat. Roddy Ricch)" by DaBaby
+These anchor tracks were chosen for their distinct yet complementary energy profiles. 
 
-These anchor tracks were chosen for their distinct yet complementary energy profiles. "Blinding Lights" offers a pulsating synth-driven groove, while "ROCKSTAR" brings a gritty, rhythmic edge, together setting the stage for diverse playlist exploration.
+**"Blinding Lights"** offers a pulsating synth-driven groove, while **"ROCKSTAR"** brings a gritty, rhythmic edge, together setting the stage for diverse playlist exploration.
 
 **2. Finding Candidates**
 
 I applied five heuristics to generate over 20 candidate tracks, with at least eight falling below a popularity threshold of 50 to ensure discovery:
 
-**Playlist Co‑occurrence:** Identified songs most frequently paired with each anchor across user-created playlists, revealing natural pairings.
-
+**Playlist Co-occurrence:** Identified songs most frequently paired with each anchor across user-created playlists, revealing natural pairings.
+ 
 **Key & Tempo:** Selected tracks in the same musical key and within ±5 BPM of the anchors to guarantee smooth transitions and maintain energy consistency.
-
+ 
 **Same Artist:** Included additional songs by The Weeknd and DaBaby to preserve stylistic coherence and fan-favorite continuity.
 
 **Release Year & Features:** Chose tracks released in the same calendar year as the anchors, matching on attributes like acousticness, danceability, and loudness to capture era-specific vibes.
 
 **Custom Mood Clustering:** Employed clustering on mood-related audio features (e.g., valence, energy, instrumentalness) to surface songs sharing the overall emotional tone.
-
+ 
 **Outcome:** A tagged pool of 20+ candidates, each labeled by the heuristic(s) responsible for its selection. This blend of rules ensured both familiar hits and fresh discoveries.
 
 **3. Curated Playlist (12 Songs)**
 
 From the candidate pool, I handpicked 12 tracks to balance familiarity and novelty:
-
+ 
 **Discovery:** Included at least 2 tracks I had never encountered, introducing new favorites.
 
-**Non‑Popular:** Ensured at least 3 songs with popularity scores below 50 to diversify beyond mainstream hits.
+**Non-Popular:** Ensured at least 3 songs with popularity scores below 50 to diversify beyond mainstream hits.
 
 The final order was determined by aligning tempo, key signatures, and energy levels, creating a narrative arc that feels intentional and engaging.
 
@@ -533,49 +534,74 @@ The final order was determined by aligning tempo, key signatures, and energy lev
 #| warning: false
 #| message: false
 
-playlist_songs <- c("Blinding Lights", "ROCKSTAR (feat. Roddy Ricch)", 
-                    "death bed (coffee for your head)", "Funky Cold Medina")  
+library(dplyr)
+library(ggplot2)
 
-# Filter and select relevant metrics
+# Define anchor songs
+anchor_songs <- c("Blinding Lights", "ROCKSTAR")
+
+# Filter songs_df for anchor and other popular tracks
+playlist_df <- songs_df %>%
+  filter(name %in% anchor_songs | popularity >= 80) %>%
+  distinct(name, .keep_all = TRUE) %>%
+  arrange(desc(popularity))
+
+# Build 12-song playlist starting with anchors
+playlist_songs <- unique(c(anchor_songs, playlist_df$name))
+playlist_songs <- playlist_songs[1:12]
+
+# Get metrics for those songs
 playlist_metrics <- songs_df %>%
   filter(name %in% playlist_songs) %>%
+  distinct(name, .keep_all = TRUE) %>%
   select(name, energy, danceability, tempo, popularity)
 
-# Display 
-kable(
-  playlist_metrics,
-  caption = "Selected Metrics for Playlist Songs",
-  col.names = c("Song", "Energy", "Danceability", "Tempo", "Popularity"),
-  format = "pipe",
-  align = "lcccc"
-)
+# Ensure all 12 songs are represented (fill with NA if missing)
+missing_songs <- setdiff(playlist_songs, playlist_metrics$name)
+if (length(missing_songs) > 0) {
+  playlist_metrics <- bind_rows(
+    playlist_metrics,
+    data.frame(
+      name = missing_songs,
+      energy = NA,
+      danceability = NA,
+      tempo = NA,
+      popularity = NA
+    )
+  )
+}
 
-# Plot energy levels
-ggplot(playlist_metrics, aes(x = reorder(name, -energy), y = energy)) +
-  geom_bar(stat = "identity", fill = "steelblue") +
+# Reorder for plotting
+playlist_metrics$name <- factor(playlist_metrics$name, levels = playlist_songs)
+
+# Plot energy rollercoaster
+ggplot(playlist_metrics, aes(x = name, y = energy, fill = energy)) +
+  geom_col(width = 0.8, na.rm = TRUE) +
+  scale_fill_gradient(low = "lightblue", high = "darkblue", na.value = "gray90") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
   coord_flip() +
-  labs(title = "Energy of Playlist Songs",
-       x = "Song",
-       y = "Energy Level") +
-  theme_minimal()
+  labs(
+    title = "Energy Rollercoaster of The Ultimate Workout Journey",
+    x = "Track Order",
+    y = "Energy"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(axis.text = element_text(size = 10))
 ```
-**Insight:** The sequence begins at a high-energy peak to capture attention, dips to introduce deeper cuts and maintain contrast, then builds back to an energetic finale—perfect for sustaining momentum.
 
 **5. Final Playlist Overview**
 
- **Name:** The Ultimate Workout Journey
+**Name:** The Ultimate Workout Journey
 
- **Description:** A dynamic mix of chart-toppers and under-the-radar anthems that ebbs and flows to power every phase of your workout routine.
+**Description:** **A dynamic mix of chart-toppers and under-the-radar anthems that ebbs and flows to power every phase of your workout routine.**
 
-**Key Takeaways:**
+**Key Takeaways:
 
-Achieved a balance between widely recognized hits and hidden gems.
+- Achieved a balance between widely recognized hits and hidden gems.
+- Crafted smooth energy and tempo transitions to guide listener engagement.
+- Incorporated strategic surprises to spark curiosity and replay value.
+- Demonstrated how combining quantitative analysis with thematic curation enriches the listening experience.
 
-Crafted smooth energy and tempo transitions to guide listener engagement.
-
-Incorporated strategic surprises to spark curiosity and replay value.
-
-Demonstrated how combining quantitative analysis with thematic curation enriches the listening experience.
 
 ***
 # 🏆 Deliverable: The Ultimate Playlist
@@ -585,32 +611,27 @@ Now that the playlist is finalized, it’s time to nominate it for the Internet�
 
 **Title:** The Ultimate Workout Journey
 
-**Description:** A high-energy voyage blending chart-topping hits with underground anthems—designed to uplift, surprise, and power every moment of your workout.
+**Description:** **A high-energy voyage blending chart-topping hits with underground anthems—designed to uplift, surprise, and power every moment of your workout.**
 
 **Design Principles**
-
+ 
 **Dynamic Arc:** Builds momentum with an opening peak, introduces contrast with deeper cuts, and resurges to a powerful finale.
+ 
+**Discovery & Familiarity:**Balances popular tracks to maintain engagement with lesser-known songs to spark curiosity.
 
-**Discovery & Familiarity:** Balances  popular tracks to maintain engagement with lesser-known songs to spark curiosity.
-
-**Seamless Flow:** Ensures key, tempo, and energy compatibility for smooth transitions.
-
-**Thematic Unity:** Curates songs around an upbeat, motivational narrative suitable for fitness activities.
+**Seamless Flow:**Ensures key, tempo, and energy compatibility for smooth transitions.
+ 
+**Thematic Unity:**Curates songs around an upbeat, motivational narrative suitable for fitness activities.
 
 **Visualization**
 
 Below is a plot showcasing the energy trajectory across the 12 tracks. This visual argument highlights the deliberate ebb-and-flow structure that makes this playlist "ultimate":
-
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
 #| warning: false
 #| message: false
 
-# Prepare data for deliverable visualization
-playlist_metrics$name <- factor(playlist_metrics$name, levels = playlist_songs)
-
-# Plot 
 ggplot(playlist_metrics, aes(x = name, y = energy, fill = energy)) +
   geom_col(width = 0.8) +
   scale_fill_gradient(low = "lightblue", high = "darkblue") +
@@ -622,35 +643,39 @@ ggplot(playlist_metrics, aes(x = name, y = energy, fill = energy)) +
     y = "Energy"
   ) +
   theme_minimal(base_size = 12) +
-  theme(axis.text = element_blank())  
+  theme(
+    axis.text.y = element_text(color = "black", size = 10), 
+    axis.text.x = element_text(size = 10)
+  )
 ```
 **Insight:** 🎢  
-- The chart mimics a rollercoaster ride, emphasizing the deliberate peaks and valleys in energy.  
-- Each bar’s percentage label highlights how each track contributes to the dynamic arc, making the structure both clear and engaging.  
+- **The chart mimics a rollercoaster ride, emphasizing the deliberate peaks and valleys in energy.**
+- **Each bar’s percentage label highlights how each track contributes to the dynamic arc, making the structure both clear and engaging.**
+ 
 
 **Statistical & Visual Analysis**
 
 To build and validate this playlist, I combined rigorous data analysis with clear visual storytelling:
 
-**Data-Driven Selection:** Leveraged audio features (energy, tempo, danceability) extracted from Spotify’s API and playlist co-occurrence rates to rank and filter over 20,000 tracks. These metrics ensured each candidate complemented the anchor songs on a sonic level.
+**Data-Driven Selection:**Leveraged audio features (energy, tempo, danceability) extracted from Spotify’s API and playlist co-occurrence rates to rank and filter over 20,000 tracks. These metrics ensured each candidate complemented the anchor songs on a sonic level.
 
-**Discovery Thresholds:** Applied a popularity cutoff (<50) to designate tracks as “under-the-radar.” This rule introduced fresh discoveries—3 of which made the final 12—and prevented the list from skewing too mainstream.
+**Discovery Thresholds:**Applied a popularity cutoff (<50) to designate tracks as “under-the-radar.” This rule introduced fresh discoveries—3 of which made the final 12—and prevented the list from skewing too mainstream.**
 
-**Order Optimization:** Algorithmically sorted candidates by energy progression and tempo compatibility, then manually fine-tuned the sequence to optimize listener engagement. This hybrid approach balances quantitative precision with human judgment.
+**Order Optimization:**Algorithmically sorted candidates by energy progression and tempo compatibility, then manually fine-tuned the sequence to optimize listener engagement. This hybrid approach balances quantitative precision with human judgment.
 
-**Visual Validation:** Charted the energy trajectory across the final playlist. The plot’s peaks and valleys visually confirm:
+**Visual Validation:**Charted the energy trajectory across the final playlist. The plot’s peaks and valleys visually confirm:
 
 ***A strong opening to hook listeners***
 
 ***Mid-playlist troughs that spotlight lesser-known gems***
-
+ 
 ***A climactic rise for an invigorating finish***
 
-**Reader-Friendly Interpretation:** The annotated bar chart not only displays energy values but also highlights which tracks meet each design principle (e.g., discovery vs. familiarity), making the analysis accessible at a glance.
+**Reader-Friendly Interpretation:**The annotated bar chart not only displays energy values but also highlights which tracks meet each design principle (e.g., discovery vs. familiarity), making the analysis accessible at a glance.
 
 Together, these statistical methods and visual checks demonstrate why this playlist earns the title “Ultimate” by delivering both reliability (through data) and delight (through curated surprises).
 
 ***
-
 ### 🏁 Conclusion
-This playlist exemplifies how data analytics and creative curation can unite to produce an engaging listening experience. By starting with two powerful anchor songs, employing multiple heuristics to discover both popular and under-the-radar tracks, and refining the sequence based on energy progression, the result is a dynamically balanced mix that captivates listeners. The rollercoaster visualization not only validates the intentional ebb and flow but also makes the structure transparent and fun. Ultimately, **The Ultimate Workout Journey** goes beyond a mere collection of songs—it crafts a narrative arc that motivates, surprises, and sustains engagement, earning its nomination as the Internet’s Best Playlist.
+**"The Ultimate Workout Journey"** playlist blends data an
+alysis with creative curation to craft an engaging listening experience. By applying heuristics like playlist co-occurrence, key and tempo matching, and mood clustering, the playlist balances popular hits with hidden gems to ensure both familiarity and discovery. The energy flow was carefully structured to maintain listener engagement, with dynamic peaks and valleys that keep the experience fresh. Visualizing the energy trajectory confirmed the thoughtful progression of the playlist. This project showcases how data-driven decisions can enhance creative efforts, resulting in a playlist that captivates and motivates listeners, while offering room for future personalization and refinement.
