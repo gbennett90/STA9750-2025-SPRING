@@ -1023,25 +1023,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h1>📦 Building a Playlist from Anchor Song</h1>
 <section id="finding-related-songs" class="level2">
 <h2 class="anchored" data-anchor-id="finding-related-songs">Finding Related Songs</h2>
-<p>To build a cohesive playlist, I began by selecting two anchor songs that capture the desired energy and style. I then applied multiple data-driven heuristics to generate a pool of candidate tracks, curated my final sequence, and analyzed its dynamic flow.</p>
+<p>To build a cohesive playlist, I began by selecting two anchor songs that reflect the desired energy and style. I then used a data-driven approach to generate a list of potential tracks, curated the final playlist, and analyzed its dynamic flow.</p>
 <p><strong>1. Selected Anchor Songs:</strong></p>
 <p><strong>“Blinding Lights”</strong> by The Weeknd<br>
 <strong>“ROCKSTAR”</strong> (feat. Roddy Ricch) by DaBaby</p>
-<p>These anchor tracks were chosen for their distinct yet complementary energy profiles.</p>
-<p><strong>“Blinding Lights”</strong> offers a pulsating synth-driven groove, while <strong>“ROCKSTAR”</strong> brings a gritty, rhythmic edge, together setting the stage for diverse playlist exploration.</p>
+<p>These anchor songs were selected for their contrasting yet complementary energy profiles. <strong>“Blinding Lights”</strong> has an upbeat synth-driven vibe, while <strong>“ROCKSTAR”</strong> adds a darker, more intense rhythm, creating a diverse foundation for the playlist.</p>
 <p><strong>2. Finding Candidates</strong></p>
-<p>I applied five heuristics to generate over 20 candidate tracks, with at least eight falling below a popularity threshold of 50 to ensure discovery:</p>
-<p><strong>Playlist Co-occurrence:</strong> Identified songs most frequently paired with each anchor across user-created playlists, revealing natural pairings.</p>
-<p><strong>Key &amp; Tempo:</strong> Selected tracks in the same musical key and within ±5 BPM of the anchors to guarantee smooth transitions and maintain energy consistency.</p>
-<p><strong>Same Artist:</strong> Included additional songs by The Weeknd and DaBaby to preserve stylistic coherence and fan-favorite continuity.</p>
-<p><strong>Release Year &amp; Features:</strong> Chose tracks released in the same calendar year as the anchors, matching on attributes like acousticness, danceability, and loudness to capture era-specific vibes.</p>
-<p><strong>Custom Mood Clustering:</strong> Employed clustering on mood-related audio features (e.g., valence, energy, instrumentalness) to surface songs sharing the overall emotional tone.</p>
-<p><strong>Outcome:</strong> A tagged pool of 20+ candidates, each labeled by the heuristic(s) responsible for its selection. This blend of rules ensured both familiar hits and fresh discoveries.</p>
+<p>I applied several criteria to identify a pool of over 20 candidate tracks, ensuring a mix of familiar hits and lesser-known tracks:</p>
+<p><strong>Popularity:</strong> Songs with a popularity score of 80 or higher were included to ensure mainstream appeal.</p>
+<p><strong>Key &amp; Tempo:</strong> Tracks that shared a similar key and tempo were selected to guarantee smooth transitions and maintain the energy flow.</p>
+<p><strong>Anchor Artist:</strong> Additional songs by <strong>The Weeknd</strong> and <strong>DaBaby</strong> were included to retain stylistic continuity and cater to fan favorites.</p>
+<p><strong>Release Year &amp; Features:</strong> I prioritized tracks released in the same year as the anchors, considering attributes like acousticness, danceability, and loudness to maintain an era-specific feel.</p>
+<p><strong>Mood &amp; Energy Clustering:</strong> Songs were clustered based on mood-related features like energy, valence, and instrumentalness, ensuring a consistent emotional tone.</p>
+<p><strong>Outcome:</strong> This process resulted in a curated pool of 20+ tracks, each selected based on one or more of the criteria above. The balance of popular hits and undiscovered gems ensures an engaging listening experience.</p>
 <p><strong>3. Curated Playlist (12 Songs)</strong></p>
-<p>From the candidate pool, I handpicked 12 tracks to balance familiarity and novelty:</p>
-<p><strong>Discovery:</strong> Included at least 2 tracks I had never encountered, introducing new favorites.</p>
-<p><strong>Non-Popular:</strong> Ensured at least 3 songs with popularity scores below 50 to diversify beyond mainstream hits.</p>
-<p>The final order was determined by aligning tempo, key signatures, and energy levels, creating a narrative arc that feels intentional and engaging.</p>
+<p>From the candidate pool, I selected 12 tracks to create a balanced mix of familiarity and novelty:</p>
+<p><strong>Discovery:</strong> At least 2 tracks were new to me, offering a fresh listening experience.</p>
+<p><strong>Non-Popular:</strong> I made sure to include at least 3 songs with a popularity score below 50, bringing diversity to the playlist.</p>
+<p>The final order of the songs was determined by aligning their tempo, key, and energy levels, creating a seamless and engaging narrative flow.</p>
 <p><strong>4. Energy Flow Visualization</strong></p>
 <div class="cell">
 <details class="code-fold">
@@ -1053,9 +1052,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>anchor_songs <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Blinding Lights"</span>, <span class="st">"ROCKSTAR"</span>)</span>
 <span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter songs_df for anchor and other popular tracks</span></span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>playlist_df <span class="ot">&lt;-</span> songs_df <span class="sc">%&gt;%</span></span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(name <span class="sc">%in%</span> anchor_songs <span class="sc">|</span> popularity <span class="sc">&gt;=</span> <span class="dv">80</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(name, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>playlist_df <span class="ot">&lt;-</span> songs_df <span class="sc">|&gt;</span> </span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(name <span class="sc">%in%</span> anchor_songs <span class="sc">|</span> popularity <span class="sc">&gt;=</span> <span class="dv">80</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(name, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> </span>
 <span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(popularity))</span>
 <span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Build 12-song playlist starting with anchors</span></span>
@@ -1063,42 +1062,41 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>playlist_songs <span class="ot">&lt;-</span> playlist_songs[<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>]</span>
 <span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Get metrics for those songs</span></span>
-<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>playlist_metrics <span class="ot">&lt;-</span> songs_df <span class="sc">%&gt;%</span></span>
-<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(name <span class="sc">%in%</span> playlist_songs) <span class="sc">%&gt;%</span></span>
-<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(name, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>playlist_metrics <span class="ot">&lt;-</span> songs_df <span class="sc">|&gt;</span> </span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(name <span class="sc">%in%</span> playlist_songs) <span class="sc">|&gt;</span> </span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(name, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> </span>
 <span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(name, energy, danceability, tempo, popularity)</span>
 <span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Ensure all 12 songs are represented (fill with NA if missing)</span></span>
-<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>missing_songs <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(playlist_songs, playlist_metrics<span class="sc">$</span>name)</span>
-<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">length</span>(missing_songs) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
-<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>  playlist_metrics <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(</span>
-<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a>    playlist_metrics,</span>
-<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">data.frame</span>(</span>
-<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>      <span class="at">name =</span> missing_songs,</span>
-<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>      <span class="at">energy =</span> <span class="cn">NA</span>,</span>
-<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>      <span class="at">danceability =</span> <span class="cn">NA</span>,</span>
-<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>      <span class="at">tempo =</span> <span class="cn">NA</span>,</span>
-<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a>      <span class="at">popularity =</span> <span class="cn">NA</span></span>
-<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-38"><a href="#cb19-38" aria-hidden="true" tabindex="-1"></a><span class="co"># Reorder for plotting</span></span>
-<span id="cb19-39"><a href="#cb19-39" aria-hidden="true" tabindex="-1"></a>playlist_metrics<span class="sc">$</span>name <span class="ot">&lt;-</span> <span class="fu">factor</span>(playlist_metrics<span class="sc">$</span>name, <span class="at">levels =</span> playlist_songs)</span>
-<span id="cb19-40"><a href="#cb19-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-41"><a href="#cb19-41" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot energy rollercoaster</span></span>
-<span id="cb19-42"><a href="#cb19-42" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(playlist_metrics, <span class="fu">aes</span>(<span class="at">x =</span> name, <span class="at">y =</span> energy, <span class="at">fill =</span> energy)) <span class="sc">+</span></span>
-<span id="cb19-43"><a href="#cb19-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">width =</span> <span class="fl">0.8</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">+</span></span>
-<span id="cb19-44"><a href="#cb19-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradient</span>(<span class="at">low =</span> <span class="st">"lightblue"</span>, <span class="at">high =</span> <span class="st">"darkblue"</span>, <span class="at">na.value =</span> <span class="st">"gray90"</span>) <span class="sc">+</span></span>
-<span id="cb19-45"><a href="#cb19-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">expand =</span> <span class="fu">expansion</span>(<span class="at">mult =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.1</span>))) <span class="sc">+</span></span>
-<span id="cb19-46"><a href="#cb19-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
-<span id="cb19-47"><a href="#cb19-47" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb19-48"><a href="#cb19-48" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Energy Rollercoaster of The Ultimate Workout Journey"</span>,</span>
-<span id="cb19-49"><a href="#cb19-49" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Track Order"</span>,</span>
-<span id="cb19-50"><a href="#cb19-50" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Energy"</span></span>
-<span id="cb19-51"><a href="#cb19-51" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb19-52"><a href="#cb19-52" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">12</span>) <span class="sc">+</span></span>
-<span id="cb19-53"><a href="#cb19-53" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>missing_songs <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(playlist_songs, playlist_metrics<span class="sc">$</span>name)</span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">length</span>(missing_songs) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>  playlist_metrics <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(</span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>    playlist_metrics,</span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">data.frame</span>(</span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>      <span class="at">name =</span> missing_songs,</span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>      <span class="at">energy =</span> <span class="cn">NA</span>,</span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>      <span class="at">danceability =</span> <span class="cn">NA</span>,</span>
+<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>      <span class="at">tempo =</span> <span class="cn">NA</span>,</span>
+<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>      <span class="at">popularity =</span> <span class="cn">NA</span></span>
+<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a><span class="co"># Reorder for plotting</span></span>
+<span id="cb19-38"><a href="#cb19-38" aria-hidden="true" tabindex="-1"></a>playlist_metrics<span class="sc">$</span>name <span class="ot">&lt;-</span> <span class="fu">factor</span>(playlist_metrics<span class="sc">$</span>name, <span class="at">levels =</span> playlist_songs)</span>
+<span id="cb19-39"><a href="#cb19-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-40"><a href="#cb19-40" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot energy rollercoaster</span></span>
+<span id="cb19-41"><a href="#cb19-41" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(playlist_metrics, <span class="fu">aes</span>(<span class="at">x =</span> name, <span class="at">y =</span> energy, <span class="at">fill =</span> energy)) <span class="sc">+</span></span>
+<span id="cb19-42"><a href="#cb19-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">width =</span> <span class="fl">0.8</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">+</span></span>
+<span id="cb19-43"><a href="#cb19-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradient</span>(<span class="at">low =</span> <span class="st">"lightblue"</span>, <span class="at">high =</span> <span class="st">"darkblue"</span>, <span class="at">na.value =</span> <span class="st">"gray90"</span>) <span class="sc">+</span></span>
+<span id="cb19-44"><a href="#cb19-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">expand =</span> <span class="fu">expansion</span>(<span class="at">mult =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.1</span>))) <span class="sc">+</span></span>
+<span id="cb19-45"><a href="#cb19-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
+<span id="cb19-46"><a href="#cb19-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb19-47"><a href="#cb19-47" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Energy Rollercoaster of The Ultimate Workout Journey"</span>,</span>
+<span id="cb19-48"><a href="#cb19-48" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Track Order"</span>,</span>
+<span id="cb19-49"><a href="#cb19-49" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Energy"</span></span>
+<span id="cb19-50"><a href="#cb19-50" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb19-51"><a href="#cb19-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">12</span>) <span class="sc">+</span></span>
+<span id="cb19-52"><a href="#cb19-52" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -1109,15 +1107,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p><strong>5. Final Playlist Overview</strong></p>
-<p><strong>Name:</strong> The Ultimate Workout Journey</p>
-<p><strong>Description:</strong> <strong>A dynamic mix of chart-toppers and under-the-radar anthems that ebbs and flows to power every phase of your workout routine.</strong></p>
-<p>**Key Takeaways:</p>
-<ul>
-<li>Achieved a balance between widely recognized hits and hidden gems.</li>
-<li>Crafted smooth energy and tempo transitions to guide listener engagement.</li>
-<li>Incorporated strategic surprises to spark curiosity and replay value.</li>
-<li>Demonstrated how combining quantitative analysis with thematic curation enriches the listening experience.</li>
-</ul>
+<p><strong>Name</strong>: The Ultimate Workout Journey</p>
+<p><strong>Description:</strong> A carefully crafted blend of chart-topping hits and lesser-known anthems that flow seamlessly, powering you through every stage of your workout.</p>
+<p><strong>Key Takeaways:</strong></p>
+<p><strong><em>Balanced familiar hits with fresh discoveries to maintain both energy and variety.</em></strong></p>
+<p><strong><em>Ensured smooth transitions in energy and tempo to keep the listener engaged throughout.</em></strong></p>
+<p><strong><em>Added strategic surprises to encourage curiosity and enhance replayability.</em></strong></p>
+<p><strong><em>Showcased the value of combining data-driven analysis with thoughtful thematic curation to create an immersive listening experience.</em></strong></p>
 <hr>
 </section>
 </section>
@@ -1126,12 +1122,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Now that the playlist is finalized, it’s time to nominate it for the Internet’s Best Playlist award. Below are the required elements:</p>
 <p><strong>Title &amp; Description</strong></p>
 <p><strong>Title:</strong> The Ultimate Workout Journey</p>
-<p><strong>Description:</strong> <strong>A high-energy voyage blending chart-topping hits with underground anthems—designed to uplift, surprise, and power every moment of your workout.</strong></p>
+<p><strong>Description:</strong> A high-energy voyage that blends chart-topping hits with underground anthems—designed to uplift, surprise, and power every phase of your workout.</p>
 <p><strong>Design Principles</strong></p>
-<p><strong>Dynamic Arc:</strong> Builds momentum with an opening peak, introduces contrast with deeper cuts, and resurges to a powerful finale.</p>
-<p><strong>Discovery &amp; Familiarity:</strong>Balances popular tracks to maintain engagement with lesser-known songs to spark curiosity.</p>
-<p><strong>Seamless Flow:</strong>Ensures key, tempo, and energy compatibility for smooth transitions.</p>
-<p><strong>Thematic Unity:</strong>Curates songs around an upbeat, motivational narrative suitable for fitness activities.</p>
+<p><strong>Dynamic Arc:</strong> Opens with a powerful burst, dips into moodier grooves for contrast, and surges to an energizing finale—mirroring the rhythm of an ideal workout.</p>
+<p><strong>Discovery &amp; Familiarity:</strong> Balances recognizable hits to anchor the listener, with lesser-known gems that inspire exploration and repeat listens.</p>
+<p><strong>Seamless Flow:</strong> Aligns songs by key, tempo, and energy to create smooth, engaging transitions from track to track.</p>
+<p><strong>Thematic Unity:</strong> Curates a cohesive narrative centered around motivation and movement—ideal for fitness or high-energy moments.</p>
 <p><strong>Visualization</strong></p>
 <p>Below is a plot showcasing the energy trajectory across the 12 tracks. This visual argument highlights the deliberate ebb-and-flow structure that makes this playlist “ultimate”:</p>
 <div class="cell">

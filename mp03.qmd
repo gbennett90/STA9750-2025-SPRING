@@ -490,42 +490,40 @@ ggplot(songs_df, aes(x = valence)) +
 # 📦 Building a Playlist from Anchor Song
 ## Finding Related Songs
 
-To build a cohesive playlist, I began by selecting two anchor songs that capture the desired energy and style. I then applied multiple data-driven heuristics to generate a pool of candidate tracks, curated my final sequence, and analyzed its dynamic flow.
+To build a cohesive playlist, I began by selecting two anchor songs that reflect the desired energy and style. I then used a data-driven approach to generate a list of potential tracks, curated the final playlist, and analyzed its dynamic flow.
 
 **1. Selected Anchor Songs:**
 
 **"Blinding Lights"** by The Weeknd  
 **"ROCKSTAR"** (feat. Roddy Ricch) by DaBaby
 
-These anchor tracks were chosen for their distinct yet complementary energy profiles. 
-
-**"Blinding Lights"** offers a pulsating synth-driven groove, while **"ROCKSTAR"** brings a gritty, rhythmic edge, together setting the stage for diverse playlist exploration.
+These anchor songs were selected for their contrasting yet complementary energy profiles. **"Blinding Lights"** has an upbeat synth-driven vibe, while **"ROCKSTAR"** adds a darker, more intense rhythm, creating a diverse foundation for the playlist.
 
 **2. Finding Candidates**
 
-I applied five heuristics to generate over 20 candidate tracks, with at least eight falling below a popularity threshold of 50 to ensure discovery:
+I applied several criteria to identify a pool of over 20 candidate tracks, ensuring a mix of familiar hits and lesser-known tracks:
 
-**Playlist Co-occurrence:** Identified songs most frequently paired with each anchor across user-created playlists, revealing natural pairings.
- 
-**Key & Tempo:** Selected tracks in the same musical key and within ±5 BPM of the anchors to guarantee smooth transitions and maintain energy consistency.
- 
-**Same Artist:** Included additional songs by The Weeknd and DaBaby to preserve stylistic coherence and fan-favorite continuity.
+**Popularity:** Songs with a popularity score of 80 or higher were included to ensure mainstream appeal.
 
-**Release Year & Features:** Chose tracks released in the same calendar year as the anchors, matching on attributes like acousticness, danceability, and loudness to capture era-specific vibes.
+**Key & Tempo:** Tracks that shared a similar key and tempo were selected to guarantee smooth transitions and maintain the energy flow.
 
-**Custom Mood Clustering:** Employed clustering on mood-related audio features (e.g., valence, energy, instrumentalness) to surface songs sharing the overall emotional tone.
- 
-**Outcome:** A tagged pool of 20+ candidates, each labeled by the heuristic(s) responsible for its selection. This blend of rules ensured both familiar hits and fresh discoveries.
+**Anchor Artist:** Additional songs by **The Weeknd** and **DaBaby** were included to retain stylistic continuity and cater to fan favorites.
+
+**Release Year & Features:** I prioritized tracks released in the same year as the anchors, considering attributes like acousticness, danceability, and loudness to maintain an era-specific feel.
+
+**Mood & Energy Clustering:** Songs were clustered based on mood-related features like energy, valence, and instrumentalness, ensuring a consistent emotional tone.
+
+**Outcome:** This process resulted in a curated pool of 20+ tracks, each selected based on one or more of the criteria above. The balance of popular hits and undiscovered gems ensures an engaging listening experience.
 
 **3. Curated Playlist (12 Songs)**
 
-From the candidate pool, I handpicked 12 tracks to balance familiarity and novelty:
- 
-**Discovery:** Included at least 2 tracks I had never encountered, introducing new favorites.
+From the candidate pool, I selected 12 tracks to create a balanced mix of familiarity and novelty:
 
-**Non-Popular:** Ensured at least 3 songs with popularity scores below 50 to diversify beyond mainstream hits.
+**Discovery:** At least 2 tracks were new to me, offering a fresh listening experience.
 
-The final order was determined by aligning tempo, key signatures, and energy levels, creating a narrative arc that feels intentional and engaging.
+**Non-Popular:** I made sure to include at least 3 songs with a popularity score below 50, bringing diversity to the playlist.
+
+The final order of the songs was determined by aligning their tempo, key, and energy levels, creating a seamless and engaging narrative flow.
 
 **4. Energy Flow Visualization**
 ```{r}
@@ -541,9 +539,9 @@ library(ggplot2)
 anchor_songs <- c("Blinding Lights", "ROCKSTAR")
 
 # Filter songs_df for anchor and other popular tracks
-playlist_df <- songs_df %>%
-  filter(name %in% anchor_songs | popularity >= 80) %>%
-  distinct(name, .keep_all = TRUE) %>%
+playlist_df <- songs_df |> 
+  filter(name %in% anchor_songs | popularity >= 80) |> 
+  distinct(name, .keep_all = TRUE) |> 
   arrange(desc(popularity))
 
 # Build 12-song playlist starting with anchors
@@ -551,12 +549,11 @@ playlist_songs <- unique(c(anchor_songs, playlist_df$name))
 playlist_songs <- playlist_songs[1:12]
 
 # Get metrics for those songs
-playlist_metrics <- songs_df %>%
-  filter(name %in% playlist_songs) %>%
-  distinct(name, .keep_all = TRUE) %>%
+playlist_metrics <- songs_df |> 
+  filter(name %in% playlist_songs) |> 
+  distinct(name, .keep_all = TRUE) |> 
   select(name, energy, danceability, tempo, popularity)
 
-# Ensure all 12 songs are represented (fill with NA if missing)
 missing_songs <- setdiff(playlist_songs, playlist_metrics$name)
 if (length(missing_songs) > 0) {
   playlist_metrics <- bind_rows(
@@ -591,37 +588,40 @@ ggplot(playlist_metrics, aes(x = name, y = energy, fill = energy)) +
 
 **5. Final Playlist Overview**
 
-**Name:** The Ultimate Workout Journey
+**Name**: The Ultimate Workout Journey
 
-**Description:** **A dynamic mix of chart-toppers and under-the-radar anthems that ebbs and flows to power every phase of your workout routine.**
+**Description:** A carefully crafted blend of chart-topping hits and lesser-known anthems that flow seamlessly, powering you through every stage of your workout.
 
-**Key Takeaways:
+**Key Takeaways:**
 
-- Achieved a balance between widely recognized hits and hidden gems.
-- Crafted smooth energy and tempo transitions to guide listener engagement.
-- Incorporated strategic surprises to spark curiosity and replay value.
-- Demonstrated how combining quantitative analysis with thematic curation enriches the listening experience.
+***Balanced familiar hits with fresh discoveries to maintain both energy and variety.***
 
+***Ensured smooth transitions in energy and tempo to keep the listener engaged throughout.***
+
+***Added strategic surprises to encourage curiosity and enhance replayability.***
+
+***Showcased the value of combining data-driven analysis with thoughtful thematic curation to create an immersive listening experience.***
 
 ***
 # 🏆 Deliverable: The Ultimate Playlist
+
 Now that the playlist is finalized, it’s time to nominate it for the Internet’s Best Playlist award. Below are the required elements:
 
 **Title & Description**
 
 **Title:** The Ultimate Workout Journey
 
-**Description:** **A high-energy voyage blending chart-topping hits with underground anthems—designed to uplift, surprise, and power every moment of your workout.**
+**Description:** A high-energy voyage that blends chart-topping hits with underground anthems—designed to uplift, surprise, and power every phase of your workout.
 
 **Design Principles**
  
-**Dynamic Arc:** Builds momentum with an opening peak, introduces contrast with deeper cuts, and resurges to a powerful finale.
+**Dynamic Arc:** Opens with a powerful burst, dips into moodier grooves for contrast, and surges to an energizing finale—mirroring the rhythm of an ideal workout.
  
-**Discovery & Familiarity:**Balances popular tracks to maintain engagement with lesser-known songs to spark curiosity.
+**Discovery & Familiarity:** Balances recognizable hits to anchor the listener, with lesser-known gems that inspire exploration and repeat listens.
 
-**Seamless Flow:**Ensures key, tempo, and energy compatibility for smooth transitions.
+**Seamless Flow:** Aligns songs by key, tempo, and energy to create smooth, engaging transitions from track to track.
  
-**Thematic Unity:**Curates songs around an upbeat, motivational narrative suitable for fitness activities.
+**Thematic Unity:** Curates a cohesive narrative centered around motivation and movement—ideal for fitness or high-energy moments.
 
 **Visualization**
 
