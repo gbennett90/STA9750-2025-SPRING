@@ -1,5 +1,5 @@
 ---
-title: "Spotify Songs Analysis"
+title: "Mini Project 3"
 author: "Gisell Bennett"
 format:
   html:
@@ -14,7 +14,7 @@ format:
 
 ---
 
-## 🎧 Featured Playlist
+## 🎧 The Ultimate Workout Journey
 
 <iframe width="560" height="315" 
         src="https://www.youtube.com/embed/videoseries?list=PLmH_SoAQlZUrYectNXWlFvJ2BoNsB7RkO" 
