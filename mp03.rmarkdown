@@ -12,6 +12,8 @@ format:
     css: styles.css  
 ---
 
+
+
 ---
 
 ## 🎧 Featured Playlist
@@ -25,15 +27,21 @@ format:
 
 ---
 
+
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 ```
+
+
 
 # 📘 Introduction
 
 This mini-project explores a large Spotify playlist dataset and corresponding song characteristics. The goal is to analyze how user-created playlists reflect patterns in music preference and how these patterns align with musical attributes like energy, danceability, and valence.
 
 ## 🎵 Song Characteristics Dataset
+
+
 
 ```{r}
 #| code-fold: true
@@ -86,9 +94,13 @@ songs_df |>
   kable(caption = "Song Characteristics")
 ```
 
+
+
 ## 📝 Spotify Million Playlist Dataset
 
 Due to ongoing issues with the GitHub repository originally hosting the Spotify Million Playlist Dataset (flagged by students and the professor), only a single JSON file mpd.slice.0-999.json was accessible. While this limits broader generalization, the selected slice provides a representative sample to conduct exploratory analysis.
+
+
 
 ```{r}
 #| message: false
@@ -143,6 +155,8 @@ if (file.exists(local_file_path)) {
 }
 ```
 
+
+
 ------------------------------------------------------------------------
 
 ## 📊 Questions
@@ -150,6 +164,8 @@ if (file.exists(local_file_path)) {
 ### Identifying Characteristics of Popular Songs
 
 **1. How many distinct tracks and artists are represented in the playlist data?**
+
+
 
 ```{r}
 #| code-fold: true
@@ -176,7 +192,11 @@ distinct_counts <- tibble(
 kable(distinct_counts, caption = "🎼 Overview of Unique Tracks and Artists", align = 'l')
 ```
 
+
+
 **2. What are the 5 most popular tracks in the playlist data?**
+
+
 
 ```{r}
 #| code-fold: true
@@ -197,7 +217,11 @@ top_5_popular_tracks <- songs_df |>
 kable(top_5_popular_tracks, caption = "🎧 Top 5 Most Popular Tracks", align = 'l')
 ```
 
+
+
 **3. What is the most popular track in the playlist data that does not have a corresponding entry in the song characteristics data?**
+
+
 
 ```{r}
 #| code-fold: true
@@ -225,7 +249,11 @@ most_common_missing_track <- missing_tracks |>
 kable(most_common_missing_track, caption = "🚫 Most Common Playlist Track Missing from Songs Data", align = 'l')
 ```
 
+
+
 **4. According to the song characteristics data, what is the most “danceable” track? How often does it appear in a playlist?**
+
+
 
 ```{r}
 #| code-fold: true
@@ -259,7 +287,11 @@ kable(
 )
 ```
 
+
+
 **5. Which playlist has the longest average track length?**
+
+
 
 ```{r}
 #| code-fold: true
@@ -289,7 +321,11 @@ kable(
 )
 ```
 
+
+
 **6. What is the most popular playlist on Spotify?**
+
+
 
 ```{r}
 #| code-fold: true
@@ -316,6 +352,8 @@ kable(
 )
 ```
 
+
+
 ### 📉 Visually Identifying Characteristics of Popular Songs
 
 This section visually explores various aspects of popular Spotify songs. We start by examining the correlation between popularity and playlist appearances, finding a moderate positive relationship. A bar plot of release years highlights the dominance of recent years in shaping user preferences, particularly the top 5% most popular songs.
@@ -325,6 +363,8 @@ Danceability peaked in the early 2010s, as shown by a line plot, while a bar plo
 Finally, a scatter plot suggests a slight positive correlation between energy and popularity, and the distribution of valence scores shows that users favor songs with more positive moods.
 
 **1. Is the popularity column correlated with the number of playlist appearances?**
+
+
 
 ```{r}
 #| code-fold: true
@@ -351,7 +391,11 @@ ggplot(track_appearances, aes(x = num_appearances, y = popularity)) +
   theme_minimal()
 ```
 
+
+
 **2. In what year were the most popular songs released?**
+
+
 
 ```{r}
 #| code-fold: true
@@ -393,7 +437,11 @@ ggplot(top_popular_songs, aes(x = year)) +
   theme_minimal()
 ```
 
+
+
 **3. In what year did danceability peak?**
+
+
 
 ```{r}
 #| code-fold: true
@@ -415,7 +463,11 @@ ggplot(danceability_by_year, aes(x = year, y = avg_danceability)) +
   theme_minimal()
 ```
 
+
+
 **4. Which decade is most represented on user playlists?**
+
+
 
 ```{r}
 #| code-fold: true
@@ -436,7 +488,11 @@ ggplot(songs_df, aes(x = as.factor(decade))) +
   theme_minimal()
 ```
 
+
+
 **5.Create a plot of key frequency among songs.**
+
+
 
 ```{r}
 #| code-fold: true
@@ -454,7 +510,11 @@ ggplot(songs_df, aes(x = as.factor(key))) +
   theme_minimal()
 ```
 
+
+
 **6. What are the most popular track lengths?**
+
+
 
 ```{r}
 #| code-fold: true
@@ -484,7 +544,11 @@ ggplot(track_length_popularity, aes(x = track_length_min, y = popularity)) +
   )
 ```
 
+
+
 **7a. How does energy relate to popularity?**
+
+
 
 ```{r}
 #| code-fold: true
@@ -502,7 +566,11 @@ ggplot(songs_df, aes(x = energy, y = popularity)) +
   theme_minimal()
 ```
 
+
+
 **7b. What is the distribution of valence (mood) scores across songs?**
+
+
 
 ```{r}
 #| code-fold: true
@@ -518,6 +586,8 @@ ggplot(songs_df, aes(x = valence)) +
        y = "Frequency") +
   theme_minimal()
 ```
+
+
 
 # 📦 Building a Playlist from Anchor Song
 
@@ -559,6 +629,8 @@ From the candidate pool, I selected 12 tracks to create a balanced mix of famili
 The final order of the songs was determined by aligning their tempo, key, and energy levels, creating a seamless and engaging narrative flow.
 
 **4. Energy Flow Visualization**
+
+
 
 ```{r}
 #| code-fold: true
@@ -620,6 +692,8 @@ ggplot(playlist_metrics, aes(x = name, y = energy, fill = energy)) +
   theme(axis.text = element_text(size = 10))
 ```
 
+
+
 **5. Final Playlist Overview**
 
 **Name**: The Ultimate Workout Journey
@@ -662,6 +736,8 @@ Now that the playlist is finalized, it’s time to nominate it for the Internet�
 
 Below is a plot showcasing the energy trajectory across the 12 tracks. This visual argument highlights the deliberate ebb-and-flow structure that makes this playlist "ultimate":
 
+
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -684,6 +760,8 @@ ggplot(playlist_metrics, aes(x = name, y = energy, fill = energy)) +
     axis.text.x = element_text(size = 10)
   )
 ```
+
+
 
 **Insight:** 🎢\
 The chart mimics a rollercoaster ride, emphasizing the deliberate peaks and valleys in energy.
@@ -716,3 +794,4 @@ Together, these statistical methods and visual checks demonstrate why this playl
 ### 🏁 Conclusion
 
 **"The Ultimate Workout Journey"** playlist blends data an alysis with creative curation to craft an engaging listening experience. By applying heuristics like playlist co-occurrence, key and tempo matching, and mood clustering, the playlist balances popular hits with hidden gems to ensure both familiarity and discovery. The energy flow was carefully structured to maintain listener engagement, with dynamic peaks and valleys that keep the experience fresh. Visualizing the energy trajectory confirmed the thoughtful progression of the playlist. This project showcases how data-driven decisions can enhance creative efforts, resulting in a playlist that captivates and motivates listeners, while offering room for future personalization and refinement.
+
