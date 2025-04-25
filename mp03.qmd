@@ -316,7 +316,7 @@ kable(
 )
 ```
 
-### 📉 Visually Identifying Characteristics of Popular Songs
+## 📉 Visually Identifying Characteristics of Popular Songs
 
 This section visually explores various aspects of popular Spotify songs. We start by examining the correlation between popularity and playlist appearances, finding a moderate positive relationship. A bar plot of release years highlights the dominance of recent years in shaping user preferences, particularly the top 5% most popular songs.
 
@@ -520,8 +520,10 @@ ggplot(songs_df, aes(x = valence)) +
 ```
 
 # 📦 Building a Playlist from Anchor Song
-
 ## Finding Related Songs
+
+Want to see the final playlist?  
+[🎧 Jump to Featured Playlist](#featured-playlist)
 
 To build a cohesive playlist, I began by selecting two anchor songs that reflect the desired energy and style. I then used a data-driven approach to generate a list of potential tracks, curated the final playlist, and analyzed its dynamic flow.
 
@@ -713,6 +715,6 @@ Together, these statistical methods and visual checks demonstrate why this playl
 
 ------------------------------------------------------------------------
 
-### 🏁 Conclusion
+## 🏁 Conclusion
 
 **"The Ultimate Workout Journey"** playlist blends data an alysis with creative curation to craft an engaging listening experience. By applying heuristics like playlist co-occurrence, key and tempo matching, and mood clustering, the playlist balances popular hits with hidden gems to ensure both familiarity and discovery. The energy flow was carefully structured to maintain listener engagement, with dynamic peaks and valleys that keep the experience fresh. Visualizing the energy trajectory confirmed the thoughtful progression of the playlist. This project showcases how data-driven decisions can enhance creative efforts, resulting in a playlist that captivates and motivates listeners, while offering room for future personalization and refinement.
