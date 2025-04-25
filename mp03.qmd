@@ -17,6 +17,7 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 ```
 
 # 📘 Introduction
+
 This mini-project explores a large Spotify playlist dataset and corresponding song characteristics. The goal is to analyze how user-created playlists reflect patterns in music preference and how these patterns align with musical attributes like energy, danceability, and valence.
 
 ## 🎵 Song Characteristics Dataset
@@ -129,11 +130,14 @@ if (file.exists(local_file_path)) {
 }
 ```
 
-***
+------------------------------------------------------------------------
+
 ## 📊 Questions
+
 ### Identifying Characteristics of Popular Songs
 
 **1. How many distinct tracks and artists are represented in the playlist data?**
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -157,6 +161,7 @@ kable(distinct_counts, caption = "🎼 Overview of Unique Tracks and Artists", a
 ```
 
 **2. What are the 5 most popular tracks in the playlist data?**
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -174,6 +179,7 @@ kable(top_5_popular_tracks, caption = "🎧 Top 5 Most Popular Tracks", align = 
 ```
 
 **3. What is the most popular track in the playlist data that does not have a corresponding entry in the song characteristics data?**
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -206,6 +212,7 @@ if (nrow(zero_appearance_tracks) == 0) {
 ```
 
 **4. According to the song characteristics data, what is the most “danceable” track? How often does it appear in a playlist?**
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -239,6 +246,7 @@ kable(
 ```
 
 **5. Which playlist has the longest average track length?**
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -268,6 +276,7 @@ kable(
 ```
 
 **6. What is the most popular playlist on Spotify?**
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -294,6 +303,7 @@ kable(
 ```
 
 ### 📉 Visually Identifying Characteristics of Popular Songs
+
 This section visually explores various aspects of popular Spotify songs. We start by examining the correlation between popularity and playlist appearances, finding a moderate positive relationship. A bar plot of release years highlights the dominance of recent years in shaping user preferences, particularly the top 5% most popular songs.
 
 Danceability peaked in the early 2010s, as shown by a line plot, while a bar plot reveals the 2000s and 2010s as the most represented decades. A polar plot of musical key frequencies shows a balanced distribution, and a histogram indicates a preference for medium-length songs, with shorter tracks slightly more common.
@@ -301,6 +311,7 @@ Danceability peaked in the early 2010s, as shown by a line plot, while a bar plo
 Finally, a scatter plot suggests a slight positive correlation between energy and popularity, and the distribution of valence scores shows that users favor songs with more positive moods.
 
 **1. Is the popularity column correlated with the number of playlist appearances?**
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -327,6 +338,7 @@ ggplot(track_appearances, aes(x = num_appearances, y = popularity)) +
 ```
 
 **2. In what year were the most popular songs released?**
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -368,6 +380,7 @@ ggplot(top_popular_songs, aes(x = year)) +
 ```
 
 **3. In what year did danceability peak?**
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -389,6 +402,7 @@ ggplot(danceability_by_year, aes(x = year, y = avg_danceability)) +
 ```
 
 **4. Which decade is most represented on user playlists?**
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -409,6 +423,7 @@ ggplot(songs_df, aes(x = as.factor(decade))) +
 ```
 
 **5.Create a plot of key frequency among songs.**
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -426,6 +441,7 @@ ggplot(songs_df, aes(x = as.factor(key))) +
 ```
 
 **6. What are the most popular track lengths?**
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -455,6 +471,7 @@ ggplot(track_length_popularity, aes(x = track_length_min, y = popularity)) +
 ```
 
 **7a. How does energy relate to popularity?**
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Popularity by Genre"
@@ -472,6 +489,7 @@ ggplot(songs_df, aes(x = energy, y = popularity)) +
 ```
 
 **7b. What is the distribution of valence (mood) scores across songs?**
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Popularity by Genre"
@@ -488,13 +506,14 @@ ggplot(songs_df, aes(x = valence)) +
 ```
 
 # 📦 Building a Playlist from Anchor Song
+
 ## Finding Related Songs
 
 To build a cohesive playlist, I began by selecting two anchor songs that reflect the desired energy and style. I then used a data-driven approach to generate a list of potential tracks, curated the final playlist, and analyzed its dynamic flow.
 
 **1. Selected Anchor Songs:**
 
-**"Blinding Lights"** by The Weeknd  
+**"Blinding Lights"** by The Weeknd\
 **"ROCKSTAR"** (feat. Roddy Ricch) by DaBaby
 
 These anchor songs were selected for their contrasting yet complementary energy profiles. **"Blinding Lights"** has an upbeat synth-driven vibe, while **"ROCKSTAR"** adds a darker, more intense rhythm, creating a diverse foundation for the playlist.
@@ -526,6 +545,7 @@ From the candidate pool, I selected 12 tracks to create a balanced mix of famili
 The final order of the songs was determined by aligning their tempo, key, and energy levels, creating a seamless and engaging narrative flow.
 
 **4. Energy Flow Visualization**
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Energy Flow"
@@ -602,7 +622,8 @@ ggplot(playlist_metrics, aes(x = name, y = energy, fill = energy)) +
 
 ***Showcased the value of combining data-driven analysis with thoughtful thematic curation to create an immersive listening experience.***
 
-***
+------------------------------------------------------------------------
+
 # 🏆 Deliverable: The Ultimate Playlist
 
 Now that the playlist is finalized, it’s time to nominate it for the Internet’s Best Playlist award. Below are the required elements:
@@ -614,18 +635,19 @@ Now that the playlist is finalized, it’s time to nominate it for the Internet�
 **Description:** A high-energy voyage that blends chart-topping hits with underground anthems—designed to uplift, surprise, and power every phase of your workout.
 
 **Design Principles**
- 
+
 **Dynamic Arc:** Opens with a powerful burst, dips into moodier grooves for contrast, and surges to an energizing finale—mirroring the rhythm of an ideal workout.
- 
+
 **Discovery & Familiarity:** Balances recognizable hits to anchor the listener, with lesser-known gems that inspire exploration and repeat listens.
 
 **Seamless Flow:** Aligns songs by key, tempo, and energy to create smooth, engaging transitions from track to track.
- 
+
 **Thematic Unity:** Curates a cohesive narrative centered around motivation and movement—ideal for fitness or high-energy moments.
 
 **Visualization**
 
 Below is a plot showcasing the energy trajectory across the 12 tracks. This visual argument highlights the deliberate ebb-and-flow structure that makes this playlist "ultimate":
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -648,34 +670,35 @@ ggplot(playlist_metrics, aes(x = name, y = energy, fill = energy)) +
     axis.text.x = element_text(size = 10)
   )
 ```
-**Insight:** 🎢  
-- **The chart mimics a rollercoaster ride, emphasizing the deliberate peaks and valleys in energy.**
-- **Each bar’s percentage label highlights how each track contributes to the dynamic arc, making the structure both clear and engaging.**
- 
+
+**Insight:** 🎢\
+The chart mimics a rollercoaster ride, emphasizing the deliberate peaks and valleys in energy.
+Each bar’s percentage label highlights how each track contributes to the dynamic arc, making the structure both clear and engaging.
 
 **Statistical & Visual Analysis**
 
 To build and validate this playlist, I combined rigorous data analysis with clear visual storytelling:
 
-**Data-Driven Selection:**Leveraged audio features (energy, tempo, danceability) extracted from Spotify’s API and playlist co-occurrence rates to rank and filter over 20,000 tracks. These metrics ensured each candidate complemented the anchor songs on a sonic level.
+**Data-Driven Selection:** Leveraged audio features (energy, tempo, danceability) extracted from Spotify’s API and playlist co-occurrence rates to rank and filter over 20,000 tracks. These metrics ensured each candidate complemented the anchor songs on a sonic level.
 
-**Discovery Thresholds:**Applied a popularity cutoff (<50) to designate tracks as “under-the-radar.” This rule introduced fresh discoveries—3 of which made the final 12—and prevented the list from skewing too mainstream.**
+**Discovery Thresholds:** Applied a popularity cutoff (\<50) to designate tracks as “under-the-radar.” This rule introduced fresh discoveries—3 of which made the final 12—and prevented the list from skewing too mainstream.\*\*
 
-**Order Optimization:**Algorithmically sorted candidates by energy progression and tempo compatibility, then manually fine-tuned the sequence to optimize listener engagement. This hybrid approach balances quantitative precision with human judgment.
+**Order Optimization:** Algorithmically sorted candidates by energy progression and tempo compatibility, then manually fine-tuned the sequence to optimize listener engagement. This hybrid approach balances quantitative precision with human judgment.
 
-**Visual Validation:**Charted the energy trajectory across the final playlist. The plot’s peaks and valleys visually confirm:
+**Visual Validation:** Charted the energy trajectory across the final playlist. The plot’s peaks and valleys visually confirm:
 
 ***A strong opening to hook listeners***
 
 ***Mid-playlist troughs that spotlight lesser-known gems***
- 
+
 ***A climactic rise for an invigorating finish***
 
 **Reader-Friendly Interpretation:**The annotated bar chart not only displays energy values but also highlights which tracks meet each design principle (e.g., discovery vs. familiarity), making the analysis accessible at a glance.
 
 Together, these statistical methods and visual checks demonstrate why this playlist earns the title “Ultimate” by delivering both reliability (through data) and delight (through curated surprises).
 
-***
+------------------------------------------------------------------------
+
 ### 🏁 Conclusion
-**"The Ultimate Workout Journey"** playlist blends data an
-alysis with creative curation to craft an engaging listening experience. By applying heuristics like playlist co-occurrence, key and tempo matching, and mood clustering, the playlist balances popular hits with hidden gems to ensure both familiarity and discovery. The energy flow was carefully structured to maintain listener engagement, with dynamic peaks and valleys that keep the experience fresh. Visualizing the energy trajectory confirmed the thoughtful progression of the playlist. This project showcases how data-driven decisions can enhance creative efforts, resulting in a playlist that captivates and motivates listeners, while offering room for future personalization and refinement.
+
+**"The Ultimate Workout Journey"** playlist blends data an alysis with creative curation to craft an engaging listening experience. By applying heuristics like playlist co-occurrence, key and tempo matching, and mood clustering, the playlist balances popular hits with hidden gems to ensure both familiarity and discovery. The energy flow was carefully structured to maintain listener engagement, with dynamic peaks and valleys that keep the experience fresh. Visualizing the energy trajectory confirmed the thoughtful progression of the playlist. This project showcases how data-driven decisions can enhance creative efforts, resulting in a playlist that captivates and motivates listeners, while offering room for future personalization and refinement.
