@@ -12,6 +12,19 @@ format:
     css: styles.css  
 ---
 
+---
+
+## 🎧 Featured Playlist
+
+<iframe width="560" height="315" 
+        src="https://www.youtube.com/embed/videoseries?list=PLmH_SoAQlZUrYectNXWlFvJ2BoNsB7RkO" 
+        frameborder="0" 
+        allow="autoplay; encrypted-media" 
+        allowfullscreen>
+</iframe>
+
+---
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 ```
