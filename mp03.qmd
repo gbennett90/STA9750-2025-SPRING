@@ -693,7 +693,7 @@ To build and validate this playlist, I combined rigorous data analysis with clea
 
 ***A climactic rise for an invigorating finish***
 
-**Reader-Friendly Interpretation:**The annotated bar chart not only displays energy values but also highlights which tracks meet each design principle (e.g., discovery vs. familiarity), making the analysis accessible at a glance.
+**Reader-Friendly Interpretation:** The annotated bar chart not only displays energy values but also highlights which tracks meet each design principle (e.g., discovery vs. familiarity), making the analysis accessible at a glance.
 
 Together, these statistical methods and visual checks demonstrate why this playlist earns the title “Ultimate” by delivering both reliability (through data) and delight (through curated surprises).
 
