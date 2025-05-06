@@ -314,6 +314,28 @@ clean_2020 |>
   arrange(desc(biden_share)) |>
   select(state, county, joe_biden_democratic, total_votes, biden_share) |>
   slice_max(biden_share, n = 10)
+
+library(ggplot2)
+library(dplyr)
+
+top_biden_counties <- clean_2020 |>
+  mutate(biden_share = joe_biden_democratic / total_votes) |>
+  arrange(desc(biden_share)) |>
+  slice_max(biden_share, n = 10) |>
+  select(state, county, joe_biden_democratic, total_votes, biden_share)
+
+# Plotting
+ggplot(top_biden_counties, aes(x = reorder(paste(county, state, sep = ", "), biden_share), 
+                               y = biden_share)) +
+  geom_col(fill = "blue") +
+  coord_flip() +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  labs(
+    title = "Top 10 Most Pro-Biden Counties (2020 Election)",
+    x = "County, State",
+    y = "Biden Vote Share (%)"
+  ) +
+  theme_minimal()
 ```
 
 **3. Which county or counties had the largest shift towards Trump (in absolute terms) in 2024?**
