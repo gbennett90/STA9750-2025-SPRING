@@ -19,9 +19,13 @@ library(purrr)
 library(ggplot2)
 ```
 
+
+
 ## 🧩 US County Shapes
 
 I focused on acquiring data for the ***2020 U.S. Presidential Election*** by scraping county-level election results from Wikipedia. Using the rvest and httr2 libraries in R, I collected the relevant election data for each state. The data was cleaned by removing unnecessary columns, converting character values to numeric, and renaming ambiguous columns. This ensured that the dataset contained only relevant columns, such as the total votes for Joe Biden and Donald Trump, while also addressing inconsistencies in the column names. The cleaned dataset laid the foundation for the state-level analysis conducted in the subsequent tasks.
+
+
 
 ```{r}
 #| label: Task 1
@@ -59,9 +63,13 @@ county_shapes_clean <- county_shapes %>%
 kable(county_shapes_clean)
 ```
 
+
+
 ## 🧩 2024 US Presidential Election Results
 
 Using the cleaning function developed earlier, I extracted and processed county-level election results for each state. This involved ensuring that the necessary vote columns were available and that the data was correctly formatted for analysis. After cleaning the data, I combined the results into a single dataset, making it easier to compute state-level summaries. This step was essential for preparing the dataset for deeper analysis, including vote totals and candidate comparisons across different states.
+
+
 
 ```{r}
 #| label: Task 2
@@ -118,9 +126,13 @@ ny_results <- scrape_state_results_2024("New York")
 head(ny_results)
 ```
 
+
+
 ## ✅ 2020 US Presidential Election Results
 
 The function extracts relevant vote counts for Joe Biden and Donald Trump, along with total votes, and standardizes column names across varying table formats. After combining the cleaned datasets, I computed state-level summaries, including total votes for each candidate and their respective vote shares. The summary table and accompanying bar chart reveal differences in voter turnout and candidate support across states, with ***California*** and ***Florida*** contributing the highest total vote counts in the sample.
+
+
 
 ```{r}
 #| code-fold: true
@@ -217,7 +229,11 @@ kable(
 )
 ```
 
+
+
 ## Combining 
+
+
 
 ```{r}
 #| message: false
@@ -271,9 +287,13 @@ joined_data <- county_shapes_clean %>%
 head(joined_data)
 ```
 
+
+
 ## Questions 
 
 **1. Which county or counties cast the most votes for Trump (in absolute terms) in 2024?**
+
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -302,7 +322,11 @@ top_trump_2024 <- joined_data %>%
 kable(top_trump_2024, caption = "County or Counties with the Most Trump Votes in 2024")
 ```
 
+
+
 **2. Which county or counties cast the most votes for Biden (as a fraction of total votes cast) in 2020?**
+
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -316,7 +340,11 @@ clean_2020 |>
   slice_max(biden_share, n = 10)
 ```
 
+
+
 **3. Which county or counties had the largest shift towards Trump (in absolute terms) in 2024?**
+
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -334,7 +362,11 @@ biggest_increase <- joined_data %>%
 kable(biggest_increase, caption = "Top 10 Counties with the Largest Increase in Total Votes (2020 to 2024)")
 ```
 
+
+
 **4. Which state had the largest shift towards Harris (or smallest shift towards Trump) in 2024? (Note that the total votes for a state can be obtained by summing all counties in that state.)**
+
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -343,8 +375,12 @@ kable(biggest_increase, caption = "Top 10 Counties with the Largest Increase in 
 
 
 ```
+
+
 
 **5. What is the largest county, by area, in this data set?**
+
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -353,8 +389,12 @@ kable(biggest_increase, caption = "Top 10 Counties with the Largest Increase in 
 
 
 ```
+
+
 
 **6. Which county has the highest voter density (voters per unit of area) in 2020?**
+
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -363,8 +403,12 @@ kable(biggest_increase, caption = "Top 10 Counties with the Largest Increase in 
 
 
 ```
+
+
 
 **7. Which county had the largest increase in voter turnout in 2024?**
+
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -373,3 +417,4 @@ kable(biggest_increase, caption = "Top 10 Counties with the Largest Increase in 
 
 
 ```
+
