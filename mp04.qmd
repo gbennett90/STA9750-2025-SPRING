@@ -15,6 +15,8 @@ library(stringr)
 library(janitor)
 library(dplyr)
 library(knitr)
+library(purrr)
+library(ggplot2)
 ```
 
 ## 🧩 US County Shapes
@@ -50,11 +52,8 @@ if (!dir.exists(shapefile_dir)) {
 county_shapes <- st_read(shapefile_dir)
 
 # Preview (first 6 rows, selected columns)
-library(dplyr)
-library(knitr)
-
-county_shapes_clean <- county_shapes |>
-  select(STATEFP, COUNTYFP, NAME, geometry) |>
+county_shapes_clean <- county_shapes %>%
+  select(STATEFP, COUNTYFP, NAME, geometry) %>%
   head(6)
 
 kable(county_shapes_clean)
@@ -71,27 +70,28 @@ Using the cleaning function developed earlier, I extracted and processed county-
 #| code-fold: true
 #| code-summary: Show Code
 
-# Function to scrape and clean the 2024 election results for a specific state
-scrape_clean_state_results_2024 <- function(state_name, show_table = TRUE) {
-  
-  # Prepare the state name for use in the URL
+scrape_state_results_2024 <- function(state_name) {
+  # Step 1: Generate the Wikipedia URL
   safe_state <- gsub(" ", "_", state_name)
   url <- paste0("https://en.wikipedia.org/wiki/2024_United_States_presidential_election_in_", safe_state)
+  
+  # Step 2: Create a local path to save the raw HTML
+  dir.create("data/mp04/html", showWarnings = FALSE, recursive = TRUE)
   html_path <- file.path("data/mp04/html", paste0(safe_state, "_2024.html"))
   
-  # Ensure the directory exists and download the HTML file if not already cached
-  dir.create("data/mp04/html", recursive = TRUE, showWarnings = FALSE)
-  
+  # Step 3: Download HTML if not already saved
   if (!file.exists(html_path)) {
     resp <- request(url) |> req_perform()
     writeBin(resp_body_raw(resp), html_path)
   }
   
-  # Read and extract tables from the HTML
+  # Step 4: Read the HTML
   page <- read_html(html_path)
+  
+  # Step 5: Extract all tables
   tables <- page |> html_elements("table") |> html_table(fill = TRUE)
   
-  # Find the table that contains county-level data
+  # Step 6: Find the table with a "County" column
   county_table <- NULL
   for (tbl in tables) {
     if (any(str_detect(names(tbl), regex("County|Parish|Borough", ignore_case = TRUE)))) {
@@ -99,32 +99,23 @@ scrape_clean_state_results_2024 <- function(state_name, show_table = TRUE) {
       break
     }
   }
-
-  # Handle case where no county-level data was found
+  
   if (is.null(county_table)) {
-    warning(paste("No county-level results found for", state_name))
+    warning(paste("No county-level table found for", state_name))
     return(NULL)
   }
   
-  # Clean column names and standardize them
-  county_table <- county_table |> clean_names()
-  names(county_table) <- tolower(names(county_table))
-
-  # Select only relevant columns (county, Trump votes, Biden votes, total votes, and turnout)
-  relevant_cols <- county_table |> 
-    select(matches("county|biden|trump|total|votes|turnout")) |> 
+  # Step 7: Clean up the table
+  county_table <- county_table |>
+    janitor::clean_names() |>   # optional, makes column names consistent
     mutate(state = state_name)
-
-  # Return either the first few rows or the full cleaned table
-  if (show_table) {
-    return(kable(head(relevant_cols, 10), caption = paste("2024 Results for", state_name)))
-  } else {
-    return(relevant_cols)
-  }
+  
+  return(county_table)
 }
 
-# Example usage for Georgia (just a sample, you can loop over other states)
-scrape_clean_state_results_2024("Georgia")
+# Try New York
+ny_results <- scrape_state_results_2024("New York")
+head(ny_results)
 ```
 
 ## ✅ 2020 US Presidential Election Results
@@ -226,7 +217,7 @@ kable(
 )
 ```
 
-## Combining all 3 datasets 
+## Combining 
 
 ```{r}
 #| message: false
@@ -234,5 +225,138 @@ kable(
 #| code-fold: true
 #| code-summary: Show Code
 #| include: false
+
+library(dplyr)
+library(stringr)
+
+# Scrape all 2024 results
+results_2024 <- map(state.name, ~ scrape_state_results_2024(.x))
+results_2024_df <- bind_rows(results_2024[!sapply(results_2024, is.null)])
+
+# Prep both datasets for joining
+prep_df <- function(df, year) {
+  df %>%
+    rename_with(tolower) %>%
+    mutate(
+      county = str_to_lower(str_remove_all(county, " county| parish| borough")),
+      state = str_to_lower(state)
+    ) %>%
+    mutate(year = year)
+}
+
+clean_2020 <- prep_df(results_2020_df, 2020)
+clean_2024 <- prep_df(results_2024_df, 2024)
+
+# Join on standardized county and state
+combined_results <- full_join(clean_2020, clean_2024, by = c("state", "county"), suffix = c("_2020", "_2024"))
+
+# Preview
+head(combined_results)
+
+county_shapes_clean <- county_shapes %>%
+  select(STATEFP, COUNTYFP, NAME, geometry) %>%
+  mutate(
+    fips = paste0(STATEFP, COUNTYFP),
+    county = tolower(NAME)
+  )
+
+# Convert county names to lowercase for better join matching
+combined_results <- combined_results %>%
+  mutate(county = tolower(county), state = tolower(state))
+
+joined_data <- county_shapes_clean %>%
+  mutate(state = tolower(state.name[as.integer(STATEFP)])) %>%
+  left_join(combined_results, by = c("county", "state"))
+
+head(joined_data)
+```
+
+## Questions 
+
+**1. Which county or counties cast the most votes for Trump (in absolute terms) in 2024?**
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+# Ensure column name for Trump's 2024 votes is present
+# Find any column containing "trump" and "2024"
+trump_2024_col <- names(joined_data)[str_detect(names(joined_data), "trump.*2024")][1]
+
+# Safety check in case the column doesn't exist
+if (is.null(trump_2024_col) || is.na(trump_2024_col)) {
+  stop("Trump 2024 vote column not found. Please check the joined data.")
+}
+
+# Use rlang to refer to the dynamic column name
+library(rlang)
+
+# Find the county or counties with the highest Trump 2024 vote count
+top_trump_2024 <- joined_data %>%
+  filter(!is.na(.data[[trump_2024_col]])) %>%
+  arrange(desc(.data[[trump_2024_col]])) %>%
+  filter(.data[[trump_2024_col]] == max(.data[[trump_2024_col]], na.rm = TRUE)) %>%
+  select(state, county, trump_votes_2024 = all_of(trump_2024_col))
+
+kable(top_trump_2024, caption = "County or Counties with the Most Trump Votes in 2024")
+```
+
+**2. Which county or counties cast the most votes for Biden (as a fraction of total votes cast) in 2020?**
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+```
+
+**3. Which county or counties had the largest shift towards Trump (in absolute terms) in 2024?**
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+
+```
+
+**4. Which state had the largest shift towards Harris (or smallest shift towards Trump) in 2024? (Note that the total votes for a state can be obtained by summing all counties in that state.)**
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+
+```
+
+**5. What is the largest county, by area, in this data set?**
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+
+```
+
+**6. Which county has the highest voter density (voters per unit of area) in 2020?**
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+
+```
+
+**7. Which county had the largest increase in voter turnout in 2024?**
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
 
 ```
