@@ -403,45 +403,6 @@ ggplot(top_states, aes(x = reorder(state, weighted_shift), y = weighted_shift)) 
 #| warning: false
 #| message: false
 
-county_shapefile <- st_read("C:/Users/benne/OneDrive/Documents/STA9750-2025-SPRING/data/mp04/county_shapes")
-
-# Calculate area for each county
-county_shapefile <- county_shapefile %>%
-  mutate(area = st_area(geometry))  # This creates a new column 'area' with the area of each county
-
-# Find the largest county by area
-largest_county <- county_shapefile %>%
-  arrange(desc(area)) %>%
-  slice(1)  # Select the first row, which will have the largest area
-
-# Print the largest county and its area
-print(largest_county)
-
-
-# Calculate area for each county
-county_shapefile <- county_shapefile %>%
-  mutate(area = st_area(geometry))  # Adds area column
-
-# Find the largest county by area
-largest_county <- county_shapefile %>%
-  arrange(desc(area)) %>%
-  slice(1)  # Selects the largest county
-
-# Create the plot
-ggplot() +
-  # Plot all counties
-  geom_sf(data = county_shapefile, fill = "lightblue", color = "gray", size = 0.2) +
-  # Highlight the largest county
-  geom_sf(data = largest_county, fill = "red", color = "black", size = 1.2) +
-  # Add title and theme
-  ggtitle("Largest County by Area") +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(hjust = 0.5),
-    axis.text = element_blank(),
-    axis.title = element_blank(),
-    panel.grid = element_blank()
-  )
 ```
 
 **6. Which county has the highest voter density (voters per unit of area) in 2020?**
@@ -451,14 +412,6 @@ ggplot() +
 #| warning: false
 #| message: false
 
-# Get the county with the highest voter density
-highest_density_county <- merged_data |>
-  arrange(desc(voter_density)) |>
-  slice(1) |>
-  select(NAME)
-
-# Print the county with the highest voter density
-print(highest_density_county)
 ```
 
 **7. Which county had the largest increase in voter turnout in 2024?**
