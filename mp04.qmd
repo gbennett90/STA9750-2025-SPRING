@@ -345,15 +345,16 @@ ggplot(top_biden_counties, aes(x = reorder(paste(county, state, sep = ", "), bid
 #| warning: false
 #| message: false
 
-# Calculate total vote increase
-biggest_increase <- joined_data %>%
-  filter(!is.na(total_votes_2020), !is.na(total_votes_2024)) %>%
-  mutate(vote_change = total_votes_2024 - total_votes_2020) %>%
-  arrange(desc(vote_change)) %>%
-  slice(1:10) %>%
-  select(state, county, total_votes_2020, total_votes_2024, vote_change)
+library(dplyr)
 
-kable(biggest_increase, caption = "Top 10 Counties with the Largest Increase in Total Votes (2020 to 2024)")
+clean_2024 |>
+  mutate(
+    donald_trump_republican = as.numeric(gsub(",", "", donald_trump_republican)),
+    donald_trump_republican_2 = as.numeric(gsub("%", "", donald_trump_republican_2)),
+    trump_shift = donald_trump_republican_2 - donald_trump_republican
+  ) |>
+  filter(trump_shift == max(trump_shift, na.rm = TRUE)) |>
+  select(state, county, donald_trump_republican, donald_trump_republican_2, trump_shift)
 ```
 
 **4. Which state had the largest shift towards Harris (or smallest shift towards Trump) in 2024? (Note that the total votes for a state can be obtained by summing all counties in that state.)**
