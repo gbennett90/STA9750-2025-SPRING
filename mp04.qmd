@@ -339,6 +339,7 @@ ggplot(top_biden_counties, aes(x = reorder(paste(county, state, sep = ", "), bid
 ```
 
 **3. Which county or counties had the largest shift towards Trump (in absolute terms) in 2024?**
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -364,7 +365,53 @@ clean_2024 |>
 #| warning: false
 #| message: false
 
+# Calculate Harris' shift and total votes for each county in 2024
+clean_2024 <- clean_2024 |>
+  mutate(
+    trump_2024 = as.numeric(gsub(",", "", donald_trump_republican)),
+    harris_2024 = as.numeric(gsub(",", "", kamala_harris_democratic)),
+    total_2024 = harris_2024 + trump_2024,
+    harris_pct_2024 = 100 * harris_2024 / total_2024,
+    trump_pct_2024 = 100 * trump_2024 / total_2024,
+    harris_shift = harris_pct_2024  # Focus on Harris's percentage in 2024
+  )
 
+# Summarize the vote shifts by state (sum total votes and weighted shift for 2024)
+state_shifts <- clean_2024 |>
+  group_by(state) |>
+  summarise(
+    total_votes_2024 = sum(total_2024, na.rm = TRUE),  # Sum of all votes in each state
+    weighted_shift = sum(harris_shift * total_2024, na.rm = TRUE) / total_votes_2024  # Weighted average shift
+  ) |>
+  arrange(desc(weighted_shift))  # Sort by largest shift towards Harris
+
+# Select top states (e.g., top 5 states with largest shift)
+top_states <- state_shifts |> 
+  slice_head(n = 5)  # Top 5 states with largest shift towards Harris
+
+# Show the clean table with only relevant data (top states)
+library(knitr)
+
+kable(top_states, digits = 2, col.names = c("State", "Total 2024 Votes", "Weighted Shift Toward Harris"))
+
+# Load ggplot2 for visualization
+library(ggplot2)
+
+# Create a bar plot to visualize the shift towards Harris in 2024 for the top states
+ggplot(top_states, aes(x = reorder(state, weighted_shift), y = weighted_shift)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  coord_flip() +  # Flip the coordinates for better readability
+  labs(
+    title = "Top States with Largest Shift Toward Harris in 2024",
+    x = "State",
+    y = "Weighted Shift Toward Harris (%)"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.y = element_text(size = 12),
+    axis.text.x = element_text(size = 12),
+    plot.title = element_text(hjust = 0.5, size = 14, face = "bold")
+  )
 ```
 
 **5. What is the largest county, by area, in this data set?**
@@ -375,6 +422,43 @@ clean_2024 |>
 #| message: false
 
 
+# Calculate area for each county
+county_shapefile <- county_shapefile %>%
+  mutate(area = st_area(geometry))  # This creates a new column 'area' with the area of each county
+
+# Find the largest county by area
+largest_county <- county_shapefile %>%
+  arrange(desc(area)) %>%
+  slice(1)  # Select the first row, which will have the largest area
+
+# Print the largest county and its area
+print(largest_county)
+
+
+# Calculate area for each county
+county_shapefile <- county_shapefile %>%
+  mutate(area = st_area(geometry))  # Adds area column
+
+# Find the largest county by area
+largest_county <- county_shapefile %>%
+  arrange(desc(area)) %>%
+  slice(1)  # Selects the largest county
+
+# Create the plot
+ggplot() +
+  # Plot all counties
+  geom_sf(data = county_shapefile, fill = "lightblue", color = "gray", size = 0.2) +
+  # Highlight the largest county
+  geom_sf(data = largest_county, fill = "red", color = "black", size = 1.2) +
+  # Add title and theme
+  ggtitle("Largest County by Area") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    axis.text = element_blank(),
+    axis.title = element_blank(),
+    panel.grid = element_blank()
+  )
 ```
 
 **6. Which county has the highest voter density (voters per unit of area) in 2020?**
