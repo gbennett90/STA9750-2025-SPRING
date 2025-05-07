@@ -1,6 +1,8 @@
 ---
 title: "Mini Project 4"
-output: html_document
+output: 
+  html_document:
+    css: styles.css
 ---
 
 ```{r global_options, include=FALSE}
@@ -8,55 +10,50 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 ```
 
 ```{r setup, include=FALSE}
-library(sf)
-library(httr2)
-library(rvest)
-library(stringr)
-library(janitor)
-library(dplyr)
-library(knitr)
-library(purrr)
-library(ggplot2)
+library(sf)        # For handling spatial data (shapefiles)
+library(httr2)     # For more robust HTTP requests
+library(rvest)     # For web scraping, especially to extract tables from HTML
+library(dplyr)     # For data manipulation
+library(janitor)   # For cleaning column names and data wrangling
+library(stringr)   # For string manipulation
+library(ggplot2)   # For creating static visualizations
+library(purrr)     # For functional programming (e.g., map functions)
+library(knitr)     # For rendering output (tables, etc.) in R Markdown
 ```
+
+## Introduction
+Welcome to a deep dive into the **2020 and 2024 US Presidential Election results**! This analysis explores how each state has shifted between the two elections, county by county. From red to blue, and everything in between, let's uncover the stories behind the numbers and see how America voted!
 
 ## 🧩 US County Shapes
 
 I focused on acquiring data for the ***2020 U.S. Presidential Election*** by scraping county-level election results from Wikipedia. Using the rvest and httr2 libraries in R, I collected the relevant election data for each state. The data was cleaned by removing unnecessary columns, converting character values to numeric, and renaming ambiguous columns. This ensured that the dataset contained only relevant columns, such as the total votes for Joe Biden and Donald Trump, while also addressing inconsistencies in the column names. The cleaned dataset laid the foundation for the state-level analysis conducted in the subsequent tasks.
 
 ```{r}
-#| label: Task 1
+#| label: County Shape
 #| message: false
 #| warning: false
 #| code-fold: true
 #| code-summary: Show Code
 
-# Directory setup
-dir.create("data/mp04", recursive = TRUE, showWarnings = FALSE)
-
-# URL for detailed county shapefiles
-url <- "https://www2.census.gov/geo/tiger/GENZ2022/shp/cb_2022_us_county_500k.zip"
-zip_path <- "data/mp04/county_shapefiles.zip"
+# Directory setup for shapefiles
 shapefile_dir <- "data/mp04/county_shapes"
+zip_path <- "data/mp04/county_shapefiles.zip"
+url <- "https://www2.census.gov/geo/tiger/GENZ2022/shp/cb_2022_us_county_500k.zip"
 
-# Download only if not present
+# Download and unzip if necessary
 if (!file.exists(zip_path)) {
   download.file(url, destfile = zip_path, mode = "wb")
 }
-
-# Unzip shapefile
 if (!dir.exists(shapefile_dir)) {
   unzip(zip_path, exdir = shapefile_dir)
 }
 
-# Read shapefile
-county_shapes <- st_read(shapefile_dir)
-
-# Preview (first 6 rows, selected columns)
-county_shapes_clean <- county_shapes %>%
+# Load and clean county shapes
+county_shapes <- st_read(shapefile_dir) %>%
   select(STATEFP, COUNTYFP, NAME, geometry) %>%
   head(6)
 
-kable(county_shapes_clean)
+kable(county_shapes)
 ```
 
 ## 🧩 2024 US Presidential Election Results
@@ -64,34 +61,28 @@ kable(county_shapes_clean)
 Using the cleaning function developed earlier, I extracted and processed county-level election results for each state. This involved ensuring that the necessary vote columns were available and that the data was correctly formatted for analysis. After cleaning the data, I combined the results into a single dataset, making it easier to compute state-level summaries. This step was essential for preparing the dataset for deeper analysis, including vote totals and candidate comparisons across different states.
 
 ```{r}
-#| label: Task 2
+#| label: 2024 Election
 #| message: false
 #| warning: false
 #| code-fold: true
 #| code-summary: Show Code
 
 scrape_state_results_2024 <- function(state_name) {
-  # Step 1: Generate the Wikipedia URL
   safe_state <- gsub(" ", "_", state_name)
   url <- paste0("https://en.wikipedia.org/wiki/2024_United_States_presidential_election_in_", safe_state)
-  
-  # Step 2: Create a local path to save the raw HTML
-  dir.create("data/mp04/html", showWarnings = FALSE, recursive = TRUE)
   html_path <- file.path("data/mp04/html", paste0(safe_state, "_2024.html"))
   
-  # Step 3: Download HTML if not already saved
+  # Download and save HTML if not already present
   if (!file.exists(html_path)) {
     resp <- request(url) |> req_perform()
     writeBin(resp_body_raw(resp), html_path)
   }
   
-  # Step 4: Read the HTML
+  # Read HTML and extract tables
   page <- read_html(html_path)
-  
-  # Step 5: Extract all tables
   tables <- page |> html_elements("table") |> html_table(fill = TRUE)
   
-  # Step 6: Find the table with a "County" column
+  # Identify the table with county results
   county_table <- NULL
   for (tbl in tables) {
     if (any(str_detect(names(tbl), regex("County|Parish|Borough", ignore_case = TRUE)))) {
@@ -105,15 +96,15 @@ scrape_state_results_2024 <- function(state_name) {
     return(NULL)
   }
   
-  # Step 7: Clean up the table
+  # Clean and return county table
   county_table <- county_table |>
-    janitor::clean_names() |>   # optional, makes column names consistent
+    janitor::clean_names() |>   # Standardize column names
     mutate(state = state_name)
   
   return(county_table)
 }
 
-# Try New York
+# Example usage: Scrape and view results for New York
 ny_results <- scrape_state_results_2024("New York")
 head(ny_results)
 ```
@@ -123,30 +114,28 @@ head(ny_results)
 The function extracts relevant vote counts for Joe Biden and Donald Trump, along with total votes, and standardizes column names across varying table formats. After combining the cleaned datasets, I computed state-level summaries, including total votes for each candidate and their respective vote shares. The summary table and accompanying bar chart reveal differences in voter turnout and candidate support across states, with ***California*** and ***Florida*** contributing the highest total vote counts in the sample.
 
 ```{r}
-#| code-fold: true
-#| code-summary: "Show Code"
-#| warning: false
+#| label: 2020 Election
 #| message: false
+#| warning: false
+#| code-fold: true
+#| code-summary: Show Code
 
-library(xml2)
-library(purrr)
-library(ggplot2)
-
-# Define scraping + cleaning function
 scrape_clean_state_results_2020 <- function(state_name, show_table = FALSE) {
   safe_state <- gsub(" ", "_", state_name)
   url <- paste0("https://en.wikipedia.org/wiki/2020_United_States_presidential_election_in_", safe_state)
   html_path <- file.path("data/mp04/html", paste0(safe_state, "_2020.html"))
-  dir.create("data/mp04/html", recursive = TRUE, showWarnings = FALSE)
-
+  
+  # Download and save HTML if not already present
   if (!file.exists(html_path)) {
     resp <- request(url) |> req_perform()
     writeBin(resp_body_raw(resp), html_path)
   }
 
+  # Read HTML and extract tables
   page <- read_html(html_path)
   tables <- page |> html_elements("table") |> html_table(fill = TRUE)
 
+  # Identify the county-level table
   county_table <- NULL
   for (tbl in tables) {
     if (any(str_detect(names(tbl), regex("County|Parish|Borough", ignore_case = TRUE)))) {
@@ -160,9 +149,10 @@ scrape_clean_state_results_2020 <- function(state_name, show_table = FALSE) {
     return(NULL)
   }
 
-  county_table <- county_table |> clean_names()
-  names(county_table) <- tolower(names(county_table))
-
+  county_table <- county_table |> clean_names() |> 
+    mutate(state = state_name)
+  
+  # Check for expected vote columns and clean
   if (!any(str_detect(names(county_table), "biden")) | !any(str_detect(names(county_table), "trump"))) {
     warning(paste("Expected vote columns not found in", state_name))
     return(NULL)
@@ -176,9 +166,7 @@ scrape_clean_state_results_2020 <- function(state_name, show_table = FALSE) {
 
   if (!"total_votes" %in% names(cleaned)) {
     tv_col <- names(cleaned)[str_detect(names(cleaned), "total|votes")][1]
-    if (!is.na(tv_col)) {
-      cleaned <- cleaned |> rename(total_votes = all_of(tv_col))
-    }
+    cleaned <- cleaned |> rename(total_votes = all_of(tv_col))
   }
 
   if (show_table) {
@@ -188,14 +176,12 @@ scrape_clean_state_results_2020 <- function(state_name, show_table = FALSE) {
   }
 }
 
-# Select 50 states for full data
-states <- state.name  # All U.S. states from the built-in state.name dataset
-
-# Scrape and clean data
+# Scrape and clean data for all states
+states <- state.name  # List of U.S. states
 results_2020 <- map(states, ~ scrape_clean_state_results_2020(.x))
 results_2020_df <- bind_rows(results_2020[!sapply(results_2020, is.null)])
 
-# Summarize vote totals by state
+# Summarize state-level results
 state_summary_2020 <- results_2020_df |>
   group_by(state) |>
   summarise(
@@ -210,24 +196,22 @@ state_summary_2020 <- results_2020_df |>
   ) |>
   arrange(desc(total_votes))
 
-# View summary
+# Preview the top 10 states by total votes
 kable(
   head(state_summary_2020, 10),
   caption = "Top States by Total Votes in the 2020 Presidential Election"
 )
 ```
 
-## Combining 
+## Combining Datasets
 
 ```{r}
+#| label: Combining Datasets
 #| message: false
 #| warning: false
 #| code-fold: true
 #| code-summary: Show Code
 #| include: false
-
-library(dplyr)
-library(stringr)
 
 # Scrape all 2024 results
 results_2024 <- map(state.name, ~ scrape_state_results_2024(.x))
@@ -346,8 +330,6 @@ ggplot(top_biden_counties, aes(x = reorder(paste(county, state, sep = ", "), bid
 #| warning: false
 #| message: false
 
-library(dplyr)
-
 clean_2024 |>
   mutate(
     donald_trump_republican = as.numeric(gsub(",", "", donald_trump_republican)),
@@ -421,6 +403,7 @@ ggplot(top_states, aes(x = reorder(state, weighted_shift), y = weighted_shift)) 
 #| warning: false
 #| message: false
 
+county_shapefile <- st_read("C:/Users/benne/OneDrive/Documents/STA9750-2025-SPRING/data/mp04/county_shapes")
 
 # Calculate area for each county
 county_shapefile <- county_shapefile %>%
@@ -468,15 +451,14 @@ ggplot() +
 #| warning: false
 #| message: false
 
+# Get the county with the highest voter density
+highest_density_county <- merged_data |>
+  arrange(desc(voter_density)) |>
+  slice(1) |>
+  select(NAME)
 
+# Print the county with the highest voter density
+print(highest_density_county)
 ```
 
 **7. Which county had the largest increase in voter turnout in 2024?**
-```{r}
-#| code-fold: true
-#| code-summary: "Show Code"
-#| warning: false
-#| message: false
-
-
-```
