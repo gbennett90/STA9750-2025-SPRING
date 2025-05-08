@@ -12,6 +12,8 @@ format:
     css: styles.css  
 ---
 
+![U.S. Flag](https://upload.wikimedia.org/wikipedia/commons/a/a4/Flag_of_the_United_States.svg)
+# Election Analysis - 2024
 
 ```{r global_options, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
@@ -584,3 +586,13 @@ ggsave("shift_map_large.png", plot = shift_plot, width = 12, height = 8, dpi = 3
 
 This map clearly illustrates the geographical variation in voting patterns and provides a visual representation of Trump’s support change over the two election cycles.
 
+## 🏁 Conclusion
+This mini-project highlighted the shifting political landscape between the 2020 and 2024 U.S. Presidential Elections, with a focus on county-level vote data. By gathering, cleaning, and merging extensive datasets, we were able to craft a detailed, spatially informed picture of partisan change across the United States.
+
+**The key findings include:**
+
+**Trump's Regional Shifts:** Certain areas experienced notable increases in support for Trump, which were concentrated in rural and suburban counties across swing states.
+
+**Impactful Counties:** Counties like Miami-Dade and certain areas in Pennsylvania played significant roles in the national swing. The ability to track these shifts on a map was crucial in understanding regional patterns and how they influenced national outcomes.
+
+**Overall Election Trends:** While certain states saw more dramatic swings, others showed stability or even a reduction in support for Trump, as seen in large urban areas where Biden's support remained strong.
