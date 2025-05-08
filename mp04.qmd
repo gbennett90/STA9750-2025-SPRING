@@ -341,6 +341,7 @@ election_geo <- election_geo |>
 glimpse(election_geo)
 ```
 
+
 ## ❓ Key Questions & Findings
 
 **1. Which county or counties cast the most votes for Trump (in absolute terms) in 2024?**
