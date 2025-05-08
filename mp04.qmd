@@ -522,7 +522,6 @@ To visualize the shift in Trump’s vote share from 2020 to 2024, we created a c
 #| warning: false
 #| message: false
 
-# Read shapefile
 us_shapefile <- st_read("C:/Users/benne/OneDrive/Documents/STA9750-2025-SPRING/cb_2023_us_county_500k.shp")
 us_reprojected <- st_transform(us_shapefile, crs = 4326)
 
@@ -534,8 +533,8 @@ election_data <- election_geo |>  # Make sure election_geo includes shapefile ge
     shift_pct = trump_pct_2024 - trump_pct_2020
   )
 
-# Draw the map
-ggplot(data = election_data) +
+# Create the plot
+shift_plot <- ggplot(data = election_data) +
   geom_sf(aes(fill = shift_pct), color = "white", size = 0.1) +
   scale_fill_gradient2(
     low = "#2166ac",     # Blue: shift away from Trump
@@ -559,46 +558,12 @@ ggplot(data = election_data) +
     panel.grid = element_blank()
   )
 
-centroids <- st_centroid(election_data)
-centroids_coords <- st_coordinates(centroids)
+# Display the plot
+print(shift_plot)
 
-election_data <- election_data |>
-  mutate(
-    lon = centroids_coords[,1],
-    lat = centroids_coords[,2],
-    dx = ifelse(abs(shift_pct) > 1, shift_pct / 10, 0),  # Arrow x-length (scaled)
-    dy = 0  # Optional: all arrows horizontal
-  )
-
-ggplot(data = election_data) +
-  # Background county fill (optional)
-  geom_sf(aes(fill = shift_pct), color = NA) +
-  scale_fill_gradient2(
-    low = "#2166ac", mid = "white", high = "#b2182b",
-    midpoint = 0, name = "Shift in Trump Vote (%)"
-  ) +
-  
-  # Arrows for vote share shift
-  geom_segment(
-    aes(x = lon, y = lat, xend = lon + dx, yend = lat + dy),
-    arrow = arrow(length = unit(0.08, "inches"), type = "closed"),
-    size = 0.3, color = "black", alpha = 0.7
-  ) +
-
-  labs(
-    title = "County-Level Shift in Trump Vote Share (2020 → 2024)",
-    subtitle = "Arrows show direction and magnitude of shift",
-    caption = "Source: Wikipedia + US Census | Visualization: Gisell Bennett"
-  ) +
-  theme_minimal() +
-  theme(
-    legend.position = "bottom",
-    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
-    plot.subtitle = element_text(hjust = 0.5),
-    axis.text = element_blank(),
-    axis.title = element_blank(),
-    panel.grid = element_blank()
-  )
+# Save a larger version
+ggsave("shift_map_large.png", plot = shift_plot, width = 12, height = 8, dpi = 300)
 ```
 
 This map clearly illustrates the geographical variation in voting patterns and provides a visual representation of Trump’s support change over the two election cycles.
+
