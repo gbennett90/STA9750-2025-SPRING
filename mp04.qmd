@@ -1,5 +1,5 @@
 ---
-title: "Mini Project 4"
+title: "Mini Project 4: Mapping America’s Political Shift"
 author: "Gisell Bennett"
 format:
   html:
@@ -17,9 +17,9 @@ format:
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 ```
 
-## Introduction
+## 🗳️ Introduction
 
-This project analyzes the shift in US presidential election results between 2020 and 2024 at the county level. Tasks include scraping election data from Wikipedia, downloading county shapefiles from the US Census Bureau, cleaning and merging the data, performing initial analysis, and reproducing a figure similar to the New York Times county shift map using geospatial tools.
+This project investigates shifts in the U.S. political landscape by comparing county-level presidential election results from 2020 and 2024. Using data scraped from Wikipedia and geospatial shapefiles from the U.S. Census Bureau, we analyzed voting trends across all 50 states. Our primary goal was to reproduce a New York Times–style map that visualizes how support for the Republican candidate (Donald Trump) changed across counties between the two election years. We also examined which counties contributed most to the national swing and explored regional patterns of partisan change.
 
 ```{r}
 #| message: false
@@ -41,9 +41,11 @@ library(arrow)
 library(janitor)
 ```
 
-## Data Acquisition
+## 🗂️ Data Acquisition
 
-**County Shapes**
+### 🗺️ County Shapefiles
+
+These shapefiles are necessary to visualize county-level results on a map.
 
 ```{r}
 #| label: Shapefile
@@ -107,7 +109,9 @@ county_clean <- county_clean %>%
 glimpse(county_clean)
 ```
 
-**2024 County Level Election Results**
+### 🌐 2024 County-Level Election Results
+
+Election data for each U.S. state in 2024 was scraped from Wikipedia using a custom R function. The script identifies and extracts tables containing county-level vote totals for Donald Trump (Republican) and Kamala Harris (Democratic), as well as total votes cast
 
 ```{r}
 #| code-fold: true
@@ -207,7 +211,10 @@ cleaned_data_2024 <- combined_data_2024 |>
 head(cleaned_data_2024)
 ```
 
-**2020 County Level Election Results**
+### 🕰️ 2020 County-Level Election Results
+
+A similar scraping process was used to acquire 2020 results from Wikipedia. County-level vote totals for Donald Trump and Joe Biden were extracted for consistency and comparison with 2024 results.
+
 ```{r}
 #| message: false
 #| warning: false
@@ -288,7 +295,10 @@ cleaned_data_2020 <- combined_data_2020 |>
 head(cleaned_data_2020)
 ```
 
-**Joining Data**
+### 🔗 Joining the Data
+
+We merged the 2020 and 2024 county-level election results using full_join, ensuring we captured counties present in either year. This combined dataset was then joined with geographic shapefile data using left_join, allowing for spatial analysis. Counties with missing Trump vote data for both years were filtered out. Lastly, vote columns were cleaned and converted to numeric values for accurate calculations. A glimpse() confirms the structure of the final dataset.
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -322,7 +332,7 @@ election_geo <- election_geo |>
 glimpse(election_geo)
 ```
 
-## Questions
+## ❓ Key Questions & Findings
 
 **1. Which county or counties cast the most votes for Trump (in absolute terms) in 2024?**
 ```{r}
@@ -494,7 +504,17 @@ turnout_increase_table <- election_geo |>
 turnout_increase_table
 ```
 
-## Reproduce NYT Figure
+## 🗺️ Reproducing the NYT Figure: Trump Vote Share Shift
+
+To visualize the shift in Trump’s vote share from 2020 to 2024, we created a county-level map similar to the one used by The New York Times. The process involved several key steps:
+
+**Shapefile Processing:** We started by loading a shapefile of U.S. counties and reprojected it into the correct coordinate reference system (CRS).
+
+**Vote Share Calculation:** Next, we calculated the percentage of votes Trump received in 2020 and 2024 for each county, followed by determining the shift in vote share (2024 vs. 2020).
+
+**Map Creation:** We used ggplot2 to create a map, where each county’s color represents the percentage shift in Trump’s vote share: blue for a shift away from Trump and red for a shift toward him.
+
+**Arrow Visualization:** To further highlight shifts, arrows were added to show the direction and magnitude of change. Counties with a larger shift towards Trump were represented by longer arrows.
 
 ```{r}
 #| code-fold: true
@@ -579,6 +599,6 @@ ggplot(data = election_data) +
     axis.title = element_blank(),
     panel.grid = element_blank()
   )
-
-aes(color = shift_pct > 0)
 ```
+
+This map clearly illustrates the geographical variation in voting patterns and provides a visual representation of Trump’s support change over the two election cycles.

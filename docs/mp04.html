@@ -8,7 +8,7 @@
 
 <meta name="author" content="Gisell Bennett">
 
-<title>Mini Project 4 – STA 9750 Submission Material</title>
+<title>Mini Project 4: Mapping America’s Political Shift – STA 9750 Submission Material</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -73,7 +73,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-549806ee2085284f45b00abea8c6df48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-21cc9f1b1e4a86305e6a500d516abfbe.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-c74cff87e4e987b3a73ddb9bc4675304.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -103,9 +103,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }</script>
 
 
+<link rel="stylesheet" href="styles.css">
 </head>
 
-<body class="nav-fixed fullcontent">
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -125,13 +126,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul class="collapse">
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">🗳️ Introduction</a></li>
+  <li><a href="#data-acquisition" id="toc-data-acquisition" class="nav-link" data-scroll-target="#data-acquisition">🗂️ Data Acquisition</a></li>
+  <li><a href="#key-questions-findings" id="toc-key-questions-findings" class="nav-link" data-scroll-target="#key-questions-findings">❓ Key Questions &amp; Findings</a></li>
+  <li><a href="#reproducing-the-nyt-figure-trump-vote-share-shift" id="toc-reproducing-the-nyt-figure-trump-vote-share-shift" class="nav-link" data-scroll-target="#reproducing-the-nyt-figure-trump-vote-share-shift">🗺️ Reproducing the NYT Figure: Trump Vote Share Shift</a></li>
+  </ul>
+</nav>
+    </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Mini Project 4</h1>
+<h1 class="title">Mini Project 4: Mapping America’s Political Shift</h1>
 </div>
 
 
@@ -155,8 +167,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <section id="introduction" class="level2">
-<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>This project analyzes the shift in US presidential election results between 2020 and 2024 at the county level. Tasks include scraping election data from Wikipedia, downloading county shapefiles from the US Census Bureau, cleaning and merging the data, performing initial analysis, and reproducing a figure similar to the New York Times county shift map using geospatial tools.</p>
+<h2 class="anchored" data-anchor-id="introduction">🗳️ Introduction</h2>
+<p>This project investigates shifts in the U.S. political landscape by comparing county-level presidential election results from 2020 and 2024. Using data scraped from Wikipedia and geospatial shapefiles from the U.S. Census Bureau, we analyzed voting trends across all 50 states. Our primary goal was to reproduce a New York Times–style map that visualizes how support for the Republican candidate (Donald Trump) changed across counties between the two election years. We also examined which counties contributed most to the national swing and explored regional patterns of partisan change.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Show Code</summary>
@@ -176,8 +188,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </section>
 <section id="data-acquisition" class="level2">
-<h2 class="anchored" data-anchor-id="data-acquisition">Data Acquisition</h2>
-<p><strong>County Shapes</strong></p>
+<h2 class="anchored" data-anchor-id="data-acquisition">🗂️ Data Acquisition</h2>
+<section id="county-shapefiles" class="level3">
+<h3 class="anchored" data-anchor-id="county-shapefiles">🗺️ County Shapefiles</h3>
+<p>These shapefiles are necessary to visualize county-level results on a map.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Show Code</summary>
@@ -245,7 +259,10 @@ $ geometry    &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((-88.02858 3..., MULTIPOL
 $ state       &lt;chr&gt; "Alabama", "Alabama", "Alabama", "Alabama", "Arkansas", "A…</code></pre>
 </div>
 </div>
-<p><strong>2024 County Level Election Results</strong></p>
+</section>
+<section id="county-level-election-results" class="level3">
+<h3 class="anchored" data-anchor-id="county-level-election-results">🌐 2024 County-Level Election Results</h3>
+<p>Election data for each U.S. state in 2024 was scraped from Wikipedia using a custom R function. The script identifies and extracts tables containing county-level vote totals for Donald Trump (Republican) and Kamala Harris (Democratic), as well as total votes cast</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Show Code</summary>
@@ -352,7 +369,10 @@ $ state       &lt;chr&gt; "Alabama", "Alabama", "Alabama", "Alabama", "Arkansas"
 6 Alabama Blount      25,354      2,576        28,163     </code></pre>
 </div>
 </div>
-<p><strong>2020 County Level Election Results</strong></p>
+</section>
+<section id="county-level-election-results-1" class="level3">
+<h3 class="anchored" data-anchor-id="county-level-election-results-1">🕰️ 2020 County-Level Election Results</h3>
+<p>A similar scraping process was used to acquire 2020 results from Wikipedia. County-level vote totals for Donald Trump and Joe Biden were extracted for consistency and comparison with 2024 results.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Show Code</summary>
@@ -441,7 +461,10 @@ $ state       &lt;chr&gt; "Alabama", "Alabama", "Alabama", "Alabama", "Arkansas"
 6 Alabama Blount      24,711      2,640       27,588     </code></pre>
 </div>
 </div>
-<p><strong>Joining Data</strong></p>
+</section>
+<section id="joining-the-data" class="level3">
+<h3 class="anchored" data-anchor-id="joining-the-data">🔗 Joining the Data</h3>
+<p>We merged the 2020 and 2024 county-level election results using full_join, ensuring we captured counties present in either year. This combined dataset was then joined with geographic shapefile data using left_join, allowing for spatial analysis. Counties with missing Trump vote data for both years were filtered out. Lastly, vote columns were cleaned and converted to numeric values for accurate calculations. A glimpse() confirms the structure of the final dataset.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Show Code</summary>
@@ -488,8 +511,9 @@ $ total_votes_2024 &lt;dbl&gt; 122249, 44349, 9855, 5307, 15803, 4714, 10717, NA
 </div>
 </div>
 </section>
-<section id="questions" class="level2">
-<h2 class="anchored" data-anchor-id="questions">Questions</h2>
+</section>
+<section id="key-questions-findings" class="level2">
+<h2 class="anchored" data-anchor-id="key-questions-findings">❓ Key Questions &amp; Findings</h2>
 <p><strong>1. Which county or counties cast the most votes for Trump (in absolute terms) in 2024?</strong></p>
 <div class="cell">
 <details class="code-fold">
@@ -729,8 +753,13 @@ Geodetic CRS:  NAD83
 </div>
 </div>
 </section>
-<section id="reproduce-nyt-figure" class="level2">
-<h2 class="anchored" data-anchor-id="reproduce-nyt-figure">Reproduce NYT Figure</h2>
+<section id="reproducing-the-nyt-figure-trump-vote-share-shift" class="level2">
+<h2 class="anchored" data-anchor-id="reproducing-the-nyt-figure-trump-vote-share-shift">🗺️ Reproducing the NYT Figure: Trump Vote Share Shift</h2>
+<p>To visualize the shift in Trump’s vote share from 2020 to 2024, we created a county-level map similar to the one used by The New York Times. The process involved several key steps:</p>
+<p><strong>Shapefile Processing:</strong> We started by loading a shapefile of U.S. counties and reprojected it into the correct coordinate reference system (CRS).</p>
+<p><strong>Vote Share Calculation:</strong> Next, we calculated the percentage of votes Trump received in 2020 and 2024 for each county, followed by determining the shift in vote share (2024 vs.&nbsp;2020).</p>
+<p><strong>Map Creation:</strong> We used ggplot2 to create a map, where each county’s color represents the percentage shift in Trump’s vote share: blue for a shift away from Trump and red for a shift toward him.</p>
+<p><strong>Arrow Visualization:</strong> To further highlight shifts, arrows were added to show the direction and magnitude of change. Counties with a larger shift towards Trump were represented by longer arrows.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Show Code</summary>
@@ -841,15 +870,8 @@ Geodetic CRS:  NAD83</code></pre>
 </figure>
 </div>
 </div>
-<details class="code-fold">
-<summary>Show Code</summary>
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">aes</span>(<span class="at">color =</span> shift_pct <span class="sc">&gt;</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>Aesthetic mapping: 
-* `colour` -&gt; `shift_pct &gt; 0`</code></pre>
 </div>
-</div>
+<p>This map clearly illustrates the geographical variation in voting patterns and provides a visual representation of Trump’s support change over the two election cycles.</p>
 
 
 </section>
