@@ -421,7 +421,11 @@ shift_table <- election_table |>
   select(state, county_name, trump_shift, trump_votes_2020, trump_votes_2024)
 
 # Show the county or counties with the largest shift towards Trump (in absolute terms)
-head(shift_table, 10) 
+shift_table_head <- head(shift_table, 10)
+
+# Display the top 10 counties 
+shift_table_head |>
+  kable(digits = 0, caption = "Top 10 Counties with the Largest Shift Towards Trump (2020-2024)", format = "markdown")
 ```
 
 **4. Which state had the largest shift towards Harris (or smallest shift towards Trump) in 2024? (Note that the total votes for a state can be obtained by summing all counties in that state.)**
@@ -450,8 +454,9 @@ state_with_largest_harris_shift <- state_shift_table |>
   slice(1) |>
   select(state, harris_shift, trump_shift)
 
-# Display the result
-state_with_largest_harris_shift
+# Display 
+state_with_largest_harris_shift |>
+  kable(digits = 0, caption = "State with the Largest Shift Towards Harris (2024)", format = "markdown")
 ```
 
 **5. What is the largest county, by area, in this data set?**
@@ -461,18 +466,16 @@ state_with_largest_harris_shift
 #| warning: false
 #| message: false
 
-library(dplyr)
-library(sf)
-
-# Step 1: Calculate the area for each county
+# Calculate the area for each county
 largest_county_by_area <- election_geo |>
   mutate(area = st_area(geometry)) |>
   arrange(desc(area)) |>
   slice(1) |>
   select(county_name, state, area)
 
-# Display the result
-largest_county_by_area
+# Display 
+largest_county_by_area |>
+  kable(digits = 0, caption = "Largest County by Area", format = "markdown")
 ```
 
 **6. Which county has the highest voter density (voters per unit of area) in 2020?**
@@ -492,19 +495,19 @@ voter_density_table <- election_geo |>
   slice(1) |>
   select(county_name, state, voter_density_2020, area, total_votes_2020)
 
-# Display the result
-voter_density_table
+# Display 
+voter_density_table |>
+  kable(digits = c(0, 0, 2, 0, 0), caption = "County with Highest Voter Density (2020)", format = "markdown")
 ```
 
 **7. Which county had the largest increase in voter turnout in 2024?**
-
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
 #| warning: false
 #| message: false
 
-# Step 1: Calculate the change in voter turnout from 2020 to 2024
+# Calculate the change in voter turnout from 2020 to 2024
 turnout_increase_table <- election_geo |>
   mutate(
     turnout_increase = as.numeric(total_votes_2024) - as.numeric(total_votes_2020)  # Calculate increase in turnout
@@ -513,8 +516,9 @@ turnout_increase_table <- election_geo |>
   slice(1) |>
   select(county_name, state, total_votes_2020, total_votes_2024, turnout_increase)
 
-# Display the result
-turnout_increase_table
+# Display 
+turnout_increase_table |>
+  kable(digits = c(0, 0, 0, 0, 0), caption = "County with the Largest Increase in Voter Turnout (2020 to 2024)", format = "markdown")
 ```
 
 ## 🗺️ Reproducing the NYT Figure: Trump Vote Share Shift
