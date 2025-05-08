@@ -354,7 +354,10 @@ most_trump_votes_2024 <- election_geo |>
   slice(1) |>
   select(county_name, trump_votes_2024)
 
-most_trump_votes_2024
+# Display the county with the most Trump votes in 2024
+most_trump_votes_2024 |>
+  st_drop_geometry() |>
+  kable(digits = 0, caption = "County with the Most Trump Votes in 2024", format = "markdown")
 ```
 
 **2. Which county or counties cast the most votes for Biden (as a fraction of total votes cast) in 2020?**
@@ -364,9 +367,9 @@ most_trump_votes_2024
 #| warning: false
 #| message: false
 
-# Convert relevant vote columns to numeric and remove geometry
+# Convert relevant vote columns to numeric
 election_table <- election_geo |>
-  st_drop_geometry() |>  # Remove geometry for a simpler table
+  st_drop_geometry() |>  
   mutate(across(contains("votes"), ~ as.numeric(gsub(",", "", .))))
 
 # Calculate Biden vote fraction (as a percentage)
@@ -377,7 +380,11 @@ biden_fraction_table <- election_table |>
   select(state, county_name, biden_fraction_2020, total_votes_2020)
 
 # Show the top 10 counties 
-head(biden_fraction_table, 10)
+top_biden_counties_table <- head(biden_fraction_table, 10) |> 
+  kable(digits = 2, caption = "Top 10 Counties by Biden Vote Share (2020)", format = "markdown")
+
+# Print the table
+top_biden_counties_table
 
 # Take top 10 for plotting
 top_biden_counties <- biden_fraction_table |> slice_max(biden_fraction_2020, n = 10)
@@ -393,7 +400,6 @@ ggplot(top_biden_counties, aes(x = reorder(paste(county_name, state, sep = ", ")
     y = "Biden Vote Share (%)"
   ) +
   theme_minimal()
-
 ```
 
 **3. Which county or counties had the largest shift towards Trump (in absolute terms) in 2024?**
