@@ -39,6 +39,7 @@ library(readr)
 library(ggplot2)
 library(arrow)  
 library(janitor)
+library(knitr)
 ```
 
 ## 🗂️ Data Acquisition
@@ -207,8 +208,10 @@ cleaned_data_2024 <- combined_data_2024 |>
   ) |>
   select(state, county_name, trump_votes, harris_votes, total_votes)
 
-# View cleaned data
-head(cleaned_data_2024)
+# Display 
+cleaned_data_2024 |>
+  slice_head(n = 10) |>
+  kable(digits = 0, caption = "2024 County-Level Results", format = "markdown")
 ```
 
 ### 🕰️ 2020 County-Level Election Results
@@ -291,8 +294,12 @@ cleaned_data_2020 <- combined_data_2020 |>
   ) |>
   select(state, county_name, trump_votes, biden_votes, total_votes)
 
-# View result
-head(cleaned_data_2020)
+library(knitr)
+
+# Display a clean sample table from cleaned_data_2020
+cleaned_data_2020 |>
+  slice_head(n = 10) |>
+  kable(digits = 0, caption = "2020 County-Level Results", format = "markdown")
 ```
 
 ### 🔗 Joining the Data
