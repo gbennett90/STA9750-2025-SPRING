@@ -435,23 +435,6 @@ subject_variation |>
 **Insight:** The dataset reveals significant variation in Weighted Index Scores (WIS) across different subjects: SCIENCE, MATH, ELA, and Combined. SCIENCE shows the highest variation, with a standard deviation of 59.82 and a variance of 3578.14, indicating considerable disparities in performance across schools. MATH follows closely with a standard deviation of 47.14 and variance of 2221.72, suggesting notable variability. ELA displays moderate variation, with a standard deviation of 44.17 and variance of 1951.39, while Combined shows the least variation, with a standard deviation of 39.50 and variance of 1560.58, likely due to the averaging of scores across subjects. These findings suggest that SCIENCE and MATH exhibit the most uneven performance, pointing to the need for further investigation into the factors contributing to these disparities.
 
 
-
-```{r}
-#| code-fold: true
-#| code-summary: "Show Code"
-#| warning: false
-#| message: false
-
-```
-
-```{r}
-#| code-fold: true
-#| code-summary: "Show Code"
-#| warning: false
-#| message: false
-
-```
-
 ```{r}
 #| code-fold: true
 #| code-summary: "Show Code"
