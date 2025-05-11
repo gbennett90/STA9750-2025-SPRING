@@ -1,0 +1,478 @@
+---
+title: "Education Funding Analysis: Gisell Bennett"
+format:
+  html:
+    css: style.css
+    theme: flatly
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+```{r}
+#| label: Load Libraries
+#| include: false
+
+# Load the necessary libraries
+library(tidyverse)
+library(tidyr)
+library(readxl)
+library(janitor)
+library(knitr)
+library(ggalt)
+library(scales)
+library(DBI)
+library(odbc)
+```
+
+::: content-box
+# Introduction
+
+Growing up in New York City can be an exciting experience, but for many students in underserved communities, the quality of education remains a persistent concern. Disparities in school funding across districts have long raised questions about their immediate effects on student achievement. Inadequate funding often results in larger class sizes, limited access to academic resources, and fewer support programs—all of which can hinder students' ability to succeed in the short term. These conditions negatively impact test preparation, classroom engagement, and ultimately, performance on standardized assessments such as the Regents, SAT, and ACT, as well as overall GPA. This analysis focuses on exploring the correlation between school funding levels and short-term academic success across New York City school districts, using relevant data to evaluate how financial inequities shape early educational outcomes.
+
+## Existing Research
+
+Before diving into the NYC-specific analysis, it is important to understand what existing research reveals about this issue. The ***2025*** report ***Does Money Matter in Education?*** by the ***Albert Shanker Institute*** reinforces the connection between increased school funding and improved academic outcomes. The report finds that targeted investments in public education—particularly in low-income communities—lead to higher test scores, better student engagement, and stronger graduation rates. These improvements are especially significant for historically underfunded districts, where even modest funding increases can yield meaningful gains. In the context of New York City, where school funding varies widely between districts, these findings underscore the importance of analyzing how budget disparities influence short-term academic indicators such as Regents scores, SAT/ACT performance, and GPA.
+
+Further reinforcing this connection, the ***National Education Association’s (NEA)*** report ***Money Matters*** highlights the positive impact of school funding on student achievement, especially for minority and economically disadvantaged students. The report notes that underfunded schools often face challenges such as overcrowded classrooms, high teacher turnover, and a lack of educational resources—all of which contribute to lower academic performance. These systemic issues are particularly pronounced in New York City, where some districts consistently receive fewer resources than others. As this analysis will demonstrate, variations in school funding are directly tied to short-term academic metrics. Understanding these relationships is essential to advocating for more equitable funding policies that support early student success and reduce educational gaps across the city.
+
+## National Center for Education Statistics (NCES)
+
+I pulled data from the ***National Center for Education Statistics (NCES)*** website, which provides detailed financial information about public elementary and secondary schools across the United States. The dataset includes metrics such as total revenue per student, federal, state, and local revenue distributions, and school-level details including district names, school levels, and geographic information. This data is crucial for my project, which focuses on analyzing the allocation of school funding and its impact on educational outcomes, particularly in underserved communities. By examining the financial breakdowns across different districts and comparing them with school performance metrics, I aim to identify trends and potential inefficiencies in how funding is distributed. The financial data provided by ***NCES*** serves as a foundation for these analyses, allowing for a better understanding of how funding correlates with educational performance at both the district and school levels.
+
+```{r}
+#| label: Other Characteristics
+#| message: false
+#| warning: false
+#| code-fold: true
+#| code-summary: Show Code
+
+# File path
+file_path1 <- "C:/Users/benne/OneDrive/Documents/STA9750-2025-SPRING/ncesdata_8E07F4C8.xlsx"
+
+# Load the Excel file
+df1 <- read_excel(file_path1)
+
+# Clean column names
+df1_cleaned <- df1 |>
+  clean_names()
+
+# Convert column names to uppercase
+names(df1_cleaned) <- toupper(names(df1_cleaned))
+
+# Define columns to remove
+columns_to_remove <- c(
+  "FIPST", "MSTATE", "GSLO", "GSHI", "A_TYPE", "DISTLOCALE", 
+  "SCHOOL_LEVEL", "LOCALE_CODE", "LOCALE_TEXT", "DATA_TYPE", 
+  "MSC", "MSC_TEXT", "TYPE_CODE", "TYPE_TEXT"
+)
+
+# Drop unnecessary columns
+df1_reduced <- df1_cleaned |>
+  select(-all_of(columns_to_remove)) |>
+  rename(
+    `District ID` = LEAID,
+    `District Name` = NAME,
+    `State Name` = FIPST_NAME,
+    `Poverty Percentage` = PERCENT_POVERTY
+  ) |>
+  mutate(
+    `Poverty Percentage` = ifelse(
+      is.na(as.numeric(`Poverty Percentage`)),
+      NA,
+      sprintf("%.1f%%", as.numeric(`Poverty Percentage`))
+    )
+  )
+
+
+# Preview cleaned dataset
+df1_reduced |> 
+  head() |> 
+  kable(format = "markdown", caption = "New York School District Characteristics")
+```
+
+**Insight:** This dataset allows you to understand the level of poverty in various school districts, which could serve as a key indicator of resource allocation or academic performance challenges.
+
+```{r}
+#| label: Revenue Per Student
+#| message: false
+#| warning: false
+#| code-fold: true
+#| code-summary: Show Code
+
+# File path
+file_path2 <- "C:/Users/benne/OneDrive/Documents/STA9750-2025-SPRING/ncesdata_9713EF8D.xlsx"
+
+# Load and clean data
+df2_cleaned <- read_excel(file_path2) |>
+  clean_names()
+
+# Convert column names to uppercase
+names(df2_cleaned) <- toupper(names(df2_cleaned))
+
+# Remove unnecessary columns
+df2_cleaned <- df2_cleaned |>
+  select(-c("STATE", "SCHOOL_LEVEL", "GRADE_SPAN_LOW", "GRADE_SPAN_HIGH"))
+
+# Rename selected columns
+df2_cleaned <- df2_cleaned |>
+  rename(
+    `District ID` = LEAID,
+    `District Name` = DISTRICT_NAME,
+    `ZIP Code` = ZIP_CODE,
+    `Total Expenditure Per Student` = TOTAL_CURRENT_EXPENDITURES_PER_STUDENT,
+    `Instructional Expenditure Per Student` = INSTRUCTIONAL_EXPENDITURES_PER_STUDENT,
+    `Support Expenditure Per Student` = STUDENTAND_STAFF_SUPPORT_PER_STUDENT,
+    `Administration Expenditure Per Student` = ADMINISTRATION_PER_STUDENT,
+    `Operations Expenditure Per Student` = OPERATIONS_PER_STUDENT,
+    `Fall Membership` = V33
+  )
+
+# Round numeric expenditure columns
+df2_cleaned <- df2_cleaned |>
+  mutate(across(
+    c(
+      `Total Expenditure Per Student`,
+      `Instructional Expenditure Per Student`,
+      `Support Expenditure Per Student`,
+      `Administration Expenditure Per Student`,
+      `Operations Expenditure Per Student`
+    ),
+    ~ round(as.numeric(.), 2)
+  ))
+
+# Preview the cleaned dataset
+df2_cleaned |>
+  head() |>
+  kable(format = "markdown", caption = "New York School Expenditure Per Student")
+```
+
+**Insight:** This dataset highlights how much money is spent per student in different categories across districts. It helps analyze financial prioritization and resource allocation. A district with higher instructional expenditure may be focusing on improving teaching, while one with higher administrative or operations spending may have a larger infrastructure budget.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+# File path
+file_path3 <- "C:/Users/benne/OneDrive/Documents/STA9750-2025-SPRING/ncesdata_22B97CF4 (1).xlsx"
+
+# Load the Excel file
+df3 <- read_excel(file_path3)
+
+# Clean column names
+df3_cleaned <- df3 |>
+  janitor::clean_names()
+
+# Convert column names to uppercase
+names(df3_cleaned) <- toupper(names(df3_cleaned))
+
+# Remove irrelevant columns
+columns_to_remove <- c("STATE", "SCHOOL_LEVEL", "GRADE_SPAN_LOW", "GRADE_SPAN_HIGH")
+df3_cleaned <- df3_cleaned |>
+  select(-all_of(columns_to_remove))
+
+# Rename columns to match style from previous datasets
+df3_cleaned <- df3_cleaned |>
+  rename(
+    `District ID` = LEAID,
+    `District Name` = DISTRICT_NAME,
+    `ZIP Code` = ZIP_CODE,
+    `Total Revenue Per Student` = TOTAL_REVENUE_PER_STUDENT,
+    `Federal Revenue Per Student` = TOTAL_FEDERAL_REVENUE_PER_STUDENT,
+    `Local Revenue Per Student` = TOTAL_LOCAL_REVENUE_PER_STUDENT,
+    `State Revenue Per Student` = TOTAL_STATE_REVENUE_PER_STUDENT
+  )
+
+# Format revenue columns to 2 decimal places
+df3_cleaned <- df3_cleaned |>
+  mutate(across(
+    c(`Total Revenue Per Student`, `Federal Revenue Per Student`, `Local Revenue Per Student`, `State Revenue Per Student`),
+    ~ sprintf("%.2f", as.numeric(.))
+  ))
+
+# Preview the cleaned and formatted dataset
+head(df3_cleaned) |>
+  knitr::kable(format = "markdown", caption = "Per-Student Revenue by District")
+```
+
+**Insight:** This dataset provides a breakdown of revenue sources, which can reveal disparities between districts. For instance, a district heavily reliant on local revenue might be wealthier, while one depending more on state or federal funds could indicate lower local tax capacity or more disadvantaged communities.
+
+**Key Observations Across Datasets:**
+
+**Poverty vs. Spending:** By combining the characteristics dataset with the expenditure and revenue data, you could explore if districts with higher poverty percentages are spending more or less per student in specific areas like instruction or support.
+
+**Revenue Source Distribution:** Some districts might receive more federal revenue due to socioeconomic conditions, while others may rely heavily on local taxes. Understanding the revenue source mix is essential for analyzing funding disparities.
+
+**Financial Priorities:** The differences between total expenditure, instructional spending, and support spending could point to how different districts prioritize their budgets, especially when looking at those with high poverty rates.
+
+```{r}
+#| label: Join Dataset
+#| message: false
+#| warning: false
+#| code-fold: true
+#| code-summary: Show Code
+
+# Merge datasets by District ID using left_join
+combined_data <- df1_reduced |>
+  left_join(df2_cleaned, by = "District ID") |>
+  left_join(df3_cleaned, by = "District ID")
+
+# Drop duplicate columns 
+combined_data <- combined_data |>
+  select(-contains(".x"), -contains(".y"), -`State Name`)
+
+# Clean 
+combined_data <- combined_data |>
+  mutate(`Poverty Percentage` = gsub("%", "", `Poverty Percentage`)) |>
+  mutate(`Poverty Percentage` = as.numeric(`Poverty Percentage`)) |>
+  mutate(`Poverty Percentage` = `Poverty Percentage` / 100) 
+
+# Convert all columns (except 'District ID' and 'District Name') to numeric if they are not already numeric
+combined_data <- combined_data |>
+  mutate(across(-c(`District ID`, `District Name`), as.numeric))
+
+# Rearrange columns so that 'District ID', 'District Name', and 'Fall Membership' are at the front
+combined_data <- combined_data |>
+  select(`District ID`, `District Name`, `Fall Membership`, everything())
+
+# Preview 
+head(combined_data) |>
+  kable(format = "markdown", caption = "NCES Data (Per Student)")
+```
+
+## New York State Education Department (NYSED)
+
+In addition to financial data, I incorporated student achievement data from the ***New York State Education Department (NYSED)***, the agency responsible for setting statewide academic standards and assessing school performance across New York. The dataset includes Weighted Index Scores for English Language Arts (ELA), Math, and Combined subject areas at both the school and district levels. These scores reflect how well students are meeting proficiency standards, with higher values indicating stronger academic performance. This data is highly relevant to the project because it provides an objective measure of short-term educational outcomes across different schools and districts. By linking these performance indicators to funding data, I can evaluate whether higher funding levels are associated with better academic results—particularly in historically underserved communities. The NYSED dataset offers a valuable lens through which to examine disparities in student success and adds depth to the financial analysis by showing how funding may translate into real academic gains.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+# Connect to the database
+con <- dbConnect(odbc::odbc(),
+                 .connection_string = "Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=C:/Users/benne/OneDrive/Documents/STA9750-2025-SPRING/Report Card Database.accdb")
+
+# Load EM performance data and filter for "All Students" and 2024
+em_filtered <- dbReadTable(con, "ACC EM Core and Weighted Performance") |>
+  filter(SUBGROUP_NAME == "All Students", YEAR == "2024") |>
+  select(ENTITY_CD, ENTITY_NAME, SUBJECT, WEIGHTED_INDEX)
+
+# Load HS performance data and filter for "All Students" and 2024
+hs_filtered <- dbReadTable(con, "ACC HS Core and Weighted Performance") |>
+  filter(SUBGROUP_NAME == "All Students", YEAR == "2024") |>
+  select(ENTITY_CD, ENTITY_NAME, SUBJECT, WEIGHTED_INDEX)
+
+# Combine both filtered datasets into one
+combined_perf <- bind_rows(em_filtered, hs_filtered)
+
+# Show a preview 
+combined_perf |> 
+  head() |> 
+  kable(caption = "Performance Data (All Students, 2024)")
+```
+**Insight:** The preview data from the New York State Education Department (NYSED) displays Weighted Index Scores for academic performance in English Language Arts (ELA), Math, and a Combined category across different schools and districts. For instance, Albany City School District shows a consistent score of 100.9 across all subjects, which serves as a baseline average. In contrast, Montessori Magnet School, a school within the same district, significantly outperforms the district with scores of 147.4 in ELA, 158.1 in Math, and 152.8 Combined. These higher scores suggest that certain schools—often with specialized programs—may achieve stronger student outcomes than the district average. This snapshot helps illustrate early evidence of achievement gaps within districts, emphasizing the need to investigate how funding, school type, and resource allocation contribute to performance differences.
+
+## 🎯 Key Questions
+
+**1. Which NYC school districts have the highest poverty rates?**
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+# Top 10 school districts by poverty percentage
+top_10_poverty <- combined_data |>
+  arrange(desc(`Poverty Percentage`)) |>
+  slice_head(n = 10) |>
+  select(`District Name`, `Poverty Percentage`)
+
+# Display the top 10 districts using kable
+top_10_poverty |>
+  kable(format = "markdown", caption = "Top 10 School Districts by Poverty Rate")
+```
+
+**2. Do high-poverty districts spend less on instruction per student?**
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+# Scatter plot with a regression line
+combined_data |>
+  ggplot(aes(x = `Poverty Percentage`, y = `Total Expenditure Per Student`)) +
+  geom_point(alpha = 0.5) +  # Points with some transparency
+  geom_smooth(method = "lm", color = "blue", se = FALSE) +  # Linear regression line
+  labs(title = "Relationship between Poverty Rate and Total Expenditure Per Student",
+       x = "Poverty Percentage",
+       y = "Total Expenditure Per Student") +
+  theme_minimal()
+
+# Compute correlation between poverty percentage and total expenditure per student
+correlation <- cor(combined_data$`Poverty Percentage`, combined_data$`Total Expenditure Per Student`, use = "complete.obs")
+cat("Correlation between Poverty Percentage and Total Expenditure Per Student:", correlation)
+```
+**Insight:** The analysis found a weak positive correlation of 0.1487 between poverty percentage and total expenditure per student in NYC school districts. This suggests that while districts with higher poverty rates tend to spend slightly more per student, the relationship is not strong. This highlights that factors beyond poverty, such as district wealth and funding sources, likely influence spending more significantly. This finding helps my analysis by emphasizing that poverty alone does not fully explain variations in educational spending.
+
+**3. What are the extremes?**
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+# Remove rows where Total Revenue Per Student is 0
+combined_data_non_zero <- combined_data |>
+  filter(`Total Revenue Per Student` != 0)
+
+# Sort the data in descending order by Total Revenue Per Student and select the top 10 highest values
+top_10_extremes <- combined_data_non_zero |>
+  arrange(desc(`Total Revenue Per Student`)) |>
+  head(10) # top 10 highest values
+
+# Sort the data in ascending order by Total Revenue Per Student and select the top 10 lowest values
+bottom_10_extremes <- combined_data_non_zero |>
+  arrange(`Total Revenue Per Student`) |>
+  head(10) # top 10 lowest values
+
+# Display the extremes
+top_10_extremes |>
+  select(`District Name`, `Total Revenue Per Student`) |>
+  kable(format = "markdown", caption = "Top 10 Highest Total Revenue Per Student")
+
+bottom_10_extremes |>
+  select(`District Name`, `Total Revenue Per Student`) |>
+  kable(format = "markdown", caption = "Top 10 Lowest Total Revenue Per Student")
+```
+
+**4.  What trade-offs exist in spending categories?**
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+# Calculate spending proportions relative to Total Revenue Per Student
+combined_data <- combined_data |>
+  mutate(
+    Proportion_Federal = `Federal Revenue Per Student` / `Total Revenue Per Student`,
+    Proportion_State = `State Revenue Per Student` / `Total Revenue Per Student`,
+    Proportion_Local = `Local Revenue Per Student` / `Total Revenue Per Student`
+  )
+
+# Calculate correlations between different funding sources
+correlations <- combined_data |>
+  select(Proportion_Federal, Proportion_State, Proportion_Local) |>
+  cor(use = "complete.obs") 
+
+# Plot the relationships between different funding categories
+library(ggplot2)
+
+# Plot Proportions of Federal, State, and Local Spending
+ggplot(combined_data, aes(x = Proportion_Federal, y = Proportion_State)) +
+  geom_point(aes(color = Proportion_Local)) +
+  labs(
+    title = "Federal vs. State Spending Proportions",
+    x = "Proportion of Federal Spending",
+    y = "Proportion of State Spending",
+    color = "Proportion of Local Spending"
+  ) +
+  theme_minimal()
+
+# Show correlation results as a table using kable
+correlations |> kable(format = "markdown", caption = "Correlation Between Spending Proportions")
+
+# Summary of Total Spending by Category
+spending_summary <- combined_data |>
+  summarise(
+    Total_Federal_Spending = sum(`Federal Revenue Per Student`, na.rm = TRUE),
+    Total_State_Spending = sum(`State Revenue Per Student`, na.rm = TRUE),
+    Total_Local_Spending = sum(`Local Revenue Per Student`, na.rm = TRUE),
+    Total_Revenue = sum(`Total Revenue Per Student`, na.rm = TRUE)
+  )
+
+# Display the total spending summary
+spending_summary |> kable(format = "markdown", caption = "Total Spending by Category")
+```
+**Insight:** Correlations: There is a moderate positive correlation between federal and state funding proportions (0.575), indicating that districts with higher federal funding also tend to receive more state funding. In contrast, there is a strong negative correlation between local and state funding (-0.976), suggesting that as state funding increases, districts reduce their reliance on local funds. Additionally, federal and local funding have a moderate negative correlation (-0.738), implying that districts with higher federal funding tend to rely less on local funding.
+
+Total Spending: Local funding accounts for the largest share of total revenue across districts, followed by state and federal contributions. This indicates that local taxes play a significant role in financing schools, while federal funds make up the smallest portion.
+
+**Key Takeaway:**
+The strong trade-off between state and local funding suggests that districts balance their reliance on these sources, with the amount of federal funding influencing local funding decisions. Understanding these dynamics helps identify disparities and guide policy decisions for more equitable school funding.
+
+**5. Which subject (ELA, Math, or Combined) shows the greatest variation in WIS across schools?**
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+# Group by Subject and calculate standard deviation and variance
+subject_variation <- combined_perf |>
+  group_by(SUBJECT) |>
+  summarise(
+    Std_Dev = sd(WEIGHTED_INDEX, na.rm = TRUE),  # Standard deviation for WIS
+    Variance = var(WEIGHTED_INDEX, na.rm = TRUE)  # Variance for WIS
+  ) |>
+  arrange(desc(Std_Dev))  # Sort by Standard Deviation
+
+# Display the result
+subject_variation |> 
+  kable(caption = "Variation in WIS Across Subjects")
+```
+**Insight:** The dataset reveals significant variation in Weighted Index Scores (WIS) across different subjects: SCIENCE, MATH, ELA, and Combined. SCIENCE shows the highest variation, with a standard deviation of 59.82 and a variance of 3578.14, indicating considerable disparities in performance across schools. MATH follows closely with a standard deviation of 47.14 and variance of 2221.72, suggesting notable variability. ELA displays moderate variation, with a standard deviation of 44.17 and variance of 1951.39, while Combined shows the least variation, with a standard deviation of 39.50 and variance of 1560.58, likely due to the averaging of scores across subjects. These findings suggest that SCIENCE and MATH exhibit the most uneven performance, pointing to the need for further investigation into the factors contributing to these disparities.
+
+
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+```
+:::
