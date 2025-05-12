@@ -96,7 +96,6 @@ df1_reduced |>
   head() |> 
   kable(format = "markdown", caption = "New York School District Characteristics")
 ```
-
 **Insight:** This dataset allows you to understand the level of poverty in various school districts, which could serve as a key indicator of resource allocation or academic performance challenges.
 
 ```{r}
@@ -152,7 +151,6 @@ df2_cleaned |>
   head() |>
   kable(format = "markdown", caption = "New York School Expenditure Per Student")
 ```
-
 **Insight:** This dataset highlights how much money is spent per student in different categories across districts. It helps analyze financial prioritization and resource allocation. A district with higher instructional expenditure may be focusing on improving teaching, while one with higher administrative or operations spending may have a larger infrastructure budget.
 
 ```{r}
@@ -202,7 +200,6 @@ df3_cleaned <- df3_cleaned |>
 head(df3_cleaned) |>
   knitr::kable(format = "markdown", caption = "Per-Student Revenue by District")
 ```
-
 **Insight:** This dataset provides a breakdown of revenue sources, which can reveal disparities between districts. For instance, a district heavily reliant on local revenue might be wealthier, while one depending more on state or federal funds could indicate lower local tax capacity or more disadvantaged communities.
 
 # 🔍 Key Observations Across Datasets
@@ -358,6 +355,7 @@ bottom_10_extremes |>
   select(`District Name`, `Total Revenue Per Student`) |>
   kable(format = "markdown", caption = "Top 10 Lowest Total Revenue Per Student")
 ```
+**Insight:** Kiryas Joel, a small district serving a Hasidic Jewish community with a focus on special education, receives over $659,000 per student—driven by intensive services, state reimbursements, and legal decisions affirming separate schooling for religious and special-needs students. In contrast, Starpoint, a general education district, receives around $21,000 per student. This stark funding gap underscores how district type, student demographics, and political context shape both funding and academic outcomes.
 
 **4.  What trade-offs exist in spending categories?**
 
@@ -439,14 +437,13 @@ subject_variation |>
 ```
 **Insight:** The dataset reveals significant variation in Weighted Index Scores (WIS) across different subjects: SCIENCE, MATH, ELA, and Combined. SCIENCE shows the highest variation, with a standard deviation of 59.82 and a variance of 3578.14, indicating considerable disparities in performance across schools. MATH follows closely with a standard deviation of 47.14 and variance of 2221.72, suggesting notable variability. ELA displays moderate variation, with a standard deviation of 44.17 and variance of 1951.39, while Combined shows the least variation, with a standard deviation of 39.50 and variance of 1560.58, likely due to the averaging of scores across subjects. These findings suggest that SCIENCE and MATH exhibit the most uneven performance, pointing to the need for further investigation into the factors contributing to these disparities.
 
-# 📘 Conclusion: The Uneven Price of Opportunity
-This analysis confirms a strong correlation between the distribution of school funding and short-term educational outcomes across NYC districts. Districts with higher per-pupil spending, such as Bayside and Forest Hills, consistently show better performance on key academic indicators like Regents exam scores, SAT/ACT participation, and average GPA. In contrast, underserved communities like Jamaica and Hollis, which face lower funding despite higher poverty rates, demonstrate significantly lower student achievement across the same metrics.
+# 📘 Conclusion: Good grades are more complex than just money!
 
-Visualizations from the NCES data reinforce this disparity: scatterplots show that districts with low funding and high poverty tend to fall in the bottom-left quadrant, indicating both resource constraints and weaker outcomes. Bar charts rank districts by per-student funding, exposing a stark gap between the most and least supported areas. These patterns are further validated by external reports, which reveal that schools in areas like Jamaica offer fewer advanced courses, have less experienced staff, and struggle with early-grade proficiency in reading and math.
+Our analysis finds a clear and consistent relationship between school funding and short-term academic outcomes across New York City districts. Generally, districts with higher per-pupil spending tend to report stronger performance on standardized tests such as the SAT and Regents exams, as well as higher average GPAs. This suggests that investment in public education—whether through hiring more qualified teachers, expanding student support services, or reducing class sizes—can directly benefit student achievement.
 
-In the short term, these inequities manifest as lower test performance, reduced college readiness, and limited academic engagement. Students in underfunded schools begin falling behind as early as 4th grade, with only 37% reaching math proficiency in some areas, compared to over 80% in wealthier districts. These gaps suggest that the effects of unequal funding are immediate and measurable, not just long-term or theoretical.
+However, funding alone does not fully explain disparities in academic success. Many underfunded districts demonstrate pockets of strong performance, while some well-funded districts still face challenges. This highlights the influence of other key factors, such as parental involvement, student mental and physical health, school leadership, community stability, and access to enrichment opportunities outside the classroom. These dimensions play a critical role in shaping educational outcomes and should not be overlooked.
 
-In sum, the current distribution of school funding in NYC directly impacts academic success in underserved communities, limiting educational opportunities and reinforcing cycles of disadvantage. Addressing this funding gap is not only a matter of fairness but a necessary step toward ensuring that all students — regardless of their ZIP code — can access a high-quality education.
+Ultimately, while equitable funding is a necessary foundation for academic success, it is most effective when paired with holistic support systems that address the broader social and economic conditions students face. Future policy efforts should consider both financial investment and targeted interventions to ensure all students have the resources and conditions they need to thrive.
 
 # 📚 References
 
@@ -461,4 +458,24 @@ In sum, the current distribution of school funding in NYC directly impacts acade
 ***Reardon, S. F., Kalogrides, D., & Shores, K. (2019). The Geography of Racial/Ethnic Test Score Gaps. Stanford Center for Education Policy Analysis. https://cepa.stanford.edu***
 
 ***New York City Department of Education. (2023). School District Data. https://www.schools.nyc.gov/about-us/reports***
+
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+```
+
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+```
+
 :::
+
