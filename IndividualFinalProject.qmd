@@ -1,5 +1,6 @@
 ---
-title: "Education Funding Analysis: Gisell Bennett"
+title: "Funding Vs. Education"
+author: "Gisell Bennett"
 format:
   html:
     css: style.css
