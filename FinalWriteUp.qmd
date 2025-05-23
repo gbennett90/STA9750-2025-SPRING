@@ -1,6 +1,6 @@
 ---
 title: "Funding Vs. Education"
-author: "The Lit Group: Gisell Bennett"
+author: "The Lit Group"
 format:
   html:
     css: style.css
