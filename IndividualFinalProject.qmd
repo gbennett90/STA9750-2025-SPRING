@@ -349,7 +349,7 @@ ggplot(federal_data, aes(x = reorder(`District Name`, `Federal Revenue Per Stude
     y = "Federal Revenue Per Student (USD)",
     fill = "Funding Rank"
   ) +
-  theme_minimal(base_size = 9) +
+  theme_minimal(base_size = 8) +
   theme(axis.text.y = element_text(size = 5))
 ```
 **Description:**This figure visualizes the Top 10 and Bottom 10 U.S. school districts based on Federal Revenue Per Student, excluding any districts that report zero federal funding. The chart uses color to distinguish the highest-funded (orange) from the lowest-funded (blue) districts and formats revenue figures in "K" notation (e.g., $3K) for improved readability and to avoid label overlap.
@@ -398,6 +398,11 @@ ggplot(state_data, aes(x = reorder(`District Name`, `State Revenue Per Student`)
 ```
 
 **Description:** This visualization compares the top 10 and bottom 10 school districts based on state revenue per student, using filtered data that excludes any district reporting zero or missing revenue. Each bar represents per-student state funding, formatted in thousands for clarity. The chart offers a clear contrast between districts receiving substantial support from state budgets and those with the least assistance.
+
+**Key Observation**
+
+**Kiryas Joel Village Union Free School District** consistently stands out as an outlier with significantly higher revenue per student from state, federal, and local sources compared to other districts. This elevated funding reflects the district’s unique educational mission serving a close-knit community with specific religious and cultural needs. The district provides specialized services and programs, including extensive special education support, which contribute to higher per-student costs. Additionally, its smaller size means fixed operational expenses are spread over fewer students, increasing per-student revenue figures. Local community support and relevant policies further contribute to the district’s distinct funding profile. Overall, Kiryas Joel’s funding pattern highlights the tailored educational resources necessary to meet the needs of its unique population.
+
 
 ## New York State Education Department (NYSED)
 
