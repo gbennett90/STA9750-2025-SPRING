@@ -5,10 +5,10 @@ format:
   html:
     css: style.css
     theme: flatly
-toc: true
-toc-depth: 3
+    toc: true
+    toc-depth: 3
+    toc-location: right
 ---
-
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
@@ -256,6 +256,149 @@ head(combined_data) |>
   kable(format = "markdown", caption = "NCES Data (Per Student)")
 ```
 
+
+
+**✨Local Revenue Per Student — Top & Bottom 10**
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+# Filter and rank top 10 and bottom 10 (excluding zeros)
+local_data <- combined_data |>
+  select(`District Name`, `Local Revenue Per Student`) |>
+  filter(!is.na(`Local Revenue Per Student`)) |>
+  
+  # Top 10
+  arrange(desc(`Local Revenue Per Student`)) |>
+  slice_head(n = 10) |>
+  mutate(rank = "Top 10") |>
+  
+  # Bind with Bottom 10 (excluding zeros)
+  bind_rows(
+    combined_data |>
+      select(`District Name`, `Local Revenue Per Student`) |>
+      filter(!is.na(`Local Revenue Per Student`), `Local Revenue Per Student` > 0) |>
+      arrange(`Local Revenue Per Student`) |>
+      slice_head(n = 10) |>
+      mutate(rank = "Bottom 10")
+  ) |>
+  mutate(rank = factor(rank, levels = c("Top 10", "Bottom 10")))
+
+# Plot with shortened labels and adjusted formatting
+ggplot(local_data, aes(x = reorder(`District Name`, `Local Revenue Per Student`), 
+                       y = `Local Revenue Per Student`, fill = rank)) +
+  geom_col() +
+  coord_flip() +
+  scale_fill_manual(values = c("Top 10" = "orange", "Bottom 10" = "blue")) +
+  scale_y_continuous(labels = label_number(scale = 1e-3, suffix = "K", accuracy = 1)) +
+  labs(
+    title = "Top 10 and Bottom 10 Districts",
+    x = "District Name",
+    y = "Local Revenue Per Student (in Thousands)",
+    fill = "Funding Rank"
+  ) +
+  theme_minimal() +
+  theme(axis.text.y = element_text(size = 6))
+```
+**Description:** This figure compares the top 10 and bottom 10 U.S. school districts in terms of local revenue per student. Districts with missing or zero revenue values have been excluded to ensure accurate comparisons. The bars are color-coded, with orange representing the top 10 highest-funded districts and blue representing the bottom 10 lowest-funded ones. This visualization helps highlight disparities in local funding across school districts and can guide further investigation into the underlying factors contributing to these differences.
+
+
+
+**✏️Federal Revenue Per Student — Top & Bottom 10**
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+# Filter for top and bottom 10 districts with federal revenue > 0
+top_federal <- combined_data |>
+  select(`District Name`, `Federal Revenue Per Student`) |>
+  mutate(`Federal Revenue Per Student` = as.numeric(`Federal Revenue Per Student`)) |>
+  filter(!is.na(`Federal Revenue Per Student`), `Federal Revenue Per Student` > 0) |>
+  arrange(desc(`Federal Revenue Per Student`)) |>
+  slice_head(n = 10) |>
+  mutate(rank = "Top 10")
+
+bottom_federal <- combined_data |>
+  select(`District Name`, `Federal Revenue Per Student`) |>
+  mutate(`Federal Revenue Per Student` = as.numeric(`Federal Revenue Per Student`)) |>
+  filter(!is.na(`Federal Revenue Per Student`), `Federal Revenue Per Student` > 0) |>
+  arrange(`Federal Revenue Per Student`) |>
+  slice_head(n = 10) |>
+  mutate(rank = "Bottom 10")
+
+# Combine top and bottom data
+federal_data <- bind_rows(top_federal, bottom_federal) |>
+  mutate(rank = factor(rank, levels = c("Top 10", "Bottom 10")))
+
+# Plot
+ggplot(federal_data, aes(x = reorder(`District Name`, `Federal Revenue Per Student`), 
+                         y = `Federal Revenue Per Student`, fill = rank)) +
+  geom_col() +
+  coord_flip() +
+  scale_fill_manual(values = c("Top 10" = "orange", "Bottom 10" = "blue")) +
+  scale_y_continuous(labels = label_number(scale = 1e-3, suffix = "K")) +
+  labs(
+    title = "Top 10 and Bottom 10",
+    x = "District Name",
+    y = "Federal Revenue Per Student (USD)",
+    fill = "Funding Rank"
+  ) +
+  theme_minimal(base_size = 9) +
+  theme(axis.text.y = element_text(size = 5))
+```
+**Description:**This figure visualizes the Top 10 and Bottom 10 U.S. school districts based on Federal Revenue Per Student, excluding any districts that report zero federal funding. The chart uses color to distinguish the highest-funded (orange) from the lowest-funded (blue) districts and formats revenue figures in "K" notation (e.g., $3K) for improved readability and to avoid label overlap.
+
+
+
+**State Revenue Per Student — Top & Bottom 10**
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| warning: false
+#| message: false
+
+# Prepare State Revenue Data (exclude 0s, get top and bottom 10)
+state_data <- combined_data |>
+  select(`District Name`, `State Revenue Per Student`) |>
+  filter(!is.na(`State Revenue Per Student`), `State Revenue Per Student` > 0) |>
+  arrange(desc(`State Revenue Per Student`)) |>
+  slice_head(n = 10) |>
+  mutate(rank = "Top 10") |>
+  bind_rows(
+    combined_data |>
+      select(`District Name`, `State Revenue Per Student`) |>
+      filter(!is.na(`State Revenue Per Student`), `State Revenue Per Student` > 0) |>
+      arrange(`State Revenue Per Student`) |>
+      slice_head(n = 10) |>
+      mutate(rank = "Bottom 10")
+  ) |>
+  mutate(rank = factor(rank, levels = c("Top 10", "Bottom 10")))
+
+# Plotting
+ggplot(state_data, aes(x = reorder(`District Name`, `State Revenue Per Student`), 
+                       y = `State Revenue Per Student`, fill = rank)) +
+  geom_col() +
+  coord_flip() +
+  scale_fill_manual(values = c("Top 10" = "orange", "Bottom 10" = "blue")) +
+  scale_y_continuous(labels = scales::label_number(scale = 1e-3, suffix = "K")) +
+  labs(
+    title = "Top 10 and Bottom 10",
+    x = "District Name",
+    y = "State Revenue Per Student (USD)",
+    fill = "Funding Rank"
+  ) +
+  theme_minimal()
+```
+
+**Description:** This visualization compares the top 10 and bottom 10 school districts based on state revenue per student, using filtered data that excludes any district reporting zero or missing revenue. Each bar represents per-student state funding, formatted in thousands for clarity. The chart offers a clear contrast between districts receiving substantial support from state budgets and those with the least assistance.
+
 ## New York State Education Department (NYSED)
 
 In addition to financial data, I incorporated student achievement data from the ***New York State Education Department (NYSED)***, the agency responsible for setting statewide academic standards and assessing school performance across New York. The dataset includes Weighted Index Scores for English Language Arts (ELA), Math, and Combined subject areas at both the school and district levels. These scores reflect how well students are meeting proficiency standards, with higher values indicating stronger academic performance. This data is highly relevant to the project because it provides an objective measure of short-term educational outcomes across different schools and districts. By linking these performance indicators to funding data, I can evaluate whether higher funding levels are associated with better academic results—particularly in historically underserved communities. The NYSED dataset offers a valuable lens through which to examine disparities in student success and adds depth to the financial analysis by showing how funding may translate into real academic gains.
@@ -450,7 +593,7 @@ subject_variation |>
 
 # 📘 Conclusion: Good grades are more complex than just money!
 
-Our analysis finds a clear and consistent relationship between school funding and short-term academic outcomes across New York State districts. Generally, districts with higher per-pupil spending tend to report stronger performance on standardized tests such as the SAT and Regents exams, as well as higher average GPAs. This suggests that investment in public education—whether through hiring more qualified teachers, expanding student support services, or reducing class sizes—can directly benefit student achievement.
+My analysis finds a clear and consistent relationship between school funding and short-term academic outcomes across New York State districts. Generally, districts with higher per-pupil spending tend to report stronger performance on standardized tests such as the SAT and Regents exams, as well as higher average GPAs. This suggests that investment in public education—whether through hiring more qualified teachers, expanding student support services, or reducing class sizes—can directly benefit student achievement.
 
 However, funding alone does not fully explain disparities in academic success. Many underfunded districts demonstrate pockets of strong performance, while some well-funded districts still face challenges. This highlights the influence of other key factors, such as parental involvement, student mental and physical health, school leadership, community stability, and access to enrichment opportunities outside the classroom. These dimensions play a critical role in shaping educational outcomes and should not be overlooked.
 
