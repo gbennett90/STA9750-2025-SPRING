@@ -1,6 +1,6 @@
 ---
 title: "Funding Vs. Education"
-author: "The Lit Group"
+author: "The Lit Group: Gisell Bennett"
 format:
   html:
     css: style.css
@@ -11,7 +11,7 @@ format:
 ---
 
 ::: content-box
-# Introduction
+# 📝 Introduction
 
 The distribution of school funding across **New York State (NYS)** districts is a powerful determinant of student success. Funding influences nearly every aspect of education—from classroom size and curriculum quality to the availability of extracurricular programs and student support services. However, school districts across the state do not receive equal financial support. Instead, resource allocation often reflects local wealth and property taxes, which results in a wide variation in educational investment across communities.
 
@@ -20,7 +20,7 @@ This group project aims to explore how these funding differences affect educatio
 By examining patterns in school spending, student performance, and community characteristics, this project seeks to better understand how financial differences shape educational experiences and outcomes across New York State.
 
 
-# What is the correlation between funding levels and student success (e.g test scores, grades)?
+# 📊 What is the correlation between funding levels and student success (e.g test scores, grades)? - Gisell Bennett
 
 Our group conducted an in-depth examination of how differences in school funding influence educational outcomes across school districts, with special attention to communities facing economic challenges. By analyzing a variety of data—such as spending per student, poverty levels, and student achievement measures like test scores and graduation rates—we aimed to understand the broader relationship between financial resources and academic success. The data revealed substantial variation in funding among districts. Some districts allocate significantly more money per student than others, and this financial gap is often linked to differences in educational quality and opportunities. For instance, districts with more funding generally have higher student performance on key assessments and graduation rates, while districts with less funding tend to have lower scores and fewer opportunities for advanced classes or extracurricular programs. These findings highlight how limited financial resources in economically challenged areas can hinder schools’ ability to provide a rich and supportive learning environment.
 
@@ -30,7 +30,7 @@ Funding is an important piece of the puzzle, but it’s not the only factor dete
 
 
 
-# Conclusion
+# 🔍 Conclusion
 
 In addressing the overarching question—how the distribution of school funding across New York State districts impacts educational outcomes, particularly in underserved communities—our analysis indicates that funding plays a significant but not exclusive role. Districts with greater financial resources tend to demonstrate higher academic achievement, yet this relationship is influenced by additional factors such as poverty rates, local decision-making authority, and how funds are allocated to meet student needs. The uneven distribution of funding often corresponds with reduced access to critical educational opportunities in underserved communities, contributing to ongoing challenges in student performance. As our group incorporates further data and diverse analyses, we expect to develop a more nuanced understanding of how equitable funding distribution can effectively support improved educational outcomes statewide.
 :::
