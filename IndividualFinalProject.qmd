@@ -3,14 +3,12 @@ title: "Funding Vs. Education"
 author: "Gisell Bennett"
 format:
   html:
-    theme: flatly
     css: style.css
-    toc: true
-    toc-depth: 3
-    toc-location: left
-    toc-title: "Contents"
-    number-sections: true
+    theme: flatly
+toc: true
+toc-depth: 3
 ---
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
@@ -35,19 +33,29 @@ library(odbc)
 ::: content-box
 # 📘 Introduction
 
-Growing up in New York State can be an exciting experience, but for many students in underserved communities, the quality of education remains a persistent concern. Disparities in school funding across districts have long raised questions about their immediate effects on student achievement. Inadequate funding often results in larger class sizes, limited access to academic resources, and fewer support programs—all of which can hinder students' ability to succeed in the short term. These conditions negatively impact test preparation, classroom engagement, and ultimately, performance on standardized assessments such as the Regents, SAT, and ACT, as well as overall GPA. This analysis focuses on exploring the correlation between school funding levels and short-term academic success across New York City school districts, using relevant data to evaluate how financial inequities shape early educational outcomes.
+Growing up in New York State can be an exciting experience, but for many students in underserved communities, the quality of education remains a persistent concern. This project aims to explore how disparities in school funding impact short-term academic success across New York school districts. By analyzing datasets from the National Center for Education Statistics (NCES) and the New York State Education Department (NYSED), I intend to examine whether higher funding levels correlate with better student outcomes—particularly standardized test scores and GPA. This analysis will help identify which funding sources and spending categories are most strongly associated with academic achievement, providing a clearer understanding of the relationships between financial inputs and student outcomes.
 
 ## 📚 Existing Research: What the Experts Say!
 
-Before diving into the NYS-specific analysis, it is important to understand what existing research reveals about this issue. The ***2025*** report ***Does Money Matter in Education?*** by the ***Albert Shanker Institute*** reinforces the connection between increased school funding and improved academic outcomes. The report finds that targeted investments in public education—particularly in low-income communities—lead to higher test scores, better student engagement, and stronger graduation rates. These improvements are especially significant for historically underfunded districts, where even modest funding increases can yield meaningful gains. In the context of New York City, where school funding varies widely between districts, these findings underscore the importance of analyzing how budget disparities influence short-term academic indicators such as Regents scores, SAT/ACT performance, and GPA.
+Before diving into the NYS-specific analysis, it is important to understand what existing research reveals about this issue. The ***2025*** report ***Does Money Matter in Education?*** by the ***Albert Shanker Institute*** reinforces the connection between increased school funding and improved academic outcomes. The report finds that targeted investments in public education—particularly in low-income communities—lead to higher test scores, better student engagement, and stronger graduation rates. These improvements are especially significant for historically underfunded districts, where even modest funding increases can yield meaningful gains. In the context of New York, where school funding varies widely between districts, these findings underscore the importance of analyzing how budget disparities influence short-term academic indicators such as Regents scores, SAT/ACT performance, and GPA.
 
-Further reinforcing this connection, the ***National Education Association’s (NEA)*** report ***Money Matters*** highlights the positive impact of school funding on student achievement, especially for minority and economically disadvantaged students. The report notes that underfunded schools often face challenges such as overcrowded classrooms, high teacher turnover, and a lack of educational resources—all of which contribute to lower academic performance. These systemic issues are particularly pronounced in New York City, where some districts consistently receive fewer resources than others. As this analysis will demonstrate, variations in school funding are directly tied to short-term academic metrics. Understanding these relationships is essential to advocating for more equitable funding policies that support early student success and reduce educational gaps across the state.
+Further reinforcing this connection, the ***National Education Association’s (NEA)*** report ***Money Matters*** highlights the positive impact of school funding on student achievement, especially for minority and economically disadvantaged students. The report notes that underfunded schools often face challenges such as overcrowded classrooms, high teacher turnover, and a lack of educational resources—all of which contribute to lower academic performance. These systemic issues are particularly pronounced in New York, where some districts consistently receive fewer resources than others. As this analysis will demonstrate, variations in school funding are directly tied to short-term academic metrics. Understanding these relationships is essential to advocating for more equitable funding policies that support early student success and reduce educational gaps across the state.
+
+These reports shape the theoretical foundation of my analysis. I use their findings to guide my hypothesis: **districts with higher instructional and support expenditures per student—especially those with higher poverty rates—will show better short-term academic performance**. My analysis also tests whether relying more on state or federal funding, as opposed to local revenue, corresponds with improved outcomes in low-income districts. 
+
+To test my hypothesis, I compiled and merged datasets from NCES and NYSED. From NCES, I used three primary tables: **(1) district characteristics, (2) per-student expenditures by category, and (3) per-student revenue sources**. From NYSED, I extracted Weighted Index Scores for English, Math, and combined subjects. My analysis involves:
+
+***Merging data on funding and performance using District IDs.***
+
+***Categorizing districts by poverty percentage to isolate underserved communities.***
+
+***Conducting comparative analysis across revenue/expenditure types.***
+
+***Identifying whether performance metrics trend upward with increased investment in key categories like instruction and student support.***
 
 # 📊 Data: Digging into the Numbers
 
 ## 🏫 National Center for Education Statistics (NCES)
-
-I pulled data from the ***National Center for Education Statistics (NCES)*** website, which provides detailed financial information about schools across the United States. The dataset includes metrics such as total revenue per student, federal, state, and local revenue distributions, and school-level details including district names, school levels, and geographic information. This data is crucial for my project, which focuses on analyzing the allocation of school funding and its impact on educational outcomes, particularly in underserved communities. By examining the financial breakdowns across different districts and comparing them with school performance metrics, I aim to identify trends and potential inefficiencies in how funding is distributed. The financial data provided by ***NCES*** serves as a foundation for these analyses, allowing for a better understanding of how funding correlates with educational performance at both the district and school levels.
 
 ```{r}
 #| label: Other Characteristics
