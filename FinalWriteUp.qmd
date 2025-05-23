@@ -20,10 +20,11 @@ This group project aims to explore how these funding differences affect educatio
 By examining patterns in school spending, student performance, and community characteristics, this project seeks to better understand how financial differences shape educational experiences and outcomes across New York State.
 
 ```{r}
-#| code-fold: true
-#| code-summary: "Show Code"
-#| warning: false
+#| echo: false
 #| message: false
+#| warning: false
+#| code-fold: true
+#| code-summary: Show Code
 
 library(knitr)
 
