@@ -1,5 +1,5 @@
 ---
-title: "Funding Vs. Education"
+title: "📊 What is the correlation between funding levels and student success (e.g test scores, grades)?"
 author: "Gisell Bennett"
 format:
   html:
@@ -617,24 +617,6 @@ Ultimately, while equitable funding is a necessary foundation for academic succe
 ***Reardon, S. F., Kalogrides, D., & Shores, K. (2019). The Geography of Racial/Ethnic Test Score Gaps. Stanford Center for Education Policy Analysis. https://cepa.stanford.edu***
 
 ***New York City Department of Education. (2023). School District Data. https://www.schools.nyc.gov/about-us/reports***
-
-
-```{r}
-#| code-fold: true
-#| code-summary: "Show Code"
-#| warning: false
-#| message: false
-
-```
-
-
-```{r}
-#| code-fold: true
-#| code-summary: "Show Code"
-#| warning: false
-#| message: false
-
-```
 
 :::
 
