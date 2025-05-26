@@ -303,7 +303,7 @@ ggplot(local_data, aes(x = reorder(`District Name`, `Local Revenue Per Student`)
   theme_minimal() +
   theme(axis.text.y = element_text(size = 6))
 ```
-**Description:** This figure compares the top 10 and bottom 10 U.S. school districts in terms of local revenue per student. Districts with missing or zero revenue values have been excluded to ensure accurate comparisons. The bars are color-coded, with orange representing the top 10 highest-funded districts and blue representing the bottom 10 lowest-funded ones. This visualization helps highlight disparities in local funding across school districts and can guide further investigation into the underlying factors contributing to these differences.
+**Description:** This figure compares the top 10 and bottom 10 NY school districts in terms of local revenue per student. Districts with missing or zero revenue values have been excluded to ensure accurate comparisons. The bars are color-coded, with orange representing the top 10 highest-funded districts and blue representing the bottom 10 lowest-funded ones. This visualization helps highlight disparities in local funding across school districts and can guide further investigation into the underlying factors contributing to these differences.
 
 
 
@@ -352,7 +352,7 @@ ggplot(federal_data, aes(x = reorder(`District Name`, `Federal Revenue Per Stude
   theme_minimal(base_size = 8) +
   theme(axis.text.y = element_text(size = 5))
 ```
-**Description:**This figure visualizes the Top 10 and Bottom 10 U.S. school districts based on Federal Revenue Per Student, excluding any districts that report zero federal funding. The chart uses color to distinguish the highest-funded (orange) from the lowest-funded (blue) districts and formats revenue figures in "K" notation (e.g., $3K) for improved readability and to avoid label overlap.
+**Description:**This figure visualizes the Top 10 and Bottom 10 NY school districts based on Federal Revenue Per Student, excluding any districts that report zero federal funding. The chart uses color to distinguish the highest-funded (orange) from the lowest-funded (blue) districts and formats revenue figures in "K" notation (e.g., $3K) for improved readability and to avoid label overlap.
 
 
 
@@ -397,7 +397,7 @@ ggplot(state_data, aes(x = reorder(`District Name`, `State Revenue Per Student`)
   theme_minimal()
 ```
 
-**Description:** This visualization compares the top 10 and bottom 10 school districts based on state revenue per student, using filtered data that excludes any district reporting zero or missing revenue. Each bar represents per-student state funding, formatted in thousands for clarity. The chart offers a clear contrast between districts receiving substantial support from state budgets and those with the least assistance.
+**Description:** This visualization compares the top 10 and bottom 10 NY school districts based on state revenue per student, using filtered data that excludes any district reporting zero or missing revenue. Each bar represents per-student state funding, formatted in thousands for clarity. The chart offers a clear contrast between districts receiving substantial support from state budgets and those with the least assistance.
 
 **Key Observation**
 
